@@ -1,13 +1,15 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import SiteSettings from 'discourse/lib/site-settings';
+//import SiteSettings from 'discourse/lib/site-settings';
+import { inject as service } from '@ember/service';
 
 export default class ElectionBannerDiscoveryComponent extends Component {
   @tracked electionListEnabled;
+  //@service siteSettings;
 
   constructor() {
     super(...arguments);
-    this.electionListEnabled = SiteSettings.elections_status_banner_discovery;
+    this.electionListEnabled = window.siteSettings.elections_status_banner_discovery;
   }
 }
 

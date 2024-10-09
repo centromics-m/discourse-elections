@@ -21,6 +21,7 @@ export default {
       withPluginApi('0.8.7', (api) => {
         // 모델 수정: topic
         api.modifyClass('model:topic', {
+          pluginId: "discourse-election",
           electionStatusName: computed('election_status', function() {
             return Object.keys(ElectionStatuses).find((k) => {
               return ElectionStatuses[k] === this.election_status;
@@ -30,6 +31,7 @@ export default {
 
         // 모델 수정: composer
         api.modifyClass('model:composer', {
+          pluginId: "discourse-election",
           isNominationStatement: computed(
             'electionNominationStatement',
             'post.election_nomination_statement',
@@ -48,6 +50,7 @@ export default {
 
         // 컴포넌트 수정: composer-body
         api.modifyClass('component:composer-body', {
+          pluginId: "discourse-election",
           // 액션을 정의하여 상태 변화를 처리
           addNominationStatementClass: action(function() {
             const isNominationStatement = this.args.composer.isNominationStatement;
@@ -73,39 +76,39 @@ export default {
         });
 
         // 위젯 수정: discourse-poll-container
-        api.reopenWidget('discourse-poll-container', {
-          html(attrs) {
-            const { poll } = attrs;
-            const options = poll.get('options');
+        // api.reopenWidget('discourse-poll-container', {
+        //   html(attrs) {
+        //     const { poll } = attrs;
+        //     const options = poll.get('options');
 
-            if (attrs.post.election_post) {
-              options.forEach((o) => {
-                if (!o.originalHtml) {
-                  o.originalHtml = o.html;
-                }
-                o.html = o.originalHtml;
-                let usernameOnly = o.html.substring(0, o.html.indexOf('<'));
-                let fullDetails = o.html.replace(usernameOnly, '');
-                o.html = attrs.showResults ? usernameOnly : fullDetails;
-              });
-            }
+        //     if (attrs.post.election_post) {
+        //       options.forEach((o) => {
+        //         if (!o.originalHtml) {
+        //           o.originalHtml = o.html;
+        //         }
+        //         o.html = o.originalHtml;
+        //         let usernameOnly = o.html.substring(0, o.html.indexOf('<'));
+        //         let fullDetails = o.html.replace(usernameOnly, '');
+        //         o.html = attrs.showResults ? usernameOnly : fullDetails;
+        //       });
+        //     }
 
-            if (attrs.showResults) {
-              const type = poll.get('type') === 'number' ? 'number' : 'standard';
-              return this.attach(`discourse-poll-${type}-results`, attrs);
-            }
+        //     if (attrs.showResults) {
+        //       const type = poll.get('type') === 'number' ? 'number' : 'standard';
+        //       return this.attach(`discourse-poll-${type}-results`, attrs);
+        //     }
 
-            if (options) {
-              return h('ul', options.map(option => {
-                return this.attach('discourse-poll-option', {
-                  option,
-                  isMultiple: attrs.isMultiple,
-                  vote: attrs.vote
-                });
-              }));
-            }
-          }
-        });
+        //     if (options) {
+        //       return h('ul', options.map(option => {
+        //         return this.attach('discourse-poll-option', {
+        //           option,
+        //           isMultiple: attrs.isMultiple,
+        //           vote: attrs.vote
+        //         });
+        //       }));
+        //     }
+        //   }
+        // });
 
         // 포스트 속성 포함
         api.includePostAttributes("topic",
@@ -163,19 +166,20 @@ export default {
         });
 
         // 위젯 수정: notification-item
-        api.reopenWidget('notification-item', {
-          description() {
-            const data = this.attrs.data;
-            const badgeName = data.badge_name;
-            if (badgeName) return escapeExpression(badgeName);
+        // api.reopenWidget('notification-item', {
+        //   description() {
+        //     const data = this.attrs.data;
+        //     const badgeName = data.badge_name;
+        //     if (badgeName) return escapeExpression(badgeName);
 
-            const description = data.description;
-            if (description) return escapeExpression(description);
+        //     const description = data.description;
+        //     if (description) return escapeExpression(description);
 
-            const title = data.topic_title;
-            return Ember.isEmpty(title) ? "" : escapeExpression(title);
-          }
-        });
+        //     const title = data.topic_title;
+        //     return Ember.isEmpty(title) ? "" : escapeExpression(title);
+        //   }
+        // });
+
       });
 
       Composer.serializeOnCreate('election_nomination_statement', 'electionNominationStatement');
