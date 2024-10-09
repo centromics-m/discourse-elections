@@ -1,0 +1,21 @@
+{{#if this.nominating}}
+  {{#if this.topic.election_poll_open_scheduled}}
+    <span>{{i18n 'election.poll.open_time_set' time=(election-time this.topic.election_poll_open_time)}}</span>
+  {{else}}
+    {{#if this.topic.election_poll_open_after}}
+      <span>{{i18n 'election.poll.open_time_not_set' time=this.pollOpenTime
+                                                     nominations=this.topic.election_poll_open_after_nominations}}</span>
+    {{/if}}
+  {{/if}}
+{{/if}}
+
+{{#if this.polling}}
+  {{#if this.topic.election_poll_close_scheduled}}
+    <span>{{i18n 'election.poll.close_time_set' time=(election-time this.topic.election_poll_close_time)}}</span>
+  {{else}}
+    {{#if this.topic.election_poll_close_after}}
+      <span>{{i18n 'election.poll.close_time_not_set' time=this.pollCloseTime
+                                                      voters=this.topic.election_poll_close_after_voters}}</span>
+    {{/if}}
+  {{/if}}
+{{/if}}

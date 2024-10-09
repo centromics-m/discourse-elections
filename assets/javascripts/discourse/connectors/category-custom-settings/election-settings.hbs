@@ -1,6 +1,13 @@
 <section>
   <label>
-    {{input type="checkbox" checked=category.custom_fields.for_elections}}
+    <Input @type="checkbox" @checked={{this.args.category.custom_fields.for_elections}} />
     {{i18n 'category.for_elections'}}
   </label>
 </section>
+
+{{!-- <section>
+  <label>
+    {{input type="checkbox" checked=category.custom_fields.for_elections}}
+    {{i18n 'category.for_elections'}}
+  </label>
+</section> --}}

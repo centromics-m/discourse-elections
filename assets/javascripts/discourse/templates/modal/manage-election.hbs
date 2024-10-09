@@ -1,6 +1,191 @@
 {{#d-modal-body title='election.manage.label' class='manage-election'}}
   <div class="control-group">
     <label>{{i18n 'election.create.position'}}</label>
+    <Input @value={{this.position}} class='input-medium' />
+    <div class="controls">
+      <ElectionSave @property={{this.position}}
+                    @name="position"
+                    @invalid={{this.positionInvalid}}
+                    @topic={{this.topic}}
+                    @error="error"
+                    @saved="saved" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label>{{i18n 'election.status.label'}}</label>
+    <ComboBox @content={{this.electionStatuses}} @value={{this.status}} />
+    <div class="controls">
+      <ElectionSave @property={{this.status}}
+                    @name="status"
+                    @unchanged={{this.statusUnchanged}}
+                    @topic={{this.topic}}
+                    @error="error"
+                    @saved="saved" />
+    </div>
+  </div>
+
+  <div class="control-group nominees">
+    <label>{{i18n 'election.manage.nominees'}}</label>
+    {{#if this.showSelector}}
+      <UserSelector @usernames={{this.usernamesString}} />
+    {{/if}}
+    <div class="controls">
+      <ElectionSaveUsernames @property={{this.usernames}}
+                             @name="usernames"
+                             @unchanged={{this.usernamesUnchanged}}
+                             @usernamesString={{this.usernamesString}}
+                             @topic={{this.topic}}
+                             @error="error"
+                             @saved="saved"
+                             @showSelector={{this.showSelector}} />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label>{{i18n 'election.winner.label'}}</label>
+    <UserSelector @usernames={{this.winner}} @single=true />
+    <div class="controls">
+      <ElectionSave @property={{this.winner}}
+                    @name="winner"
+                    @topic={{this.topic}}
+                    @error="error"
+                    @saved="saved" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <Checkbox @checked={{this.selfNomination}} />
+    <span>{{i18n 'election.create.self_nomination_allowed'}}</span>
+    <div class="controls">
+      <ElectionSave @property={{this.selfNomination}}
+                    @name="self_nomination_allowed"
+                    @topic={{this.topic}}
+                    @error="error"
+                    @saved="saved" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label>{{i18n 'election.create.nomination_message'}}</label>
+    <DEditor @value={{this.nominationMessage}} @placeholder='election.create.nomination_message_placeholder' />
+    <div class="controls">
+      <ElectionSave @property={{this.nominationMessage}}
+                    @name="nomination_message"
+                    @topic={{this.topic}}
+                    @error="error"
+                    @saved="saved" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label>{{i18n 'election.create.poll_message'}}</label>
+    <DEditor @value={{this.pollMessage}} @placeholder='election.create.poll_message_placeholder' />
+    <div class="controls">
+      <ElectionSave @property={{this.pollMessage}}
+                    @name="poll_message"
+                    @topic={{this.topic}}
+                    @error="error"
+                    @saved="saved" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label>{{i18n 'election.create.closed_poll_message'}}</label>
+    <DEditor @value={{this.closedPollMessage}} @placeholder='election.create.closed_poll_message_placeholder' />
+    <div class="controls">
+      <ElectionSave @property={{this.closedPollMessage}}
+                    @name="closed_poll_message"
+                    @topic={{this.topic}}
+                    @error="error"
+                    @saved="saved" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <Checkbox @checked={{this.statusBanner}} />
+    <span>{{i18n 'election.status_banner.enable'}}</span>
+    <div class="controls">
+      <ElectionSave @property={{this.statusBanner}}
+                    @name="status_banner"
+                    @topic={{this.topic}}
+                    @error="error"
+                    @saved="saved" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <span>{{i18n 'election.status_banner.result_hours'}}</span>
+    <Input @type="number" @value={{this.statusBannerResultHours}} class='input-small' />
+    <div class="controls">
+      <ElectionSave @property={{this.statusBannerResultHours}}
+                    @name="status_banner_result_hours"
+                    @topic={{this.topic}}
+                    @error="error"
+                    @saved="saved" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <Checkbox @checked={{this.pollOpen}} />
+    <span>{{i18n 'election.poll.open_time'}}</span>
+    <div class="controls">
+      <ElectionSaveTime @type='open'
+                        @enabled={{this.pollOpen}}
+                        @after={{this.pollOpenAfter}}
+                        @hours={{this.pollOpenAfterHours}}
+                        @nominations={{this.pollOpenAfterNominations}}
+                        @time={{this.pollOpenTime}}
+                        @topic={{this.topic}}
+                        @error="error"
+                        @saved="saved" />
+    </div>
+  </div>
+
+  {{#if this.pollOpen}}
+    <ElectionTime @type='open'
+                  @after={{this.pollOpenAfter}}
+                  @hours={{this.pollOpenAfterHours}}
+                  @nominations={{this.pollOpenAfterNominations}}
+                  @time={{this.pollOpenTime}} />
+  {{/if}}
+
+  <div class="control-group">
+    <Checkbox @checked={{this.pollClose}} />
+    <span>{{i18n 'election.poll.close_time'}}</span>
+    <div class="controls">
+      <ElectionSaveTime @type='close'
+                        @enabled={{this.pollClose}}
+                        @after={{this.pollCloseAfter}}
+                        @hours={{this.pollCloseAfterHours}}
+                        @voters={{this.pollCloseAfterVoters}}
+                        @time={{this.pollCloseTime}}
+                        @topic={{this.topic}}
+                        @error="error"
+                        @saved="saved" />
+    </div>
+  </div>
+
+  {{#if this.pollClose}}
+    <ElectionTime @type='close'
+                  @after={{this.pollCloseAfter}}
+                  @hours={{this.pollCloseAfterHours}}
+                  @voters={{this.pollCloseAfterVoters}}
+                  @time={{this.pollCloseTime}} />
+  {{/if}}
+{{/d-modal-body}}
+
+<div class="modal-footer">
+  <DButton @title='election.manage.done'
+           @label='election.manage.done'
+           @action='close'
+           @class='btn btn-primary' />
+</div>
+
+
+{{!-- {{#d-modal-body title='election.manage.label' class='manage-election'}}
+  <div class="control-group">
+    <label>{{i18n 'election.create.position'}}</label>
     {{input value=position class='input-medium'}}
     <div class="controls">
       {{election-save property=position
@@ -174,4 +359,4 @@
 
 <div class="modal-footer">
   {{d-button title='election.manage.done' label='election.manage.done' action='close' class='btn btn-primary'}}
-</div>
+</div> --}}

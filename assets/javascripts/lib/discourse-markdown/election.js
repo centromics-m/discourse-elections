@@ -6,6 +6,6 @@ export function setup(helper) {
     'div.trigger-user-card',
     'div.nomination-statement',
     'div.winner',
-    'div.winner-user'
+    'div.winner-user',
   ]);
 }

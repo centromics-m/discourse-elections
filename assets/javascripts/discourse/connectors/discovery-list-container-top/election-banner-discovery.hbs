@@ -1,7 +1,16 @@
-{{#if electionListEnabled}}
+{{#if this.electionListEnabled}}
+  {{#each @category.election_list as |e|}}
+    {{#if e.banner}}
+      <ElectionBanner @election={{e}} />
+    {{/if}}
+  {{/each}}
+{{/if}}
+
+
+{{!-- {{#if electionListEnabled}}
   {{#each category.election_list as |e|}}
     {{#if e.banner}}
       {{election-banner election=e}}
     {{/if}}
   {{/each}}
-{{/if}}
+{{/if}} --}}

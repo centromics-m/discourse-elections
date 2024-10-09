@@ -1,6 +1,69 @@
 {{#d-modal-body title='election.create.label' class='create-election'}}
   <div class="control-group">
     <label>{{i18n 'election.create.position'}}</label>
+    <Input @value={{this.position}} class='input-medium' />
+  </div>
+  <div class="control-group">
+    <label>{{i18n 'election.create.nomination_message'}}</label>
+    <DEditor @value={{this.nominationMessage}} @placeholder='election.create.nomination_message_placeholder' />
+  </div>
+  <div class="control-group">
+    <label>{{i18n 'election.create.poll_message'}}</label>
+    <DEditor @value={{this.pollMessage}} @placeholder='election.create.poll_message_placeholder' />
+  </div>
+  <div class="control-group">
+    <label>{{i18n 'election.create.closed_poll_message'}}</label>
+    <DEditor @value={{this.closedPollMessage}} @placeholder='election.create.closed_poll_message_placeholder' />
+  </div>
+  <div class="control-group">
+    <Checkbox @checked={{this.selfNominationAllowed}} @label={{i18n 'election.create.self_nomination_allowed'}} />
+  </div>
+  <div class="control-group">
+    <Checkbox @checked={{this.statusBanner}} @label={{i18n 'election.status_banner.enable'}} />
+  </div>
+  <div class="control-group">
+    <span>{{i18n 'election.status_banner.result_hours'}}</span>
+    <Input @type="number" @value={{this.statusBannerResultHours}} class='input-small' />
+  </div>
+  <div class="control-group">
+    <Checkbox @checked={{this.pollOpen}} @label={{i18n 'election.poll.open_time'}} />
+  </div>
+  {{#if this.pollOpen}}
+    <ElectionTime @type='open'
+                  @after={{this.pollOpenAfter}}
+                  @hours={{this.pollOpenAfterHours}}
+                  @nominations={{this.pollOpenAfterNominations}}
+                  @time={{this.pollOpenTime}} />
+  {{/if}}
+  <div class="control-group">
+    <Checkbox @checked={{this.pollClose}} @label={{i18n 'election.poll.close_time'}} />
+  </div>
+  {{#if this.pollClose}}
+    <ElectionTime @type='close'
+                  @after={{this.pollCloseAfter}}
+                  @hours={{this.pollCloseAfterHours}}
+                  @voters={{this.pollCloseAfterVoters}}
+                  @time={{this.pollCloseTime}} />
+  {{/if}}
+{{/d-modal-body}}
+
+<div class="modal-footer">
+  <DButton @title='election.create.btn_label'
+           @label='election.create.btn_label'
+           @action='createElection'
+           @class='btn btn-primary'
+           @disabled={{this.disabled}} />
+  {{#if this.loading}}
+    <LoadingSpinner @size='small' />
+  {{else}}
+    <a {{on "click" this.closeModal}}>{{i18n 'cancel'}}</a>
+  {{/if}}
+</div>
+
+
+{{!-- {{#d-modal-body title='election.create.label' class='create-election'}}
+  <div class="control-group">
+    <label>{{i18n 'election.create.position'}}</label>
     {{input value=position class='input-medium'}}
   </div>
   <div class="control-group">
@@ -58,4 +121,4 @@
   {{else}}
     <a {{action "closeModal"}}>{{i18n 'cancel'}}</a>
   {{/if}}
-</div>
+</div> --}}

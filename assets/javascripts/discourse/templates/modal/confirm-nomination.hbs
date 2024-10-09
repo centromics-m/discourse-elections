@@ -1,3 +1,17 @@
+{{!-- {{#d-modal-body @title=(concat @prefix 'label') @class='confirm-nomination'}}
+  {{{i18n (concat @prefix 'body') position=@model.topic.election_position categoryName=@categoryName}}}
+{{/d-modal-body}}
+
+<div class="modal-footer">
+  <DButton @title=(concat @prefix 'btn') @label=(concat @prefix 'btn') @action='toggleNomination' @class='btn btn-primary'/>
+  {{#if @loading}}
+    {{loading-spinner @size='small'}}
+  {{else}}
+    <a {{on "click" (fn this.closeModal)}}>{{i18n 'cancel'}}</a>
+  {{/if}}
+</div>
+ --}}
+
 {{#d-modal-body title=(concat prefix 'label') class='confirm-nomination'}}
   {{{i18n (concat prefix 'body') position=model.topic.election_position categoryName=categoryName}}}
 {{/d-modal-body}}

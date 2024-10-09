@@ -1,48 +1,78 @@
+// discourse/plugins/discourse-elections/discourse/initializers/election-edit.js
+
 import { withPluginApi } from 'discourse/lib/plugin-api';
 import { escapeExpression } from 'discourse/lib/utilities';
 import Composer from 'discourse/models/composer';
 import { ElectionStatuses } from '../lib/election';
 import RawHtml from 'discourse/widgets/raw-html';
-import { default as computed, observes } from 'ember-addons/ember-computed-decorators';
+import { tracked } from '@glimmer/tracking';
+import { action } from '@ember/object';
+import { scheduleOnce } from '@ember/runloop';
 import { h } from 'virtual-dom';
+import { computed } from '@ember/object';
+import I18n from "discourse-i18n";
 
 export default {
   name: 'election-edits',
   initialize(container) {
     const siteSettings = container.lookup('site-settings:main');
+
     if (siteSettings.elections_enabled) {
-      withPluginApi('0.8.7', api => {
+      withPluginApi('0.8.7', (api) => {
+        // 모델 수정: topic
         api.modifyClass('model:topic', {
-          @computed('election_status')
-          electionStatusName(status) {
+          electionStatusName: computed('election_status', function() {
             return Object.keys(ElectionStatuses).find((k) => {
-              return ElectionStatuses[k] === status;
+              return ElectionStatuses[k] === this.election_status;
             });
-          }
+          })
         });
 
+        // 모델 수정: composer
         api.modifyClass('model:composer', {
-          @computed('electionNominationStatement', 'post.election_nomination_statement', 'topic.election_is_nominee', 'topic.election_made_statement')
-          isNominationStatement(newStatement, existingStatement, isNominee, madeStatement) {
-            const editingPost = this.get('editingPost');
-            if (madeStatement && (!editingPost || !existingStatement)) return false;
-            return (newStatement || existingStatement) && isNominee;
-          }
+          isNominationStatement: computed(
+            'electionNominationStatement',
+            'post.election_nomination_statement',
+            'topic.election_is_nominee',
+            'topic.election_made_statement',
+            function() {
+              const editingPost = this.editingPost;
+              const { electionNominationStatement, post } = this;
+              const madeStatement = post.election_made_statement;
+
+              if (madeStatement && (!editingPost || !post.election_nomination_statement)) return false;
+              return (electionNominationStatement || post.election_nomination_statement) && post.election_is_nominee;
+            }
+          )
         });
 
+        // 컴포넌트 수정: composer-body
         api.modifyClass('component:composer-body', {
-          @observes('composer.isNominationStatement', 'composer.loading')
-          addNominationStatementClass() {
-            const isNominationStatement = this.get('composer.isNominationStatement');
-            Ember.run.scheduleOnce('afterRender', this, () => {
-              if (isNominationStatement) {
-                this.$('.statement-composer-label').detach().appendTo('.reply-details');
+          // 액션을 정의하여 상태 변화를 처리
+          addNominationStatementClass: action(function() {
+            const isNominationStatement = this.args.composer.isNominationStatement;
+
+            scheduleOnce('afterRender', this, () => {
+              const labelElement = this.element.querySelector('.statement-composer-label');
+              const replyDetails = document.querySelector('.reply-details');
+
+              if (isNominationStatement && labelElement && replyDetails) {
+                labelElement.remove();
+                replyDetails.appendChild(labelElement);
               }
-              this.$().toggleClass('nomination-statement', Boolean(isNominationStatement));
+
+              this.element.classList.toggle('nomination-statement', Boolean(isNominationStatement));
             });
+          }),
+
+          // 라이프사이클 훅을 사용하여 상태 변화를 감지
+          didReceiveAttrs() {
+            this._super(...arguments);
+            this.addNominationStatementClass();
           }
         });
 
+        // 위젯 수정: discourse-poll-container
         api.reopenWidget('discourse-poll-container', {
           html(attrs) {
             const { poll } = attrs;
@@ -77,16 +107,19 @@ export default {
           }
         });
 
+        // 포스트 속성 포함
         api.includePostAttributes("topic",
                                   "election_post",
                                   "election_nomination_statement",
                                   "election_nominee_title",
                                   "election_by_nominee");
 
+        // 포스트 클래스 콜백 추가
         api.addPostClassesCallback((attrs) => {
           if (attrs.election_post) return ["election-post"];
         });
 
+        // 위젯 꾸미기: poster-name:after
         api.decorateWidget('poster-name:after', (helper) => {
           const post = helper.attrs;
           let contents = [];
@@ -95,7 +128,7 @@ export default {
             contents.push(helper.h('span.statement-post-label', I18n.t('election.post.nomination_statement')));
           }
 
-          if (!post.election_by_nominee && post.election_nominee_title && Discourse.SiteSettings.elections_nominee_titles) {
+          if (!post.election_by_nominee && post.election_nominee_title && siteSettings.elections_nominee_titles) {
             contents.push(helper.h('span.nominee-title',
               new RawHtml({ html: post.election_nominee_title })
             ));
@@ -104,9 +137,10 @@ export default {
           return contents;
         });
 
+        // 위젯 꾸미기: post-avatar:after
         api.decorateWidget('post-avatar:after', (helper) => {
           const post = helper.attrs;
-          const flair = Discourse.SiteSettings.elections_nominee_avatar_flair;
+          const flair = siteSettings.elections_nominee_avatar_flair;
           let contents = [];
 
           if (post.election_by_nominee && flair.length > 0) {
@@ -119,6 +153,7 @@ export default {
           return contents;
         });
 
+        // 위젯 꾸미기: post-contents:after-cooked
         api.decorateWidget('post-contents:after-cooked', (helper) => {
           const post = helper.attrs;
           const topic = post.topic;
@@ -127,6 +162,7 @@ export default {
           }
         });
 
+        // 위젯 수정: notification-item
         api.reopenWidget('notification-item', {
           description() {
             const data = this.attrs.data;
