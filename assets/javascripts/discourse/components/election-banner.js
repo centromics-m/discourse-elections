@@ -2,7 +2,7 @@ import Component from '@ember/component';
 import { computed } from '@ember/object';
 import { action } from '@ember/object';
 import { dasherize } from '@ember/string';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 
 const electionStatus = {
   1: 'nomination',

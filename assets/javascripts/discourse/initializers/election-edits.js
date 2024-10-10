@@ -19,16 +19,42 @@ export default {
 
     if (siteSettings.elections_enabled) {
       withPluginApi('0.8.7', (api) => {
-        // 모델 수정: topic
-        api.modifyClass('model:topic', {
-          pluginId: "discourse-election",
-          electionStatusName: computed('election_status', function() {
-            return Object.keys(ElectionStatuses).find((k) => {
-              return ElectionStatuses[k] === this.election_status;
-            });
-          })
-        });
 
+        console.log('api', api);
+
+        // ok
+        // 모델 수정: topic
+        // api.modifyClass('model:topic', {
+        //   pluginId: "discourse-election",
+        //   electionStatusName: computed('election_status', function() {
+        //     console.log("election_status", this.election_status);
+        //     return Object.keys(ElectionStatuses).find((k) => {
+        //       return ElectionStatuses[k] === this.election_status;
+        //     });
+        //   })
+        // });
+        api.modifyClass("model:topic",
+          (Superclass) => class extends Superclass {
+              // Tracked property
+              @tracked election_status;
+
+              get electionStatusName() {
+                console.log("model:topic election_status", this.election_status);
+                return Object.keys(ElectionStatuses).find((k) => {
+                  return ElectionStatuses[k] === this.election_status;
+                });
+              }
+
+              // Optionally add any actions or additional methods as needed
+              // @action
+              // someAction() {
+              //   console.log("Some action was triggered");
+              // }
+            }
+        );
+
+
+        // ok
         // 모델 수정: composer
         api.modifyClass('model:composer', {
           pluginId: "discourse-election",
@@ -48,33 +74,35 @@ export default {
           )
         });
 
+        // ok
         // 컴포넌트 수정: composer-body
-        api.modifyClass('component:composer-body', {
-          pluginId: "discourse-election",
-          // 액션을 정의하여 상태 변화를 처리
-          addNominationStatementClass: action(function() {
-            const isNominationStatement = this.args.composer.isNominationStatement;
+        // api.modifyClass('component:composer-body', {
+        //   pluginId: "discourse-election",
+        //   // 액션을 정의하여 상태 변화를 처리
+        //   addNominationStatementClass: action(function() {
+        //     const isNominationStatement = this.args.composer.isNominationStatement;
 
-            scheduleOnce('afterRender', this, () => {
-              const labelElement = this.element.querySelector('.statement-composer-label');
-              const replyDetails = document.querySelector('.reply-details');
+        //     scheduleOnce('afterRender', this, () => {
+        //       const labelElement = this.element.querySelector('.statement-composer-label');
+        //       const replyDetails = document.querySelector('.reply-details');
 
-              if (isNominationStatement && labelElement && replyDetails) {
-                labelElement.remove();
-                replyDetails.appendChild(labelElement);
-              }
+        //       if (isNominationStatement && labelElement && replyDetails) {
+        //         labelElement.remove();
+        //         replyDetails.appendChild(labelElement);
+        //       }
 
-              this.element.classList.toggle('nomination-statement', Boolean(isNominationStatement));
-            });
-          }),
+        //       this.element.classList.toggle('nomination-statement', Boolean(isNominationStatement));
+        //     });
+        //   }),
 
-          // 라이프사이클 훅을 사용하여 상태 변화를 감지
-          didReceiveAttrs() {
-            this._super(...arguments);
-            this.addNominationStatementClass();
-          }
-        });
+        //   // 라이프사이클 훅을 사용하여 상태 변화를 감지
+        //   didReceiveAttrs() {
+        //     this._super(...arguments);
+        //     this.addNominationStatementClass();
+        //   }
+        // });
 
+        // ok
         // 위젯 수정: discourse-poll-container
         // api.reopenWidget('discourse-poll-container', {
         //   html(attrs) {
@@ -119,51 +147,57 @@ export default {
 
         // 포스트 클래스 콜백 추가
         api.addPostClassesCallback((attrs) => {
-          if (attrs.election_post) return ["election-post"];
+          if (attrs.election_post)
+            return ["election-post"];
+          else
+            return [];
         });
 
+        // ok
         // 위젯 꾸미기: poster-name:after
-        api.decorateWidget('poster-name:after', (helper) => {
-          const post = helper.attrs;
-          let contents = [];
+        // api.decorateWidget('poster-name:after', (helper) => {
+        //   const post = helper.attrs;
+        //   let contents = [];
 
-          if (post.election_by_nominee && post.election_nomination_statement) {
-            contents.push(helper.h('span.statement-post-label', I18n.t('election.post.nomination_statement')));
-          }
+        //   if (post.election_by_nominee && post.election_nomination_statement) {
+        //     contents.push(helper.h('span.statement-post-label', I18n.t('election.post.nomination_statement')));
+        //   }
 
-          if (!post.election_by_nominee && post.election_nominee_title && siteSettings.elections_nominee_titles) {
-            contents.push(helper.h('span.nominee-title',
-              new RawHtml({ html: post.election_nominee_title })
-            ));
-          }
+        //   if (!post.election_by_nominee && post.election_nominee_title && siteSettings.elections_nominee_titles) {
+        //     contents.push(helper.h('span.nominee-title',
+        //       new RawHtml({ html: post.election_nominee_title })
+        //     ));
+        //   }
 
-          return contents;
-        });
+        //   return contents;
+        // });
 
+        // ok
         // 위젯 꾸미기: post-avatar:after
-        api.decorateWidget('post-avatar:after', (helper) => {
-          const post = helper.attrs;
-          const flair = siteSettings.elections_nominee_avatar_flair;
-          let contents = [];
+        // api.decorateWidget('post-avatar:after', (helper) => {
+        //   const post = helper.attrs;
+        //   const flair = siteSettings.elections_nominee_avatar_flair;
+        //   let contents = [];
 
-          if (post.election_by_nominee && flair.length > 0) {
-            contents.push(helper.h('div.avatar-flair.nominee', helper.h('i', {
-              className: 'fa ' + flair,
-              title: I18n.t('election.post.nominee'),
-            })));
-          }
+        //   if (post.election_by_nominee && flair.length > 0) {
+        //     contents.push(helper.h('div.avatar-flair.nominee', helper.h('i', {
+        //       className: 'fa ' + flair,
+        //       title: I18n.t('election.post.nominee'),
+        //     })));
+        //   }
 
-          return contents;
-        });
+        //   return contents;
+        // });
 
+        // ok
         // 위젯 꾸미기: post-contents:after-cooked
-        api.decorateWidget('post-contents:after-cooked', (helper) => {
-          const post = helper.attrs;
-          const topic = post.topic;
-          if (topic.subtype === 'election' && post.firstPost) {
-            return helper.attach('election-controls', { topic });
-          }
-        });
+        // api.decorateWidget('post-contents:after-cooked', (helper) => {
+        //   const post = helper.attrs;
+        //   const topic = post.topic;
+        //   if (topic.subtype === 'election' && post.firstPost) {
+        //     return helper.attach('election-controls', { topic });
+        //   }
+        // });
 
         // 위젯 수정: notification-item
         // api.reopenWidget('notification-item', {

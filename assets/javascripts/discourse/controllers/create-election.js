@@ -5,11 +5,11 @@ import DiscourseURL from 'discourse/lib/url';
 import { ajax } from 'discourse/lib/ajax';
 //import SiteSettings from 'discourse/lib/site-settings';
 //import moment from 'moment';
-import { inject as service } from '@ember/service';
+import { service } from '@ember/service';
 
 export default class CreateElectionController extends Controller {
-  //@service siteSettings;
-  @tracked statusBannerResultHours = window.siteSettings.elections_status_banner_default_result_hours;
+  @service siteSettings;
+  @tracked statusBannerResultHours = this.siteSettings.elections_status_banner_default_result_hours;
   @tracked statusBanner = true;
   @tracked pollOpenAfter = true;
   @tracked pollOpenAfterHours = 48;
