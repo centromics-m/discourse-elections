@@ -8,9 +8,9 @@ export default class ElectionStatusComponent extends Component {
   constructor() {
     super(...arguments);
     //console.log('ElectionStatusComponent this.args', this.args.keys);
-    console.log('ElectionStatusComponent arguments', arguments);
-    console.log('ElectionStatusComponent model', this.args.model);
-    console.log('ElectionStatusComponent topic', this.args.model?.topic);
+    // console.log('ElectionStatusComponent arguments', arguments);
+    // console.log('ElectionStatusComponent model', this.args.model);
+    // console.log('ElectionStatusComponent topic', this.args.model?.topic);
 
     //console.log('this.args.model?.subtype', this.args.model?.subtype);
     this.showStatus = this.args.model?.subtype === 'election';
