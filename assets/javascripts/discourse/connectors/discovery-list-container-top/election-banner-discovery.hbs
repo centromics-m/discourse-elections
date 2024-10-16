@@ -1,3 +1,9 @@
+{{!-- <PluginOutlet
+            @name="discovery-list-container-top"
+            @connectorTagName="span"
+            @outletArgs={{hash category=@model.category tag=@model.tag}}
+          /> --}}
+
 {{#if this.electionListEnabled}}
   {{#each @category.election_list as |e|}}
     {{#if e.banner}}

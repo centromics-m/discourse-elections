@@ -4,12 +4,18 @@ import { tracked } from '@glimmer/tracking';
 import { service } from "@ember/service";
 
 export default class ElectionBannerDiscoveryComponent extends Component {
-  @tracked electionListEnabled;
   @service siteSettings;
 
-  constructor() {
-    super(...arguments);
-    this.electionListEnabled = this.siteSettings.elections_status_banner_discovery;
+  get electionListEnabled() {
+    return this.siteSettings.elections_status_banner_discovery;
+  }
+
+  get category() {
+    return this.args.outletArgs.category;
+  }
+
+  get tag() {
+    return this.args.outletArgs.tag;
   }
 }
 
