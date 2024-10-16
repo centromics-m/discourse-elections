@@ -1,0 +1,9 @@
+{{#if this.category.for_elections}}
+  {{#if this.isElectionsAdmin}}
+    <DButton icon="plus" class="btn-default" @label={{i18n 'election.create.label'}}
+        @action={{this.createElection}} @actionParam={{this.category.id}} />
+  {{/if}}
+  {{#if this.siteSettings.elections_nav_category_list}}
+    <ElectionList @category={{this.category}} />
+  {{/if}}
+{{/if}}

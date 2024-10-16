@@ -3,6 +3,7 @@ en:
     category:
       for_elections: "Allow elections to be created in this category"
     election:
+      label: "Election"
       start: "Start Poll"
       status_banner:
         enable: "Enable the election status banner."

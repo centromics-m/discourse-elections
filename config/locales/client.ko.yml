@@ -3,7 +3,7 @@ ko:
     category:
       for_elections: "이 카테고리에서 선거 생성 허용"
     election:
-      title: "선거"
+      label: "선거"
       start: "투표 시작"
       status_banner:
         enable: "선거 상태 배너 사용."
