@@ -15,9 +15,13 @@ register_asset 'lib/jquery.timepicker.scss'
 
 # register_asset 'javascripts/discourse-elections_extra.js'
 # register_asset 'stylesheets/elections_extra.scss'
-# register_component 'election-banner'
+#register_component 'election-banner'
 
 enabled_site_setting :elections_enabled
+
+# added by etna
+# register_custom_field_type('category', 'for_elections', :boolean)
+
 
 after_initialize do
   Topic.register_custom_field_type('election_self_nomination_allowed', :boolean)
@@ -73,70 +77,99 @@ after_initialize do
   end
 
   add_to_serializer(:topic_view, :subtype) { object.topic.subtype }
+
   add_to_serializer(:topic_view, :election_status,
     include_condition: -> { object.topic&.election }) { object.topic&.election_status }
+
   add_to_serializer(:topic_view, :election_position,
     include_condition: -> { object.topic&.election }) { object.topic&.election_position }
+
   add_to_serializer(:topic_view, :election_nominations,
     include_condition: -> { object.topic&.election }) { object.topic&.election }
+
   add_to_serializer(:topic_view, :election_nominations_usernames,
     include_condition: -> { object.topic&.election }) { object.topic&.election_nominations_usernames }
+
   add_to_serializer(:topic_view, :election_self_nomination_allowed,
     include_condition: -> { object.topic&.election }) { object.topic&.election_self_nomination_allowed }
+
   add_to_serializer(:topic_view, :election_can_self_nominate, include_condition: -> { object.topic&.election }) do
     scope.user && !scope.user.anonymous? &&
     (scope.is_admin? || scope.user.trust_level >= SiteSetting.elections_min_trust_to_self_nominate.to_i)
   end
+
   add_to_serializer(:topic_view, :election_is_nominee, include_condition: -> { object.topic&.election }) do
     scope.user && object.topic&.election_nominations&.include?(scope.user.id)
   end
+
   add_to_serializer(:topic_view, :election_nomination_statements,
     include_condition: -> { object.topic&.election }) { object.topic&.election_nomination_statements }
+
   add_to_serializer(:topic_view, :election_made_statement, include_condition: -> { object.topic&.election }) do
     if scope.user
       object.topic&.election_nomination_statements&.any? { |n| n['user_id'] == scope.user.id }
     end
   end
+
   add_to_serializer(:topic_view, :election_nomination_message,
     include_condition: -> { object.topic&.election }) { object.topic.custom_fields['election_nomination_message'] }
+
   add_to_serializer(:topic_view, :election_poll_message,
     include_condition: -> { object.topic&.election }) { object.topic.custom_fields['election_poll_message'] }
+
   add_to_serializer(:topic_view, :election_closed_poll_message,
     include_condition: -> { object.topic&.election }) { object.topic.custom_fields['election_closed_poll_message'] }
+
   add_to_serializer(:topic_view, :election_same_message,
     include_condition: -> { object.topic&.election }) { object.topic.custom_fields['election_poll_message'] }
+
   add_to_serializer(:topic_view, :election_status_banner,
     include_condition: -> { object.topic&.election }) { object.topic.custom_fields['election_status_banner'] }
+
   add_to_serializer(:topic_view, :election_status_banner_result_hours,
     include_condition: -> { object.topic&.election }) { object.topic.custom_fields['election_status_banner_result_hours'] }
+
   add_to_serializer(:topic_view, :election_poll_open,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_open }
+
   add_to_serializer(:topic_view, :election_poll_open_after,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_open_after }
+
   add_to_serializer(:topic_view, :election_poll_open_after_hours,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_open_after_hours }
+
   add_to_serializer(:topic_view, :election_poll_open_after_nominations,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_open_after_nominations }
+
   add_to_serializer(:topic_view, :election_poll_open_time,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_open_time }
+
   add_to_serializer(:topic_view, :election_poll_open_scheduled,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_open_scheduled }
+
   add_to_serializer(:topic_view, :election_poll_close,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_close }
+
   add_to_serializer(:topic_view, :election_poll_close_after,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_close_after }
+
   add_to_serializer(:topic_view, :election_poll_close_after_hours,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_close_after_hours }
+
   add_to_serializer(:topic_view, :election_poll_close_after_voters,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_close_after_voters }
+
   add_to_serializer(:topic_view, :election_poll_close_time,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_close_time }
+
   add_to_serializer(:topic_view, :election_poll_close_scheduled,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_close_scheduled }
+
   add_to_serializer(:topic_view, :election_winner,
     include_condition: -> { object.topic&.election }) { object.topic&.election_winner }
 
   add_to_serializer(:basic_category, :for_elections) { object.custom_fields['for_elections'] }
+
   add_to_serializer(:basic_category, :election_list,
     include_condition: -> { object.topic&.election }) { object.election_list }
 
@@ -145,18 +178,23 @@ after_initialize do
     "election_list",
   ].each do |key|
     Site.preloaded_category_custom_fields << key if Site.respond_to? :preloaded_category_custom_fields
+    # by etna
+    Category.preloaded_category_custom_fields << key if Category.respond_to? :preloaded_category_custom_fields
   end
 
   add_to_serializer(:post, :election_post,
     include_condition: -> { object.topic&.election }) { object.is_first_post? }
+
   add_to_serializer(:post, :election_nomination_statement,
     include_condition: -> { object.topic&.election }) { object.election_nomination_statement }
+
   add_to_serializer(:post, :election_nominee_title,
     include_condition: -> { object.topic&.election }) { object.user.election_nominee_title }
-  add_to_serializer(:post, :election_by_nominee,
-    include_condition: -> { object.topic&.election }) do
+
+  add_to_serializer(:post, :election_by_nominee, include_condition: -> { object.topic&.election }) do
     object.user && object.topic&.election_nominations&.include?(object.user.id)
   end
+
   add_to_serializer(:current_user, :is_elections_admin) { object.is_elections_admin? }
 
   DiscourseEvent.trigger(:elections_ready)

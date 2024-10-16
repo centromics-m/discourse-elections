@@ -44,7 +44,7 @@ export default class CreateElectionModal extends Component {
   @action
   async createElection() {
     let data = {
-      category_id: this.model.categoryId,
+      category_id: this.model.categoryId || '4', // by etna
       position: this.position,
       nomination_message: this.nominationMessage,
       poll_message: this.pollMessage,

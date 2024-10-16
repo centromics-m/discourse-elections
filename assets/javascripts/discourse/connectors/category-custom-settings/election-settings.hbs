@@ -1,13 +1,38 @@
-<section>
+{{!-- <section>
+  <h3>{{i18n 'Election.title'}}</h3>
+  {{log @outletArgs}}
+
   <label>
-    <Input @type="checkbox" @checked={{this.args.category.custom_fields.for_elections}} />
+    [custom_fields: {{ this.args.category.custom_fields }}]
+    [for_elections: {{ this.args.category.for_elections }}]
+    <Input @type="checkbox" @checked={{this.args.category.custom_fields.for_elections}} @id="for_elections" />
     {{i18n 'category.for_elections'}}
   </label>
-</section>
+</section> --}}
 
 {{!-- <section>
+  <h3>{{i18n 'Election.title'}}</h3>
   <label>
     {{input type="checkbox" checked=category.custom_fields.for_elections}}
     {{i18n 'category.for_elections'}}
   </label>
 </section> --}}
+
+
+{{!-- <label for="for-election-checkbox">
+  <input
+    type="checkbox"
+    id="for-election-checkbox"
+    checked={{this.forElection}}
+    {{on "change" this.toggleForElection}}
+  />
+  For Election
+</label> --}}
+
+<section>
+  <h3>{{i18n 'election.title'}}</h3>
+  <label>
+    {{input type="checkbox" checked=category.custom_fields.for_elections}}
+    {{i18n 'category.for_elections'}}
+  </label>
+</section>

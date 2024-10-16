@@ -38,7 +38,7 @@ export default {
               @tracked election_status;
 
               get electionStatusName() {
-                console.log("model:topic election_status", this.election_status);
+                //console.log("model:topic election_status", this.election_status);
                 return Object.keys(ElectionStatuses).find((k) => {
                   return ElectionStatuses[k] === this.election_status;
                 });
@@ -264,6 +264,18 @@ export default {
         //     const title = data.topic_title;
         //     return Ember.isEmpty(title) ? "" : escapeExpression(title);
         //   }
+        // });
+
+        // api.modifyWidget("notification-item:description", (description, { attrs }) => {
+        //   const { data } = attrs;
+        //   const badgeName = data.badge_name;
+        //   if (badgeName) return escapeExpression(badgeName);
+
+        //   const descriptionText = data.description;
+        //   if (descriptionText) return escapeExpression(descriptionText);
+
+        //   const title = data.topic_title;
+        //   return Ember.isEmpty(title) ? "" : escapeExpression(title);
         // });
       });
 

@@ -8,6 +8,7 @@ module DiscourseElections
       return false unless params.include?(:category_id)
 
       category = Category.find(params[:category_id])
+
       unless category.custom_fields["for_elections"]
         raise StandardError.new I18n.t("election.errors.category_not_enabled")
       end

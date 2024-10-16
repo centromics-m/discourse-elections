@@ -11,11 +11,6 @@ export default class ElectionControlsComponent extends Component {
   @service currentUser;
   @service modal;
 
-  // @action
-  // createElection(categoryId) {
-  //   showModal('create-election', { model: { categoryId } });
-  // }
-
   @action
   createElection(categoryId) {
     this.modal.show(CreateElectionModal, {
@@ -30,7 +25,8 @@ export default class ElectionControlsComponent extends Component {
   <template>
     {{#if this.args.category.for_elections}}
       {{#if this.isElectionsAdmin}}
-        <DButton icon="plus" class="btn-default" @label={{i18n 'election.create.label'}} @action={{this.createElection}} @actionParam={{this.args.category.id}} />
+        <DButton icon="plus" class="btn-default" @label={{i18n 'election.create.label'}}
+            @action={{this.createElection}} @actionParam={{this.args.category.id}} />
       {{/if}}
       {{#if this.args.siteSettings.elections_nav_category_list}}
         <ElectionList @category={{this.args.category}} />
@@ -38,13 +34,3 @@ export default class ElectionControlsComponent extends Component {
     {{/if}}
   </template>
 }
-
-// import showModal from 'discourse/lib/show-modal';
-
-// export default {
-//   actions: {
-//     createElection(categoryId) {
-//       showModal('create-election', { model: { categoryId }});
-//     }
-//   }
-// };

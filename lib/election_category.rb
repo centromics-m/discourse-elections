@@ -13,6 +13,7 @@ class Category
 end
 
 class DiscourseElections::ElectionCategory
+
   def self.update_election_list(category_id, topic_id, opts = {})
     category = Category.find(category_id)
     topic = Topic.find(topic_id)

@@ -1,4 +1,5 @@
 require_dependency 'user'
+
 class ::User
   def is_elections_admin?
     if SiteSetting.elections_admin_moderator
