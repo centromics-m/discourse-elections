@@ -31,14 +31,3 @@ export default class ElectionControlsComponent extends Component {
     return this.args.outletArgs.tag;
   }
 }
-
-
-// import showModal from 'discourse/lib/show-modal';
-
-// export default {
-//   actions: {
-//     createElection(categoryId) {
-//       showModal('create-election', { model: { categoryId }});
-//     }
-//   }
-// };
