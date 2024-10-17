@@ -145,10 +145,14 @@ export default class ElectionSaveComponent extends Component {
 
   handleSuccess(result) {
     if (result.success) {
-      this.icon = 'check';
-      this.topic[`election_${this.name}`] = this.property;
+      next(this, () => {
+        this.icon = 'check';
+        this.topic[`election_${this.name}`] = this.property;
+      });
     } else {
-      this.icon = 'times';
+      next(this, () => {
+        this.icon = 'times';
+      });
     }
   }
 

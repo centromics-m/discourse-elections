@@ -1,6 +1,3 @@
-{{log @outletArgs}}
-{{log @property}}
-
 <DButton
   @action={{this.save}}
   @title="election.manage.save"
@@ -9,14 +6,14 @@
   class="save"
 />
 
-{{!-- <div class="state">
-  {{#if saving}}
+<div class="state">
+  {{#if this.saving}}
     {{loading-spinner size='small'}}
   {{/if}}
-  {{#if icon}}
+  {{#if this.icon}}
     {{d-icon icon}}
   {{/if}}
-</div> --}}
+</div>
 
 
 {{!-- <DButton

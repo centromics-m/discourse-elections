@@ -1,0 +1,8 @@
+<div class="enhanced-user-chooser">
+  {{#each this.content as |user|}}
+    <div>
+      {{user.label}}
+    </div>
+  {{/each}}
+  <button {{on "click" this.customAction}}>Run Custom Action</button>
+</div>
