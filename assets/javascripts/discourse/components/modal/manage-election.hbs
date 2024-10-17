@@ -1,7 +1,8 @@
-{{#d-modal-body title='election.manage.label' class='manage-election'}}
+<DModal @closeModal={{@closeModal}} @title={{i18n 'election.manage.label'}} class="manage-election">
+<:body>
   <div class="control-group">
     <label>{{i18n 'election.create.position'}}</label>
-    <Input @value={{this.position}} class='input-medium' />
+    <Input @value={{this.position}} @onInput={{action (mut this.position) value="target.value"}} class='input-medium' />
     <div class="controls">
       <ElectionSave @property={{this.position}}
                     @name="position"
@@ -28,7 +29,7 @@
   <div class="control-group nominees">
     <label>{{i18n 'election.manage.nominees'}}</label>
     {{#if this.showSelector}}
-      <UserSelector @usernames={{this.usernamesString}} />
+      {{!-- <UserSelector @usernames={{this.usernamesString}} /> --}}
     {{/if}}
     <div class="controls">
       <ElectionSaveUsernames @property={{this.usernames}}
@@ -44,7 +45,7 @@
 
   <div class="control-group">
     <label>{{i18n 'election.winner.label'}}</label>
-    <UserSelector @usernames={{this.winner}} @single=true />
+    {{!-- <UserSelector @usernames={{this.winner}} @single=true /> --}}
     <div class="controls">
       <ElectionSave @property={{this.winner}}
                     @name="winner"
@@ -55,7 +56,8 @@
   </div>
 
   <div class="control-group">
-    <Checkbox @checked={{this.selfNomination}} />
+    {{!-- {{input type="checkbox" checked=selfNomination}} --}}
+    <Input @type="checkbox" @value={{this.selfNomination}} class='input-small' />
     <span>{{i18n 'election.create.self_nomination_allowed'}}</span>
     <div class="controls">
       <ElectionSave @property={{this.selfNomination}}
@@ -103,7 +105,8 @@
   </div>
 
   <div class="control-group">
-    <Checkbox @checked={{this.statusBanner}} />
+    {{!-- {{input type="checkbox" checked=statusBanner}} --}}
+    <Input @type="checkbox" @value={{this.statusBanner}} class='input-small' />
     <span>{{i18n 'election.status_banner.enable'}}</span>
     <div class="controls">
       <ElectionSave @property={{this.statusBanner}}
@@ -127,7 +130,8 @@
   </div>
 
   <div class="control-group">
-    <Checkbox @checked={{this.pollOpen}} />
+    {{!-- {{input type='checkbox' checked=pollOpen}} --}}
+    <Input @type="checkbox" @value={{this.pollOpen}} class='input-small' />
     <span>{{i18n 'election.poll.open_time'}}</span>
     <div class="controls">
       <ElectionSaveTime @type='open'
@@ -151,7 +155,8 @@
   {{/if}}
 
   <div class="control-group">
-    <Checkbox @checked={{this.pollClose}} />
+    {{!-- {{input type='checkbox' checked=pollClose}} --}}
+    <Input @type="checkbox" @value={{this.pollClose}} class='input-small' />
     <span>{{i18n 'election.poll.close_time'}}</span>
     <div class="controls">
       <ElectionSaveTime @type='close'
@@ -173,15 +178,17 @@
                   @voters={{this.pollCloseAfterVoters}}
                   @time={{this.pollCloseTime}} />
   {{/if}}
-{{/d-modal-body}}
+</:body>
 
-<div class="modal-footer">
-  <DButton @title='election.manage.done'
-           @label='election.manage.done'
-           @action='close'
-           @class='btn btn-primary' />
-</div>
-
+<:footer>
+  <div class="modal-footer">
+    <DButton @title='election.manage.done'
+            @label='election.manage.done'
+            @action={{this.close}}
+            class='btn btn-primary' />
+  </div>
+</:footer>
+</DModal>
 
 {{!-- {{#d-modal-body title='election.manage.label' class='manage-election'}}
   <div class="control-group">

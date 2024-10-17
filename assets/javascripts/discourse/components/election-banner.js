@@ -1,4 +1,5 @@
-import Component from '@ember/component';
+import Component from "@glimmer/component";
+
 import { computed } from '@ember/object';
 import { action } from '@ember/object';
 import { dasherize } from '@ember/string';

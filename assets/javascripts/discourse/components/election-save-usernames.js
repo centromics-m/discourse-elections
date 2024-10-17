@@ -1,7 +1,9 @@
-import ElectionSave from './election-save';
-import { ajax } from 'discourse/lib/ajax';
+import Component from "@glimmer/component";
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
+import { ajax } from 'discourse/lib/ajax';
+
+import ElectionSave from './election-save';
 
 export default class ElectionSaveUsernamesComponent extends ElectionSave {
   layoutName = 'components/election-save';

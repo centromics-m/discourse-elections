@@ -1,22 +1,34 @@
-import Controller from '@ember/controller';
-import { tracked } from '@glimmer/tracking';
-import { computed } from '@ember/object';
-import ModalFunctionality from 'discourse/mixins/modal-functionality';
-import { ElectionStatuses } from '../lib/election';
+import Component from "@glimmer/component";
+import { tracked } from "@glimmer/tracking";
+import { inject as service } from "@ember/service";
+import { action, computed, observer } from '@ember/object';
 
-export default class ManageElectionController extends Controller.extend(ModalFunctionality) {
+import { ElectionStatuses } from "../../lib/election";
+import DButton from "discourse/components/d-button";
+import ElectionSaveTime from "../../components/election-save-time";
+import ElectionTime from "../../components/election-time";
+import ElectionSaveUsernames from "../../components/election-save-usernames";
+
+export default class ManageElectionModal extends Component {
+
+  @service flashMessages; // To display error messages
+  @tracked topic;// = this.args.model.topic;
+  @tracked usernamesString;// = this.topic.election_nominations_usernames.join(",");
+  @tracked position;// = this.topic.election_position;
+  @tracked status;// = this.topic.election_status;
+
   @tracked showSelector = false;
   nominationParam = { type: 'nomination' };
   pollParam = { type: 'poll' };
   @tracked pollOpenAfter = true;
   @tracked pollCloseAfter = true;
-  @tracked topic = null;
-  @tracked position = '';
-  @tracked usernamesString = '';
+  //@tracked topic = null;
+  //@tracked position = '';
+  //@tracked usernamesString = '';
   @tracked selfNomination = false;
   @tracked statusBanner = false;
   @tracked statusBannerResultHours = 0;
-  @tracked status = '';
+  //@tracked status = '';
   @tracked nominationMessage = '';
   @tracked pollMessage = '';
   @tracked closedPollMessage = '';
@@ -37,9 +49,15 @@ export default class ManageElectionController extends Controller.extend(ModalFun
   }
 
   setup() {
-    const model = this.model;
+    const model = this.args.model;
+
+    // console.log('this.outargs', this.outletArgs);
+    // console.log('this.args', this.args);
+    // console.log('model', model);
+    //console.log('model.topic', this.args.model.model.topic);
+
     if (model) {
-      const topic = model.topic;
+      const topic = model.model.topic;
 
       this.showSelector = true;
       this.topic = topic;
@@ -80,6 +98,12 @@ export default class ManageElectionController extends Controller.extend(ModalFun
     return this.usernamesString.split(',');
   }
 
+  set usernames(value) {
+    // setter 로직: 필요 시 구현
+    console.warn('usernames was set:', value);
+    return value;
+  }
+
   @computed('usernames', 'topic.election_nominations_usernames')
   get usernamesUnchanged() {
     const newUsernames = this.usernames.filter(Boolean);
@@ -92,6 +116,12 @@ export default class ManageElectionController extends Controller.extend(ModalFun
     return newUsernames.every((username) => currentUsernames.includes(username));
   }
 
+  set usernamesUnchanged(value) {
+    // setter 로직: 필요 시 구현
+    console.warn('usernamesUnchanged was set:', value);
+    return value;
+  }
+
   @computed('status', 'topic.election_status')
   get statusUnchanged() {
     return Number(this.status) === Number(this.topic.election_status);
@@ -99,25 +129,77 @@ export default class ManageElectionController extends Controller.extend(ModalFun
 
   @computed('position')
   get positionInvalid() {
+    console.log('positionInvalid', this.position)
     return !this.position || this.position.length < 3;
   }
 
-  @action
-  close() {
-    this.send('closeModal');
-  }
+  //@observer
+  // get isPositionInvalid() {
+  //   console.log('positionInvalid2', this.position)
+  //   return !this.position
+  // }
 
-  @action
-  error(message) {
-    this.flash(message, 'error');
-  }
+  // @action
+  // close() {
+  //   this.send('closeModal');
+  // }
+
+  // @action
+  // error(message) {
+  //   this.flash(message, 'error');
+  // }
 
   @action
   saved() {
     this.model.rerender();
   }
+
+  get model() {
+    return this.args.model;
+  }
 }
 
+//export default class ManageElectionComponent extends Component {
+// export default class ManageElectionModal extends Component {
+
+//   @service flashMessages; // To display error messages
+//   @tracked topic = this.args.model.topic;
+//   @tracked usernamesString = this.topic.election_nominations_usernames.join(",");
+//   @tracked position = this.topic.election_position;
+//   @tracked status = this.topic.election_status;
+
+//   get usernames() {
+//     return this.usernamesString.split(",").filter(Boolean);
+//   }
+
+//   get positionInvalid() {
+//     return !this.position || this.position.length < 3;
+//   }
+
+//   get electionStatuses() {
+//     return Object.keys(ElectionStatuses).map((key) => ({
+//       name: key,
+//       id: ElectionStatuses[key],
+//     }));
+//   }
+
+//   @action
+//   close() {
+//     this.args.closeModal?.(); // Close the modal using the provided callback
+//   }
+
+//   @action
+//   handleError(message) {
+//     this.flashMessages.error(message); // Display an error message
+//   }
+
+//   @action
+//   saveChanges() {
+//     this.args.model.rerender?.(); // Call rerender if provided
+//   }
+// }
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 
 // import ModalFunctionality from 'discourse/mixins/modal-functionality';
 // import { ElectionStatuses } from '../lib/election';

@@ -1,0 +1,18 @@
+<div class="manage-election-modal">
+  <h2>{{t "election.manage.title"}}</h2>
+
+  <label for="position">{{t "election.position.label"}}</label>
+  <input type="text" id="position" value={{this.position}} class={{if this.positionInvalid "invalid"}}>
+
+  {{#if this.positionInvalid}}
+    <div class="error-message">{{t "election.position.invalid"}}</div>
+  {{/if}}
+
+  <button class="btn-primary" {{on "click" this.saveChanges}}>
+    {{t "election.save"}}
+  </button>
+
+  <button class="btn-secondary" {{on "click" this.close}}>
+    {{t "election.close"}}
+  </button>
+</div>

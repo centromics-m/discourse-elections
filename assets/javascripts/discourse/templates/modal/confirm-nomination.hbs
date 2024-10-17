@@ -10,7 +10,8 @@
     <a {{on "click" (fn this.closeModal)}}>{{i18n 'cancel'}}</a>
   {{/if}}
 </div>
- --}}
+
+ /////////////////////////
 
 {{#d-modal-body title=(concat prefix 'label') class='confirm-nomination'}}
   {{{i18n (concat prefix 'body') position=model.topic.election_position categoryName=categoryName}}}
@@ -24,3 +25,6 @@
     <a {{action "closeModal"}}>{{i18n 'cancel'}}</a>
   {{/if}}
 </div>
+--}}
+
+############ confirm-nomination

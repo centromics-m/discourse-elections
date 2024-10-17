@@ -1,9 +1,9 @@
-import ElectionSave from './election-save';
+import Component from "@glimmer/component";
 import { tracked } from '@glimmer/tracking';
-import { action } from '@ember/object';
-//import { computed } from '@ember-decorators/computed';
-import { computed } from "@ember/object";
+import { action, computed } from '@ember/object';
 import $ from 'jquery';
+
+import ElectionSave from "./election-save";
 
 export default class ElectionSaveTimeComponent extends ElectionSave {
   name = 'poll_time';

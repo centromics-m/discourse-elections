@@ -1,6 +1,7 @@
-import Component from '@ember/component';
-import { tracked } from '@glimmer/tracking';
-import { action } from '@ember/object';
+import Component from "@glimmer/component";
+import { tracked } from "@glimmer/tracking";
+import { inject as service } from "@ember/service";
+import { action, computed, observer } from '@ember/object';
 import { observes, on } from "@ember-decorators/object";
 
 export default class SetElectionTimeComponent extends Component {

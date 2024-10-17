@@ -1,14 +1,9 @@
-import Component from '@ember/component';
-import EmberObject, { action } from "@ember/object";
-import { gt, or } from "@ember/object/computed";
+import Component from '@glimmer/component';
+import { action, computed, observer } from '@ember/object';
 import { service } from "@ember/service";
-import { observes } from "@ember-decorators/object";
-import discourseComputed from "discourse-common/utils/decorators";
-import I18n from "discourse-i18n";
 import { tracked } from '@glimmer/tracking';
-import { computed } from '@ember/object';
-import DiscourseURL from 'discourse/lib/url';
 import { ajax } from 'discourse/lib/ajax';
+import DiscourseURL from 'discourse/lib/url';
 
 import DButton from "discourse/components/d-button";
 

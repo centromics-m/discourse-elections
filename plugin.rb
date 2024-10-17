@@ -10,6 +10,8 @@ register_asset 'stylesheets/mobile/elections.scss', :mobile
 register_asset 'lib/jquery.min.js'
 register_asset 'lib/jquery.timepicker.min.js'
 register_asset 'lib/jquery.timepicker.scss'
+register_asset 'lib/bootbox.min.js'
+register_asset 'lib/bootbox.locales.min.js'
 #register_asset 'lib/moment.min.js'
 #register_asset 'javascripts/discourse/init.js'
 
