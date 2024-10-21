@@ -167,7 +167,7 @@ class DiscourseElections::ElectionPost
   end
 
   def self.build_winner(user)
-    avatar_url = user.avatar_template_url.gsub("{size}", "50")
+    avatar_url = user&.avatar_template_url&.gsub("{size}", "50") || ""
 
     html = "<div class='winner'><span>"
 
@@ -185,7 +185,7 @@ class DiscourseElections::ElectionPost
 
   def self.build_nominee(topic, user)
     nomination_statements = topic.election_nomination_statements
-    avatar_url = user.avatar_template_url.gsub("{size}", "50")
+    avatar_url = user&.avatar_template_url&.gsub("{size}", "50") || ""
 
     html = "<div class='nomination'><span>"
 

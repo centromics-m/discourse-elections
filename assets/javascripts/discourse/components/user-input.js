@@ -5,14 +5,6 @@ import { makeArray } from "discourse-common/lib/helpers";
 import CategoryRow from "select-kit/components/category-row";
 import MultiSelectComponent from "select-kit/components/multi-select";
 
-// import EmberObject, { computed } from "@ember/object";
-// import { mapBy } from "@ember/object/computed";
-// import { makeArray } from "discourse-common/lib/helpers";
-// //import CategoryRow from "select-kit/components/category-row";
-// import MultiSelectComponent from "select-kit/components/multi-select";
-// import User from "discourse/models/user";
-import userSearch from "discourse/lib/user-search"; // userSearch 가져오기
-import UserRow from "./user-row";
 import User from "discourse/models/user";
 import { ajax } from 'discourse/lib/ajax';
 

@@ -9,7 +9,8 @@ import ElectionSaveTime from "../election-save-time";
 import ElectionTime from "../election-time";
 import ElectionSaveUsernames from "../election-save-usernames";
 //import UserSelectorComponent from "../../components/user-selector";
-import UserChooser2 from "../user-chooser2";
+//import UserChooser2 from "../user-chooser2";
+import UserSelector from "../user-selector";
 
 export default class ManageElectionModal extends Component {
 
@@ -64,7 +65,7 @@ export default class ManageElectionModal extends Component {
       this.showSelector = true;
       this.topic = topic;
       this.position = topic.election_position;
-      this.usernamesString = topic.election_nominations_usernames.join(',');
+      this.usernamesString = 'etna, etna2';//topic.election_nominations_usernames.join(',');
       this.selfNomination = topic.election_self_nomination_allowed;
       this.statusBanner = topic.election_status_banner;
       this.statusBannerResultHours = topic.election_status_banner_result_hours;
@@ -103,6 +104,14 @@ export default class ManageElectionModal extends Component {
   set usernames(value) {
     // setter 로직: 필요 시 구현
     console.warn('usernames was set:', value);
+    if(!value) {
+      console.warn('usernames was set2:', value);
+      this.usernamesString = '';
+    }
+    else {
+      console.warn('usernames was set1:', value);
+      this.usernamesString = value.join(',');
+    }
     return value;
   }
 
@@ -160,4 +169,38 @@ export default class ManageElectionModal extends Component {
   get model() {
     return this.args.model;
   }
+
+  // @action
+  // onUseranamesInput(event) {
+  //   console.log('onUseranamesInput', event);
+  //   //this.usernamesString = event.target.value.join(',');
+  // }
+
+  @action
+  onUsernamesInput(usernames) {
+    //console.log('onUsernamesInput:', usernames);
+
+    // Join the usernames into a string if needed.
+    this.usernamesString = (usernames || []).filter(Boolean).join(', ');
+
+    console.log('onUsernamesInput:', this.usernamesString);
+  }
+
+  @action
+  onUsernameSelect(username) {
+    console.log('onUsernameSelect:', username);
+
+    if(username.trim() === '') {
+      alert('Please enter a username.');
+      return;
+    }
+
+    if(this.usernames.includes(username)) {
+      alert('Username already selected.');
+      return;
+    }
+
+    this.usernames.push(username);
+  }
+
 }

@@ -29,7 +29,22 @@
   <div class="control-group nominees">
     <label>{{i18n 'election.manage.nominees'}}</label>
     {{#if this.showSelector}}
-      {{!-- <UserSelector @usernames={{this.usernamesString}} /> --}}
+      {{!-- <UserChooser2 @usernames={{this.usernamesString}} /> --}}
+      {{!-- <UserSelector @usernames={{this.usernamesString}}
+          @onChange={{this.onUseranamesInput}}
+          @options={{hash allowUncategorized=false maximum=this.max}}
+      /> --}}
+
+      {{!-- <UserSelector
+        @usernames={{this.usernamesString}}
+        @onChange={{this.onUsernamesInput}}
+        @onSelect={{this.onUsernameSelect}}
+        @single={{false}}
+        @excludedUsernames={{this.blockedUsers}}
+      /> --}}
+
+      <Input @value={{this.usernamesString}} @onInput={{action (mut this.usernamesString) value="target.value"}} class='input-medium' /><br>
+      ＊ username(id)를 쉼표로 나누어 입력 (예, "admin, user1, user2")
 
     {{/if}}
     <div class="controls">
@@ -47,6 +62,9 @@
   <div class="control-group">
     <label>{{i18n 'election.winner.label'}}</label>
     {{!-- <UserSelector @usernames={{this.winner}} @single=true /> --}}
+    <Input @value={{this.winner}} @onInput={{action (mut this.winner) value="target.value"}} class='input-medium' /><br>
+    ＊ username(id)를 입력(1개만) (예, "admin")
+
     <div class="controls">
       <ElectionSave @property={{this.winner}}
                     @name="winner"

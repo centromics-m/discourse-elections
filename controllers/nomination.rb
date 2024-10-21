@@ -7,11 +7,15 @@ module DiscourseElections
       params.require(:topic_id)
 
       usernames = params[:usernames].blank? ? [] : [*params[:usernames]]
+      usernames.map { |u| u.strip! }
 
       topic = Topic.find(params[:topic_id])
       if topic.election_status != Topic.election_statuses[:nomination] && usernames.length < 2
         raise StandardError.new I18n.t('election.errors.more_nominations')
       end
+
+      # pp '#############' + topic.election_nominations_usernames.to_s
+      # usernames = usernames - topic.election_nominations_usernames
 
       result = DiscourseElections::Nomination.set_by_username(params[:topic_id], usernames)
 

@@ -268,6 +268,11 @@ module DiscourseElections
       params.require(:topic_id)
 
       winner = params[:winner] || ''
+      winner_obj = User.find_by(username: winner)
+
+      if winner.present? && winner_obj = nil
+        raise "User(#{winner}) not found"
+      end
 
       result = DiscourseElections::ElectionTopic.set_winner(params[:topic_id], winner)
 

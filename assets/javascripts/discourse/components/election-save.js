@@ -91,12 +91,13 @@ export default class ElectionSaveComponent extends Component {
         if (original) {
           this.property = original;
         }
-        this.sendAction('error', result.message);
+        //this.sendAction('error', result.message);
+        this.handleError(result);
       //});
     }
 
     //next(() => {
-      this.sendAction('saved');
+      //this.sendAction('saved');
       this.saving = false;
     //});
   }
