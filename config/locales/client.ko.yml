@@ -79,7 +79,7 @@ ko:
 
       time_label: "Set Time"
       manage:
-        label: "Manage Election"
+        label: "선거관리"
         nominees: "Select the nominees for this election."
         save: "Save"
         done: "Done"
@@ -90,4 +90,4 @@ ko:
         poll: "{{description}}"
         closed_poll: "{{description}}"
       winner:
-        label: "Winner"
+        label: "당선자"
