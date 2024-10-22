@@ -63,7 +63,7 @@ export default class CreateElectionModal extends Component {
     console.log('createElection this.model', this.model);
 
     let data = {
-      category_id: this.model.categoryId, // by etna
+      category_id: this.model.categoryId,
       position: this.position,
       nomination_message: this.nominationMessage,
       poll_message: this.pollMessage,
