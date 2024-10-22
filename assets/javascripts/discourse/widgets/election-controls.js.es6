@@ -222,13 +222,14 @@ export default createWidget('election-controls', {
       }));
     }
 
-    if (topic.election_is_nominee && !topic.election_made_statement) {
-      contents.push(this.attach('button', {
-        action: 'makeStatement',
-        label: `election.nomination.statement.add`,
-        className: 'btn-primary add-statement'
-      }));
-    }
+    // NOTE: disabled by etna (2024.10.22)
+    // if (topic.election_is_nominee && !topic.election_made_statement) {
+    //   contents.push(this.attach('button', {
+    //     action: 'makeStatement',
+    //     label: `election.nomination.statement.add`,
+    //     className: 'btn-primary add-statement'
+    //   }));
+    // }
 
     if (user && user.is_elections_admin) {
       contents.push(this.attach('button', {

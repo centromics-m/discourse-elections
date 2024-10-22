@@ -73,28 +73,29 @@ export default {
         //   )
         // });
 
+        // NOTE: disabled by etna (2024.10.22)
         // Modify the original class with the new definition
-        api.modifyClass('model:composer', (Superclass) => class extends Superclass {
-          // Add properties and computed properties here
-          @tracked electionNominationStatement; // Define tracked property if necessary
+        // api.modifyClass('model:composer', (Superclass) => class extends Superclass {
+        //   // Add properties and computed properties here
+        //   @tracked electionNominationStatement; // Define tracked property if necessary
 
-          @computed(
-            'electionNominationStatement',
-            'post.election_nomination_statement',
-            'topic.election_is_nominee',
-            'topic.election_made_statement'
-          )
-          get isNominationStatement() {
-            const editingPost = this.editingPost;
-            const { electionNominationStatement, post } = this;
-            const madeStatement = post.election_made_statement;
+        //   @computed(
+        //     'electionNominationStatement',
+        //     'post.election_nomination_statement',
+        //     'topic.election_is_nominee',
+        //     'topic.election_made_statement'
+        //   )
+        //   get isNominationStatement() {
+        //     const editingPost = this.editingPost;
+        //     const { electionNominationStatement, post } = this;
+        //     const madeStatement = post.election_made_statement;
 
-            if (madeStatement && (!editingPost || !post.election_nomination_statement)) {
-              return false;
-            }
-            return (electionNominationStatement || post.election_nomination_statement) && post.election_is_nominee;
-          }
-        });
+        //     if (madeStatement && (!editingPost || !post.election_nomination_statement)) {
+        //       return false;
+        //     }
+        //     return (electionNominationStatement || post.election_nomination_statement) && post.election_is_nominee;
+        //   }
+        // });
 
 
         // ok
