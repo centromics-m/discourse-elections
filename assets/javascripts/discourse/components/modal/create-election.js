@@ -18,6 +18,28 @@ export default class CreateElectionModal extends Component {
   @tracked pollCloseAfterHours = 48;
   @tracked pollCloseAfterVoters = 10;
   @tracked loading = false;
+  //@tracked model = null;
+
+  constructor() {
+    super(...arguments);
+    this.setup();
+  }
+
+  setup() {
+    const model = this.args.model;
+
+    if (model) {
+      this.showSelector = true;
+      this.categoryId = model.categoryId;
+      this.position = model.position;
+      this.pollOpenTime = model.pollOpenTime;
+      this.pollCloseTime = model.pollCloseTime;
+    }
+  }
+
+  get model() {
+    return this.args.model;
+  }
 
   @computed('position', 'pollTimesValid')
   get disabled() {
@@ -38,8 +60,10 @@ export default class CreateElectionModal extends Component {
   // actions = {
   @action
   async createElection() {
+    console.log('createElection this.model', this.model);
+
     let data = {
-      category_id: this.model.categoryId || '4', // by etna
+      category_id: this.model.categoryId, // by etna
       position: this.position,
       nomination_message: this.nominationMessage,
       poll_message: this.pollMessage,
@@ -93,5 +117,4 @@ export default class CreateElectionModal extends Component {
       // Handle error as needed (e.g., show a message)
     }
   }
-  //};
 }
