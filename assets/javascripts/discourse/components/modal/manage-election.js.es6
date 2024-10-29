@@ -8,9 +8,6 @@ import DButton from "discourse/components/d-button";
 import ElectionSaveTime from "../election-save-time";
 import ElectionTime from "../election-time";
 import ElectionSaveUsernames from "../election-save-usernames";
-//import UserSelectorComponent from "../../components/user-selector";
-//import UserChooser2 from "../user-chooser2";
-import UserSelector from "../user-selector";
 
 export default class ManageElectionModal extends Component {
 
@@ -202,5 +199,4 @@ export default class ManageElectionModal extends Component {
 
     this.usernames.push(username);
   }
-
 }
