@@ -18,9 +18,3 @@ export default class ElectionBannerDiscoveryComponent extends Component {
     return this.args.outletArgs.tag;
   }
 }
-
-// export default {
-//   setupComponent(attrs, component) {
-//     component.set('electionListEnabled', Discourse.SiteSettings.elections_status_banner_discovery);
-//   }
-// };
