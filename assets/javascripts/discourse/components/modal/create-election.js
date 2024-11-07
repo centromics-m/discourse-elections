@@ -57,7 +57,6 @@ export default class CreateElectionModal extends Component {
     return true;
   }
 
-  // actions = {
   @action
   async createElection() {
     console.log('createElection this.model', this.model);

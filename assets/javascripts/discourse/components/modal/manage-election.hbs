@@ -44,7 +44,7 @@
       /> --}}
 
       <Input @value={{this.usernamesString}} @onInput={{action (mut this.usernamesString) value="target.value"}} class='input-medium' /><br>
-      ＊ username(id)를 쉼표로 나누어 입력 (예, "admin, user1, user2")
+      ＊ {{i18n 'election.manage.nominees_help'}}
 
     {{/if}}
     <div class="controls">
@@ -63,7 +63,7 @@
     <label>{{i18n 'election.winner.label'}}</label>
     {{!-- <UserSelector @usernames={{this.winner}} @single=true /> --}}
     <Input @value={{this.winner}} @onInput={{action (mut this.winner) value="target.value"}} class='input-medium' /><br>
-    ＊ username(id)를 입력(1개만) (예, "admin")
+    ＊ {{i18n 'election.winner.help'}}
 
     <div class="controls">
       <ElectionSave @property={{this.winner}}
@@ -76,7 +76,7 @@
 
   <div class="control-group">
     {{!-- {{input type="checkbox" checked=selfNomination}} --}}
-    <Input @type="checkbox" @value={{this.selfNomination}} class='input-small' />
+    <Input @type="checkbox" @checked={{this.selfNomination}} class='input-small' />
     <span>{{i18n 'election.create.self_nomination_allowed'}}</span>
     <div class="controls">
       <ElectionSave @property={{this.selfNomination}}
@@ -125,7 +125,7 @@
 
   <div class="control-group">
     {{!-- {{input type="checkbox" checked=statusBanner}} --}}
-    <Input @type="checkbox" @value={{this.statusBanner}} class='input-small' />
+    <Input @type="checkbox" @checked={{this.statusBanner}} class='input-small' />
     <span>{{i18n 'election.status_banner.enable'}}</span>
     <div class="controls">
       <ElectionSave @property={{this.statusBanner}}
@@ -149,8 +149,7 @@
   </div>
 
   <div class="control-group">
-    {{!-- {{input type='checkbox' checked=pollOpen}} --}}
-    <Input @type="checkbox" @value={{this.pollOpen}} class='input-small' />
+    <Input @type="checkbox" @checked={{this.pollOpen}} class='input-small' />
     <span>{{i18n 'election.poll.open_time'}}</span>
     <div class="controls">
       <ElectionSaveTime @type='open'
@@ -174,8 +173,7 @@
   {{/if}}
 
   <div class="control-group">
-    {{!-- {{input type='checkbox' checked=pollClose}} --}}
-    <Input @type="checkbox" @value={{this.pollClose}} class='input-small' />
+    <Input @type="checkbox" @checked={{this.pollClose}} class='input-small' />
     <span>{{i18n 'election.poll.close_time'}}</span>
     <div class="controls">
       <ElectionSaveTime @type='close'

@@ -81,6 +81,7 @@ ko:
       manage:
         label: "선거관리"
         nominees: "Select the nominees for this election."
+        nominees_help: "username(ID)를 쉼표로 나누어 입력 (예, admin, user1, user2)"
         save: "Save"
         done: "Done"
       post:
@@ -91,3 +92,4 @@ ko:
         closed_poll: "{{description}}"
       winner:
         label: "당선자"
+        help: "username(ID)를 입력(1개만) (예, admin)"

@@ -68,6 +68,7 @@ export default class ElectionSaveTimeComponent extends ElectionSave {
       data.time = this.time;
     }
 
+		console.log('data', data)
     return data;
   }
 
@@ -104,10 +105,12 @@ export default class ElectionSaveTimeComponent extends ElectionSave {
         this.voters = this.topic.election_poll_close_after_voters;
       }
 
-      this.sendAction('error', result.message);
+      //this.sendAction('error', result.message);
+			this.error = result.message;
     }
 
-    this.sendAction('saved');
+    //this.sendAction('saved');
+		//this.saved();
     this.saving = false;
   }
 }

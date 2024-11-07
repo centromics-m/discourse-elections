@@ -23,12 +23,12 @@ export default class ElectionSaveComponent extends Component {
   init() {
     super.init(...arguments);
     this.setup();
-    console.log('this', this);
-    console.log('this.args', this.args); // --> undefined
-    console.log('property', this.property);
-    console.log('name', this.get('name'));
-    console.log('topic', this.get('topic'));
-    console.log('saved', this.saved);
+    // console.log('this', this);
+    // console.log('this.args', this.args); // --> undefined
+    // console.log('property', this.property);
+    // console.log('name', this.get('name'));
+    // console.log('topic', this.get('topic'));
+    // console.log('saved', this.saved);
   }
 
   setup() {
@@ -98,6 +98,7 @@ export default class ElectionSaveComponent extends Component {
 
     //next(() => {
       //this.sendAction('saved');
+			//this.saved();
       this.saving = false;
     //});
   }
@@ -113,8 +114,11 @@ export default class ElectionSaveComponent extends Component {
       this.saving = true;
     });
 
-    //const data = this.prepareData();
-    const data = { topic_id: this.topic.id, [this.name]: this.property };
+    const data = this.prepareData();
+    // const data = {
+		// 	topic_id: this.topic.id,
+		// 	[this.name]: this.property,
+		// };
 
     //const name = this.name;
     // console.log('data', data);

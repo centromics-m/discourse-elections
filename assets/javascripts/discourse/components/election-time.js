@@ -11,6 +11,7 @@ export default class ElectionTimeComponent extends Component {
   @tracked hours = 0;
   @tracked nominations = 0;
   @tracked voters = 0;
+	@tracked type = 'open'; // open or close
 
   get showNominations() {
     return this.type === 'open';

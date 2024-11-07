@@ -81,6 +81,7 @@ en:
       manage:
         label: "Manage Election"
         nominees: "Select the nominees for this election."
+        nominees_help: "Enter username(ID) separated by commas (e.g., admin, user1, user2)"
         save: "Save"
         done: "Done"
       post:
@@ -91,3 +92,4 @@ en:
         closed_poll: "{{description}}"
       winner:
         label: "Winner"
+        help: "Enter username(ID) (only 1) (e.g. admin)"

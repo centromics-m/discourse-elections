@@ -1,5 +1,72 @@
 <div class="election-time-control">
   <div class="election-time-control-title">
+    <input type="checkbox" checked={{this.after}} {{on "change" (fn (mut this.after) this.checked) }} />
+    <span>{{i18n this.afterTitle}}</span>
+  </div>
+
+  <span>{{i18n 'election.set_time.hours'}}</span>
+
+  <input
+    type="number"
+    placeholder="0"
+    {{!-- value={{this.hours}} --}}
+    class="input-small"
+    {{on "input" (fn (mut this.hours) this.value) }}
+  />
+
+  {{#if this.showNominations}}
+    <br>
+    <span>{{i18n 'election.set_time.nominations'}}</span>
+    <input
+      type="number"
+      placeholder="0"
+      value={{this.nominations}}
+      class="input-small"
+      {{on "input" (fn (mut this.nominations) this.value)}}
+    />
+    <br>
+  {{/if}}
+
+  {{#if this.showVoters}}
+    <br>
+    <span>{{i18n 'election.set_time.voters'}}</span>
+    <input
+      type="number"
+      placeholder="0"
+      value={{this.voters}}
+      class="input-small"
+      {{on "input" (fn (mut this.voters) this.value)}}
+    />
+    <br>
+  {{/if}}
+</div>
+
+<div class="election-time-control">
+  <div class="election-time-control-title">
+    <input type="checkbox" checked={{this.manual}} {{on "change" (fn (mut this.after) this.checked) }} />
+    <span>{{i18n this.manualTitle}}</span>
+  </div>
+  <SetElectionTime
+    @dateTime={{this.time}}
+    @timeElementId={{this.timeId}}
+    @dateElementId={{this.dateId}}
+    @disabled={{this.after}}
+    @setTime={{this.setTime}}
+  />
+</div>
+
+<div class="election-description">
+  {{i18n 'election.poll.criteria' action=this.type}}
+  <ul>
+    {{#each this.criteria as |c|}}
+      <li>{{c}}</li>
+    {{/each}}
+  </ul>
+</div>
+
+
+{{!-- <div class="election-time-control">
+  <div class="election-time-control-title">
     <input type="checkbox" checked={{this.after}} {{on "change" (pick "target.checked" (fn this.set "after"))}} />
     <span>{{i18n this.afterTitle}}</span>
   </div>
@@ -32,4 +99,4 @@
       <li>{{c}}</li>
     {{/each}}
   </ul>
-</div>
+</div> --}}

@@ -1,18 +1,3 @@
-{{!-- {{d-icon 'star'}}
-<span>{{i18n key position=election.position}}</span>
-{{#if showTime}}
-  <span>{{i18n timeKey time=(election-time election.time)}}</span>
-{{/if}} --}}
-
-{{!-- <div class="{{this.classNameBindings}}" {{on "click" this.handleClick}}>
-  <!-- 배너 내용 -->
-  <span>{{this.key}}</span>
-  {{#if this.showTime}}
-    <span>{{this.timeKey}}</span>
-  {{/if}}
-  <button class="election-button">Vote Now</button>
-</div> --}}
-
 <div class="{{this.className}}">
   {{d-icon 'star'}}
   <span>{{i18n this.key position=this.election.position}}</span>
