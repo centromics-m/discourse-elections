@@ -1,4 +1,4 @@
-<div class="date-time-card">
+<div class="date-time-card" {{didInsert this.setup}}>
   {{#if this.disabled}}
     <div class="disabled"></div>
   {{/if}}
@@ -7,13 +7,21 @@
       <label class="input-group-label">
         {{i18n "election.set_time.date"}}
       </label>
-      <DatePicker @value={{this.date}} @containerId={{this.dateElementId}} />
+      <DatePicker
+        @value={{this.date}}
+        @containerId={{@dateElementId}}
+        {{!-- {{on "change" (fn (mut this.date) this.value)}} --}}
+      />
     </div>
     <div class="modal-time-area">
       <label class="input-group-label">
         {{i18n "election.set_time.time"}}
       </label>
-      <input type="text" id={{this.timeElementId}} />
+      <input
+        type="time"
+        id={{@timeElementId}}
+        {{!-- {{on "change" (fn (mut this.time) this.value)}} --}}
+      />
     </div>
   </div>
   <div id={{this.dateElementId}}></div>

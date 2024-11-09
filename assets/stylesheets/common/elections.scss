@@ -53,7 +53,8 @@
   }
 }
 
-.create-election, .manage-election {
+.create-election,
+.manage-election {
   label {
     font-size: 1em;
   }
@@ -94,7 +95,6 @@
 }
 
 .election-post .cooked {
-
   .title {
     text-decoration: underline;
   }
@@ -110,7 +110,7 @@
   .nomination {
     border-bottom: none;
 
-    &> span {
+    & > span {
       display: flex;
     }
   }
@@ -155,10 +155,10 @@
   padding: 5px;
   margin-bottom: 10px;
   cursor: pointer;
-  border: 1px solid  dark-light-diff($primary, $secondary, 90%, -65%);
+  border: 1px solid dark-light-diff($primary, $secondary, 90%, -65%);
   border-radius: 4px;
   color: $secondary;
-  transition: all .25s;
+  transition: all 0.25s;
   max-width: 680px;
 
   &.election-nomination {
@@ -188,7 +188,8 @@
 }
 
 .election-time {
-  margin: 15px;
+  //margin: 15px;
+  margin-bottom: 15px;
   padding: 0 10px;
   width: 87%;
   background-color: dark-light-diff($primary, $secondary, 95%, -65%);
@@ -209,8 +210,8 @@
       }
 
       > span {
-       text-decoration: underline;
-     }
+        text-decoration: underline;
+      }
     }
 
     .clear-time {
@@ -266,22 +267,22 @@
     }
   }
 
-  .modal-date-time-set{
+  .modal-date-time-set {
     padding-top: 3px;
     padding-bottom: 4px;
     display: flex;
     flex-direction: row;
     clear: both;
 
-    .modal-date-area{
+    .modal-date-area {
       order: 1;
     }
 
-    .modal-time-area{
+    .modal-time-area {
       order: 2;
       margin-left: 10px;
 
-      .modal-time{
+      .modal-time {
         width: 127px;
       }
     }
@@ -292,8 +293,8 @@
     text-align: center;
   }
 
-  .date-picker{
-     width: 121px;
+  .date-picker {
+    width: 121px;
   }
 
   .pika-single {

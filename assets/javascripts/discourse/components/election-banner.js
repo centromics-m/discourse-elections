@@ -1,14 +1,12 @@
 import Component from "@glimmer/component";
-
-import { computed } from '@ember/object';
-import { action } from '@ember/object';
-import { dasherize } from '@ember/string';
-import { service } from '@ember/service';
+import { action, computed } from "@ember/object";
+import { service } from "@ember/service";
+import { dasherize } from "@ember/string";
 
 const electionStatus = {
-  1: 'nomination',
-  2: 'poll',
-  3: 'closed_poll'
+  1: "nomination",
+  2: "poll",
+  3: "closed_poll",
 };
 
 export default class ElectionBannerComponent extends Component {
@@ -20,33 +18,36 @@ export default class ElectionBannerComponent extends Component {
   }
 
   // computed 속성: status
-  @computed('election.status')
+  @computed("election.status")
   get status() {
     return electionStatus[this.election.status];
   }
 
   // computed 속성: statusClass
-  @computed('status')
+  @computed("status")
   get statusClass() {
     return `election-${dasherize(this.status)}`;
   }
 
   // computed 속성: key
-  @computed('status')
+  @computed("status")
   get key() {
     return `election.status_banner.${this.status}`;
   }
 
   // computed 속성: timeKey
-  @computed('status')
+  @computed("status")
   get timeKey() {
     return `election.status_banner.${this.status}_time`;
   }
 
   // computed 속성: showTime
-  @computed('status', 'election.time')
+  @computed("status", "election.time")
   get showTime() {
-    return (this.status === 'nomination' || this.status === 'poll') && this.election.time;
+    return (
+      (this.status === "nomination" || this.status === "poll") &&
+      this.election.time
+    );
   }
 
   // 클릭 이벤트 핸들러
