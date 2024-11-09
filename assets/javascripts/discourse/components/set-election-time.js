@@ -22,6 +22,9 @@ export default class SetElectionTimeComponent extends Component {
   classNames = ["set-election-time"];
   setTime = this.args.setTime;
 
+  dateInitial = this.date;
+  timeInitial = this.time;
+
   //@on("init")
   @action
   setup() {
@@ -38,8 +41,7 @@ export default class SetElectionTimeComponent extends Component {
   }
 
   initializeTimePicker() {
-    console.log("initializeTimePicker: this.timeElementId", this.timeElementId);
-
+    //console.log("initializeTimePicker: this.timeElementId", this.timeElementId);
     const timeElementId = this.args.timeElementId;
     const $timePicker = $(`#${timeElementId}`);
 
@@ -48,10 +50,10 @@ export default class SetElectionTimeComponent extends Component {
       $timePicker.timepicker("setTime", this.time);
     }
 
-    console.log("timeElementId", timeElementId);
+    //console.log("timeElementId", timeElementId);
     $timePicker.change(() => {
       this.time = $timePicker.val();
-      console.log("time", this.time);
+      //console.log("time", this.time);
       this.setTime(this.time);
     });
   }

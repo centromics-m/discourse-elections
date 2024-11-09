@@ -17,13 +17,13 @@ export default class ElectionTimeComponent extends Component {
   @tracked after = this.args.after || false;
   @tracked manual = this.args.manual || false;
   @tracked hours = this.args.hours || 0;
-  @tracked nominations = this.args.nominations || 0;
+  @tracked nominations = this.args.nominations || 2;
   @tracked voters = 0;
   @tracked type = this.args.type;
   classNames = ["election-time"];
 
-  hoursInitial = this.hours;
-  nominationsInitial = this.nominations;
+  // hoursInitial = this.hours;
+  // nominationsInitial = this.nominations;
 
   get showNominations() {
     return this.type === "open";

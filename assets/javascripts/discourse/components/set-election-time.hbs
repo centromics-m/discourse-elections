@@ -8,19 +8,25 @@
         {{i18n "election.set_time.date"}}
       </label>
       <DatePicker
-        @value={{this.date}}
+        @value={{this.dateInitial}}
         @containerId={{@dateElementId}}
-        {{!-- {{on "change" (fn (mut this.date) this.value)}} --}}
+        {{on "change" (fn (mut this.date) this.value)}}
       />
     </div>
     <div class="modal-time-area">
       <label class="input-group-label">
         {{i18n "election.set_time.time"}}
       </label>
-      <input
+      {{!-- <input
         type="time"
         id={{@timeElementId}}
-        {{!-- {{on "change" (fn (mut this.time) this.value)}} --}}
+        {{on "change" (fn (mut this.time) this.value)}}
+      /> --}}
+      <Input
+        type="time"
+        id={{@timeElementId}}
+        @value={{this.timeInitial}}
+        {{on "change" (fn (mut this.time) this.value)}}
       />
     </div>
   </div>

@@ -45,15 +45,14 @@
         {{!-- <UserSelector @usernames={{this.usernamesString}}
           @onChange={{this.onUseranamesInput}}
           @options={{hash allowUncategorized=false maximum=this.max}}
-      /> --}}
-
+        /> --}}
         {{!-- <UserSelector
-        @usernames={{this.usernamesString}}
-        @onChange={{this.onUsernamesInput}}
-        @onSelect={{this.onUsernameSelect}}
-        @single={{false}}
-        @excludedUsernames={{this.blockedUsers}}
-      /> --}}
+          @usernames={{this.usernamesString}}
+          @onChange={{this.onUsernamesInput}}
+          @onSelect={{this.onUsernameSelect}}
+          @single={{false}}
+          @excludedUsernames={{this.blockedUsers}}
+        /> --}}
 
         <Input
           @value={{this.usernamesString}}
@@ -62,8 +61,8 @@
         /><br />
         ＊
         {{i18n "election.manage.nominees_help"}}
-
       {{/if}}
+
       <div class="controls">
         <ElectionSaveUsernames
           @property={{this.usernames}}
@@ -207,9 +206,14 @@
       </div>
     </div>
 
+    <!-- Poll open time enabled -->
     <div class="control-group">
-      <Input @type="checkbox" @checked={{this.pollOpen}} class="input-small" />
-      <span>{{i18n "election.poll.open_time"}}</span>
+      <Input
+        @type="checkbox"
+        @checked={{this.pollOpen}}
+        class="input-small"
+      />{{i18n "election.poll.open_time"}}
+
       <div class="controls">
         <ElectionSaveTime
           @type="open"
@@ -235,6 +239,7 @@
       />
     {{/if}}
 
+    <!-- Poll close time enabled -->
     <div class="control-group">
       <Input @type="checkbox" @checked={{this.pollClose}} class="input-small" />
       <span>{{i18n "election.poll.close_time"}}</span>
