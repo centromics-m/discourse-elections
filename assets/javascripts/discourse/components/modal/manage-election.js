@@ -49,10 +49,10 @@ export default class ManageElectionModal extends Component {
   setup() {
     const model = this.args.model;
 
-    // console.log('this.outargs', this.outletArgs);
-    // console.log('this.args', this.args);
-    // console.log('model', model);
-    //console.log('model.topic', this.args.model.model.topic);
+    // console.log("ManageElectionModal this.outargs", this.outletArgs);
+    // console.log("ManageElectionModal this.args", this.args);
+    // console.log("ManageElectionModal model", model);
+    // console.log("ManageElectionModal model.topic", this.args.model.model.topic);
 
     if (model) {
       const topic = model.model.topic;
@@ -99,12 +99,12 @@ export default class ManageElectionModal extends Component {
 
   set usernames(value) {
     // setter 로직: 필요 시 구현
-    console.warn("usernames was set:", value);
+    //console.warn("usernames was set:", value);
     if (!value) {
-      console.warn("usernames was set2:", value);
+      //console.warn("usernames was set2:", value);
       this.usernamesString = "";
     } else {
-      console.warn("usernames was set1:", value);
+      //console.warn("usernames was set1:", value);
       this.usernamesString = value.join(",");
     }
     return value;
@@ -127,7 +127,7 @@ export default class ManageElectionModal extends Component {
 
   set usernamesUnchanged(value) {
     // setter 로직: 필요 시 구현
-    console.warn("usernamesUnchanged was set:", value);
+    //console.warn("usernamesUnchanged was set:", value);
     return value;
   }
 
@@ -138,7 +138,7 @@ export default class ManageElectionModal extends Component {
 
   @computed("position")
   get positionInvalid() {
-    console.log("positionInvalid", this.position);
+    //console.log("positionInvalid", this.position);
     return !this.position || this.position.length < 3;
   }
 
@@ -181,7 +181,7 @@ export default class ManageElectionModal extends Component {
     // Join the usernames into a string if needed.
     this.usernamesString = (usernames || []).filter(Boolean).join(", ");
 
-    console.log("onUsernamesInput:", this.usernamesString);
+    //console.log("onUsernamesInput:", this.usernamesString);
   }
 
   @action
@@ -199,5 +199,35 @@ export default class ManageElectionModal extends Component {
     }
 
     this.usernames.push(username);
+  }
+
+  @action
+  setElectionTime_PollOpen(data) {
+    console.log("setElectionTime_PollOpen", data);
+
+    // @tracked pollOpen = false;
+    // @tracked pollOpenAfterHours = 0;
+    // @tracked pollOpenAfterNominations = 0;
+    // @tracked pollOpenTime = "";
+    this.pollOpenAfter = data.after;
+    this.pollOpenAfterHours = Number(data.hours);
+    this.pollOpenAfterNominations = Number(data.nominations);
+    this.pollOpenTime = data.time;
+
+    //console.log(this, this.pollOpenTime);
+  }
+
+  @action
+  setElectionTime_PollClose(data) {
+    //console.log("setElectionTime_PollClose", data);
+
+    // @tracked pollClose = false;
+    // @tracked pollCloseAfterHours = 0;
+    // @tracked pollCloseAfterVoters = 0;
+    // @tracked pollCloseTime = "";
+    this.pollCloseAfter = data.after;
+    this.pollCloseAfterHours = Number(data.hours);
+    this.pollCloseAfterVoters = Number(data.voters);
+    this.pollCloseTime = data.time;
   }
 }

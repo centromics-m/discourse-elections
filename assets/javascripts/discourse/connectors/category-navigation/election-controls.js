@@ -1,11 +1,10 @@
-import Component from '@glimmer/component';
-import { action } from '@ember/object';
-import { service } from '@ember/service';
+import Component from "@glimmer/component";
+import { action } from "@ember/object";
+import { service } from "@ember/service";
+import DButton from "discourse/components/d-button";
 import i18n from "discourse-common/helpers/i18n";
-
-import DButton from 'discourse/components/d-button';
-import ElectionList from '../../components/election-list';
-import CreateElectionModal from '../../components/modal/create-election';
+import ElectionList from "../../components/election-list";
+import CreateElectionModal from "../../components/modal/create-election";
 
 export default class ElectionControlsComponent extends Component {
   @service currentUser;

@@ -1,4 +1,4 @@
-<div class="election-time">
+<div class="election-time" {{didInsert this.onDidInsert}}>
   {{! Set open time to x hours after x nominations }}
   <div class="election-time-control">
     <div class="election-time-control-title">
@@ -6,6 +6,7 @@
         @type="checkbox"
         @checked={{this.after}}
         {{!-- {{on "change" (fn (mut this.after) this.checked)}} --}}
+        {{on "change" this.onAfterClicked}}
       />
       <span>{{i18n this.afterTitle}}</span>
     </div>
@@ -18,6 +19,7 @@
         placeholder="0"
         class="input-small"
         {{!-- {{on "input" (fn (mut this.hours) this.value)}} --}}
+        {{on "input" this.sendElectionTime}}
       />
     </div>
 
@@ -29,7 +31,10 @@
           @value={{this.nominations}}
           placeholder="0"
           class="input-small"
-          {{!-- {{on "input" (fn (mut this.nominations) this.value)}} --}}
+          {{!-- {{on "input" (fn (mut this.nominations) this.value)}}  --}}
+          {{!-- {{on "change" (withEventValue (fn (mut this.nominations)))}} --}}
+          {{!-- {{on "input" this.setNominations}} --}}
+          {{on "input" this.sendElectionTime}}
         />
       {{/if}}
     </div>
@@ -37,12 +42,13 @@
     <div id="set_time-voters">
       {{#if this.showVoters}}
         <span>{{i18n "election.set_time.voters"}}</span>
-        <input
-          type="number"
-          placeholder="0"
-          value={{this.voters}}
+        <Input
+          @type="number"
+          @value={{this.voters}}
+          placeholder=""
           class="input-small"
-          {{on "input" (fn (mut this.voters) this.value)}}
+          {{!-- {{on "input" (fn (mut this.voters) this.value)}} --}}
+          {{on "input" this.sendElectionTime}}
         />
       {{/if}}
     </div>
@@ -55,6 +61,8 @@
         @type="checkbox"
         @checked={{this.manual}}
         {{!-- {{on "change" (fn (mut this.manual) this.checked)}} --}}
+        {{!-- {{on "input" this.sendElectionTime}} --}}
+        {{on "change" this.onManualClicked}}
       />
       <span>{{i18n this.manualTitle}}</span>
     </div>

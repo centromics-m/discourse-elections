@@ -1,8 +1,8 @@
-import Component from '@glimmer/component';
+import Component from "@glimmer/component";
 
 export default class ElectionStatusComponent extends Component {
   get showStatus() {
-    return this.model.subtype === 'election';
+    return this.model.subtype === "election";
   }
 
   get model() {

@@ -248,6 +248,13 @@ module DiscourseElections
 
       topic = Topic.find(params[:topic_id])
 
+      # pp "##################### type #{type}"
+      # pp "##################### enabled #{enabled}"
+      # pp "##################### election_nominations #{topic.election_nominations}"
+      # pp "##################### nominations #{nominations}"
+      # pp "##################### topic.election_poll_voters #{topic.election_poll_voters}"
+      # pp "##################### voters #{voters}"
+
       if type === "open" && enabled && after &&
            topic.election_nominations.length >= nominations
         raise StandardError.new I18n.t(

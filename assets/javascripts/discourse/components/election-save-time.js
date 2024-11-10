@@ -55,6 +55,8 @@ export default class ElectionSaveTimeComponent extends ElectionSave {
       return false;
     }
 
+    console.log("prepareData args", this.args);
+
     this.icon = null;
     this.saving = true;
 
@@ -90,6 +92,8 @@ export default class ElectionSaveTimeComponent extends ElectionSave {
   resolve(result) {
     const type = this.type;
 
+    //console.log("result", result);
+
     if (result.success) {
       this.icon = "check";
       this.topic[`election_poll_${type}`] = this.enabled;
@@ -122,8 +126,8 @@ export default class ElectionSaveTimeComponent extends ElectionSave {
       this.error = result.message;
     }
 
-    //this.sendAction('saved');
-    //this.saved();
+    //this.sendAction("saved");
+
     this.saving = false;
   }
 }

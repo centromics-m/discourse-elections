@@ -1,11 +1,10 @@
-import Component from '@ember/component';
-import { tracked } from '@glimmer/tracking';
-import { get, set, action, computed } from '@ember/object';
-import { ajax } from 'discourse/lib/ajax';
+import { tracked } from "@glimmer/tracking";
+import Component from "@ember/component";
+import { action, computed, get, set } from "@ember/object";
+import { next } from "@ember/runloop";
 import { dasherize } from "@ember/string";
-import { next } from '@ember/runloop';
-
 import DButton from "discourse/components/d-button";
+import { ajax } from "discourse/lib/ajax";
 
 /*
 <ElectionSave @property={{this.position}}
@@ -23,18 +22,19 @@ export default class ElectionSaveComponent extends Component {
   init() {
     super.init(...arguments);
     this.setup();
-    // console.log('this', this);
-    // console.log('this.args', this.args); // --> undefined
-    // console.log('property', this.property);
-    // console.log('name', this.get('name'));
-    // console.log('topic', this.get('topic'));
-    // console.log('saved', this.saved);
+
+    console.log("ElectionSaveComponent this", this);
+    console.log("ElectionSaveComponent this.args", this.args); // --> undefined
+    console.log("ElectionSaveComponent property", this.property);
+    console.log("ElectionSaveComponent name", this.get("name"));
+    console.log("ElectionSaveComponent topic", this.get("topic"));
+    console.log("ElectionSaveComponent saved", this.saved);
   }
 
   setup() {
-    if(this.topic) {
+    if (this.topic) {
       next(this, () => {
-        set(this, 'property', this.topic[`election_${this.name}`]); // property = this.topic[`election_${this.name}`];
+        set(this, "property", this.topic[`election_${this.name}`]); // property = this.topic[`election_${this.name}`];
       });
     }
   }
@@ -43,19 +43,19 @@ export default class ElectionSaveComponent extends Component {
     return this.unchanged || this.saving || this.invalid;
   }
 
-  @computed('property', 'name')
+  @computed("property", "name")
   get unchanged() {
     let current = this.property;
     let original = undefined;
-    if(this.topic) {
+    if (this.topic) {
       original = this.topic[`election_${this.name}`];
     }
 
     return current === original;
   }
 
-  set unchanged(unchanged) {
-    console.log('set unchanged', unchanged);
+  set unchanged(value) {
+    console.log("set unchanged", value);
   }
 
   prepareData() {
@@ -64,14 +64,14 @@ export default class ElectionSaveComponent extends Component {
     }
 
     this.saving = true;
-    $('#modal-alert').hide();
+    $("#modal-alert").hide();
 
     const data = {
       topic_id: this.topic.id,
-      [this.name]: this.property
+      [this.name]: this.property,
     };
 
-    console.log('data', data);
+    console.log("data", data);
 
     return data;
   }
@@ -82,29 +82,32 @@ export default class ElectionSaveComponent extends Component {
 
     if (result.success) {
       //next(() => {
-        this.icon = 'check';
-        this.topic[`election_${name}`] = this.property;
+      this.icon = "check";
+      this.topic[`election_${name}`] = this.property;
       //});
     } else if (result.failed) {
       //next(() => {
-        this.icon = 'times';
-        if (original) {
-          this.property = original;
-        }
-        //this.sendAction('error', result.message);
-        this.handleError(result);
+      this.icon = "times";
+      if (original) {
+        this.property = original;
+      }
+      //this.sendAction('error', result.message);
+      this.handleError(result);
       //});
     }
 
     //next(() => {
-      //this.sendAction('saved');
-			//this.saved();
-      this.saving = false;
+    //this.sendAction('saved');
+    //this.saved();
+    this.saving = false;
     //});
   }
 
   resolveStandardError(responseText) {
-    const message = responseText.substring(responseText.indexOf('>') + 1, responseText.indexOf('plugins'));
+    const message = responseText.substring(
+      responseText.indexOf(">") + 1,
+      responseText.indexOf("plugins")
+    );
     this.resolve({ failed: true, message });
   }
 
@@ -116,19 +119,21 @@ export default class ElectionSaveComponent extends Component {
 
     const data = this.prepareData();
     // const data = {
-		// 	topic_id: this.topic.id,
-		// 	[this.name]: this.property,
-		// };
+    // 	topic_id: this.topic.id,
+    // 	[this.name]: this.property,
+    // };
 
     //const name = this.name;
     // console.log('data', data);
     // console.log('name', name);
 
-    if (!data['topic_id']) return;
+    if (!data["topic_id"]) {
+      return;
+    }
 
     //console.log('name2', name);
 
-    ajax(`/election/set-${dasherize(this.name)}`, { type: 'PUT', data })
+    ajax(`/election/set-${dasherize(this.name)}`, { type: "PUT", data })
       .then((result) => this.handleSuccess(result))
       .catch((e) => this.handleError(e))
       .finally(() => {
@@ -137,32 +142,32 @@ export default class ElectionSaveComponent extends Component {
         });
       });
 
-      // .then((result) => {
-      //   this.resolve(result);
-      // })
-      // .catch((e) => {
-      //   if (e.jqXHR && e.jqXHR.responseText) {
-      //     this.resolveStandardError(e.jqXHR.responseText);
-      //   }
-      // })
-      // .finally(() => this.resolve({}));
+    // .then((result) => {
+    //   this.resolve(result);
+    // })
+    // .catch((e) => {
+    //   if (e.jqXHR && e.jqXHR.responseText) {
+    //     this.resolveStandardError(e.jqXHR.responseText);
+    //   }
+    // })
+    // .finally(() => this.resolve({}));
   }
 
   handleSuccess(result) {
     if (result.success) {
       next(this, () => {
-        this.icon = 'check';
+        this.icon = "check";
         this.topic[`election_${this.name}`] = this.property;
       });
     } else {
       next(this, () => {
-        this.icon = 'times';
+        this.icon = "times";
       });
     }
   }
 
   handleError(e) {
-    console.error('Error during save:', e);
+    console.error("Error during save:", e);
     if (e.jqXHR && e.jqXHR.responseText) {
       this.resolveStandardError(e.jqXHR.responseText);
       alert(e.jqXHR.responseText);
@@ -174,6 +179,4 @@ export default class ElectionSaveComponent extends Component {
       this.property = value;
     });
   }
-
 }
-
