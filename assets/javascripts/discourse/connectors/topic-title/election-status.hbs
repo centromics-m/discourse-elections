@@ -1,6 +1,8 @@
 {{#if this.showStatus}}
   <div class="election-status-label">
-    <span>{{i18n (concat 'election.status.' this.model.electionStatusName)}}</span>
+    <span>{{i18n
+        (concat "election.status." this.model.electionStatusName)
+      }}</span>
   </div>
   <election-time-status topic={{this.model}} />
 {{/if}}

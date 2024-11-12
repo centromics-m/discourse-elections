@@ -10,6 +10,23 @@ export default class ElectionSaveUsernamesComponent extends ElectionSave {
   @tracked showSelector = false;
   layoutName = "components/election-save";
 
+  prepareData() {
+    if (this.disabled) {
+      return false;
+    }
+
+    this.saving = true;
+    $("#modal-alert").hide();
+
+    const data = {
+      topic_id: this.topic.id,
+      //[this.name]: this.property,
+      usernames: this.property,
+    };
+
+    return data;
+  }
+
   @action
   save() {
     const data = this.prepareData();

@@ -18,22 +18,28 @@ import { ajax } from "discourse/lib/ajax";
 export default class ElectionSaveComponent extends Component {
   @tracked saving = false;
   @tracked icon = null;
+  @tracked property = this.args.property;
 
   init() {
     super.init(...arguments);
     this.setup();
 
-    console.log("ElectionSaveComponent this", this);
-    console.log("ElectionSaveComponent this.args", this.args); // --> undefined
-    console.log("ElectionSaveComponent property", this.property);
-    console.log("ElectionSaveComponent name", this.get("name"));
-    console.log("ElectionSaveComponent topic", this.get("topic"));
-    console.log("ElectionSaveComponent saved", this.saved);
+    // console.log("ElectionSaveComponent this", this);
+    // console.log("ElectionSaveComponent this.args", this.args); // --> undefined
+    // console.log("ElectionSaveComponent property", this.property);
+    // console.log("ElectionSaveComponent name", this.get("name"));
+    // console.log("ElectionSaveComponent topic", this.get("topic"));
+    // console.log("ElectionSaveComponent saved", this.saved);
   }
 
   setup() {
     if (this.topic) {
       next(this, () => {
+        // console.log("topic", this.topic);
+        // console.log(
+        //   "ElectionSaveComponent setup",
+        //   this.topic["election_nominations_usernames"]
+        // );
         set(this, "property", this.topic[`election_${this.name}`]); // property = this.topic[`election_${this.name}`];
       });
     }
@@ -55,7 +61,7 @@ export default class ElectionSaveComponent extends Component {
   }
 
   set unchanged(value) {
-    console.log("set unchanged", value);
+    //console.log("ElectionSaveComponent: set unchanged", value);
   }
 
   prepareData() {
@@ -71,8 +77,6 @@ export default class ElectionSaveComponent extends Component {
       [this.name]: this.property,
     };
 
-    console.log("data", data);
-
     return data;
   }
 
@@ -81,26 +85,17 @@ export default class ElectionSaveComponent extends Component {
     const original = this.topic[`election_${name}`];
 
     if (result.success) {
-      //next(() => {
       this.icon = "check";
       this.topic[`election_${name}`] = this.property;
-      //});
     } else if (result.failed) {
-      //next(() => {
       this.icon = "times";
       if (original) {
         this.property = original;
       }
-      //this.sendAction('error', result.message);
       this.handleError(result);
-      //});
     }
 
-    //next(() => {
-    //this.sendAction('saved');
-    //this.saved();
     this.saving = false;
-    //});
   }
 
   resolveStandardError(responseText) {
@@ -118,20 +113,10 @@ export default class ElectionSaveComponent extends Component {
     });
 
     const data = this.prepareData();
-    // const data = {
-    // 	topic_id: this.topic.id,
-    // 	[this.name]: this.property,
-    // };
-
-    //const name = this.name;
-    // console.log('data', data);
-    // console.log('name', name);
 
     if (!data["topic_id"]) {
       return;
     }
-
-    //console.log('name2', name);
 
     ajax(`/election/set-${dasherize(this.name)}`, { type: "PUT", data })
       .then((result) => this.handleSuccess(result))

@@ -17,34 +17,34 @@ ko:
         label: "선거 목록"
       create:
         label: "새 선거"
-        position: "Position"
-        nomination_message: "Nomination Message"
-        nomination_message_placeholder: "Added to the first post of topic during the nomination process."
-        poll_message: "Poll Message"
-        poll_message_placeholder: "Added to the first post of topic when the poll is open."
-        closed_poll_message: "Closed Poll Message"
-        closed_poll_message_placeholder: "Added to the first post of topic when the poll has closed."
-        self_nomination_allowed: "Allow users to nominate themselves"
-        btn_label: "Create"
+        position: "지위(직책)"
+        nomination_message: "지명 내용"
+        nomination_message_placeholder: "지명 과정에서 주제의 첫 번째 게시물에 추가되었습니다. Added to the first post of topic during the nomination process."
+        poll_message: "투표 내용"
+        poll_message_placeholder: "투표가 열리면 주제의 첫 번째 게시물에 추가됩니다 Added to the first post of topic when the poll is open."
+        closed_poll_message: "폐쇄 투표 메시지"
+        closed_poll_message_placeholder: "투표가 마감되면 주제의 첫 번째 게시물에 추가됩니다. Added to the first post of topic when the poll has closed."
+        self_nomination_allowed: "사용자가 직접 지명할 수 있도록 함"
+        btn_label: "생성"
       status:
         label: "상태"
-        nomination: "Taking Nominations"
+        nomination: "지명 받기 Taking Nominations"
         poll: "투표 열기"
         closed_poll: "투표 마감"
       nomination:
         add:
-          label: "Nominate Yourself"
+          label: "자신을 지명하기 Nominate Yourself"
           body: "If you want to nominate yourself for {{position}}
                 in {{categoryName}}, click I nominate myself below."
-          btn: "I nominate myself"
+          btn: "나는 자신을 지명합니다"
         remove:
-          label: "Withdraw Nomination"
+          label: "지명 철회 Withdraw Nomination"
           body: "If you want to withdraw your nomination for {{position}}
                 in {{categoryName}} click I withdraw my nomination below.<br><br>"
-          btn: "I withdraw my nomination"
+          btn: "나는 자신에 대한 지명을 철회합니다"
         statement:
-          add: "Add Statement"
-          label: "Nomination Statement"
+          add: "진술 추가 Add Statement"
+          label: "지명 지술 Nomination Statement"
       set_time:
         hours: "Hours"
         days: "Days"

@@ -159,7 +159,6 @@ export default createWidget("election-controls", {
     const owner = getOwner(this); // Access the owner of this widget
     const modalService = owner.lookup("service:modal"); // Get the modal service
 
-    //console.log('modalService', modalService);
     modalService.show(name, { model }); // Open the modal with the provided model
   },
 });

@@ -55,8 +55,6 @@ export default class ElectionSaveTimeComponent extends ElectionSave {
       return false;
     }
 
-    console.log("prepareData args", this.args);
-
     this.icon = null;
     this.saving = true;
 
@@ -84,15 +82,12 @@ export default class ElectionSaveTimeComponent extends ElectionSave {
       data.time = this.time;
     }
 
-    console.log("data", data);
     return data;
   }
 
   @action
   resolve(result) {
     const type = this.type;
-
-    //console.log("result", result);
 
     if (result.success) {
       this.icon = "check";
@@ -122,11 +117,8 @@ export default class ElectionSaveTimeComponent extends ElectionSave {
         this.voters = this.topic.election_poll_close_after_voters;
       }
 
-      //this.sendAction('error', result.message);
       this.error = result.message;
     }
-
-    //this.sendAction("saved");
 
     this.saving = false;
   }

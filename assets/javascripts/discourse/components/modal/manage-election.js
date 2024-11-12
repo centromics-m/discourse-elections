@@ -49,18 +49,13 @@ export default class ManageElectionModal extends Component {
   setup() {
     const model = this.args.model;
 
-    // console.log("ManageElectionModal this.outargs", this.outletArgs);
-    // console.log("ManageElectionModal this.args", this.args);
-    // console.log("ManageElectionModal model", model);
-    // console.log("ManageElectionModal model.topic", this.args.model.model.topic);
-
     if (model) {
       const topic = model.model.topic;
 
       this.showSelector = true;
       this.topic = topic;
       this.position = topic.election_position;
-      this.usernamesString = ""; //topic.election_nominations_usernames.join(',');
+      this.usernamesString = topic.election_nominations_usernames.join(", ");
       this.selfNomination = topic.election_self_nomination_allowed;
       this.statusBanner = topic.election_status_banner;
       this.statusBannerResultHours = topic.election_status_banner_result_hours;
@@ -94,20 +89,16 @@ export default class ManageElectionModal extends Component {
 
   @computed("usernamesString")
   get usernames() {
-    return this.usernamesString.split(",");
+    return this.usernamesString.split(",").map((s) => s.trim());
   }
 
   set usernames(value) {
     // setter 로직: 필요 시 구현
-    //console.warn("usernames was set:", value);
     if (!value) {
-      //console.warn("usernames was set2:", value);
       this.usernamesString = "";
     } else {
-      //console.warn("usernames was set1:", value);
-      this.usernamesString = value.join(",");
+      this.usernamesString = value.join(", ");
     }
-    return value;
   }
 
   @computed("usernames", "topic.election_nominations_usernames")
@@ -127,30 +118,16 @@ export default class ManageElectionModal extends Component {
 
   set usernamesUnchanged(value) {
     // setter 로직: 필요 시 구현
-    //console.warn("usernamesUnchanged was set:", value);
-    return value;
-  }
-
-  @computed("status", "topic.election_status")
-  get statusUnchanged() {
-    return Number(this.status) === Number(this.topic.election_status);
+    console.warn("usernamesUnchanged was set:", value);
   }
 
   @computed("position")
   get positionInvalid() {
-    //console.log("positionInvalid", this.position);
     return !this.position || this.position.length < 3;
   }
 
-  //@observer
-  // get isPositionInvalid() {
-  //   console.log('positionInvalid2', this.position)
-  //   return !this.position
-  // }
-
   @action
   close() {
-    //this.send('closeModal');
     this.args.closeModal();
   }
 
@@ -176,55 +153,37 @@ export default class ManageElectionModal extends Component {
 
   @action
   onUsernamesInput(usernames) {
-    //console.log('onUsernamesInput:', usernames);
-
     // Join the usernames into a string if needed.
     this.usernamesString = (usernames || []).filter(Boolean).join(", ");
-
-    //console.log("onUsernamesInput:", this.usernamesString);
   }
 
-  @action
-  onUsernameSelect(username) {
-    console.log("onUsernameSelect:", username);
+  // @action
+  // onUsernameSelect(username) {
+  //   console.log("onUsernameSelect:", username);
 
-    if (username.trim() === "") {
-      alert("Please enter a username.");
-      return;
-    }
+  //   if (username.trim() === "") {
+  //     alert("Please enter a username.");
+  //     return;
+  //   }
 
-    if (this.usernames.includes(username)) {
-      alert("Username already selected.");
-      return;
-    }
+  //   if (this.usernames.includes(username)) {
+  //     alert("Username already selected.");
+  //     return;
+  //   }
 
-    this.usernames.push(username);
-  }
+  //   this.usernames.push(username);
+  // }
 
   @action
   setElectionTime_PollOpen(data) {
-    console.log("setElectionTime_PollOpen", data);
-
-    // @tracked pollOpen = false;
-    // @tracked pollOpenAfterHours = 0;
-    // @tracked pollOpenAfterNominations = 0;
-    // @tracked pollOpenTime = "";
     this.pollOpenAfter = data.after;
     this.pollOpenAfterHours = Number(data.hours);
     this.pollOpenAfterNominations = Number(data.nominations);
     this.pollOpenTime = data.time;
-
-    //console.log(this, this.pollOpenTime);
   }
 
   @action
   setElectionTime_PollClose(data) {
-    //console.log("setElectionTime_PollClose", data);
-
-    // @tracked pollClose = false;
-    // @tracked pollCloseAfterHours = 0;
-    // @tracked pollCloseAfterVoters = 0;
-    // @tracked pollCloseTime = "";
     this.pollCloseAfter = data.after;
     this.pollCloseAfterHours = Number(data.hours);
     this.pollCloseAfterVoters = Number(data.voters);

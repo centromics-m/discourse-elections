@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
-//import SiteSettings from 'discourse/lib/site-settings';
 import { service } from "@ember/service";
+//import SiteSettings from "discourse/lib/site-settings";
 
 /*
     <PluginOutlet
@@ -15,7 +15,7 @@ import { service } from "@ember/service";
 */
 
 export default class ElectionBannerTopicComponent extends Component {
-  //@service siteSettings;
+  @service siteSettings;
 
   get model() {
     return this.args.outletArgs.model;

@@ -56,7 +56,7 @@
 
         <Input
           @value={{this.usernamesString}}
-          @onInput={{action (mut this.usernamesString) value="target.value"}}
+          {{!-- @onInput={{action (mut this.usernamesString) value="target.value"}} --}}
           class="input-medium"
         /><br />
         ＊
@@ -66,7 +66,7 @@
       <div class="controls">
         <ElectionSaveUsernames
           @property={{this.usernames}}
-          @name="usernames"
+          @name="nominations_usernames"
           @unchanged={{this.usernamesUnchanged}}
           @usernamesString={{this.usernamesString}}
           @topic={{this.topic}}
@@ -82,7 +82,7 @@
       {{!-- <UserSelector @usernames={{this.winner}} @single=true /> --}}
       <Input
         @value={{this.winner}}
-        @onInput={{action (mut this.winner) value="target.value"}}
+        {{!-- @onInput={{action (mut this.winner) value="target.value"}} --}}
         class="input-medium"
       /><br />
       ＊
