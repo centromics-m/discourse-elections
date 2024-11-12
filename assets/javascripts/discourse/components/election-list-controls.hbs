@@ -1,0 +1,8 @@
+<div class="election-list-controls">
+  {{#if this.isAdmin}}
+    <button type="button" class="btn" {{on "click" this.createElection}}>
+      <i class="fa fa-plus"></i>
+      {{t "election.create.label"}}
+    </button>
+  {{/if}}
+</div>
