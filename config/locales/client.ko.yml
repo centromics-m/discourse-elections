@@ -24,12 +24,12 @@ ko:
         poll_message_placeholder: "투표가 열리면 주제의 첫 번째 게시물에 추가됩니다 Added to the first post of topic when the poll is open."
         closed_poll_message: "폐쇄 투표 메시지"
         closed_poll_message_placeholder: "투표가 마감되면 주제의 첫 번째 게시물에 추가됩니다. Added to the first post of topic when the poll has closed."
-        self_nomination_allowed: "사용자가 직접 지명할 수 있도록 함"
+        self_nomination_allowed: "회원이 자신을 지명할 수 있도록 함"
         btn_label: "생성"
       status:
         label: "상태"
-        nomination: "지명 받기 Taking Nominations"
-        poll: "투표 열기"
+        nomination: "지명 받는 중 Taking Nominations"
+        poll: "투표 중"
         closed_poll: "투표 마감"
       nomination:
         add:

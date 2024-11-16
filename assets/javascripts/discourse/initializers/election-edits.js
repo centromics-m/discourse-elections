@@ -1,26 +1,27 @@
 // discourse/plugins/discourse-elections/discourse/initializers/election-edit.js
 
-import { withPluginApi } from 'discourse/lib/plugin-api';
-import { escapeExpression } from 'discourse/lib/utilities';
-import Composer from 'discourse/models/composer';
-import { ElectionStatuses } from '../lib/election';
-import RawHtml from 'discourse/widgets/raw-html';
-import { tracked } from '@glimmer/tracking';
-import { action } from '@ember/object';
-import { scheduleOnce } from '@ember/runloop';
-import { h } from 'virtual-dom';
-import { computed } from '@ember/object';
+import { tracked } from "@glimmer/tracking";
+import { renderComponent } from "@ember/component";
+import { action } from "@ember/object";
+import { computed } from "@ember/object";
+import { scheduleOnce } from "@ember/runloop";
+import { h } from "virtual-dom";
+import { withPluginApi } from "discourse/lib/plugin-api";
+import { escapeExpression } from "discourse/lib/utilities";
+import Composer from "discourse/models/composer";
+import RawHtml from "discourse/widgets/raw-html";
+import Widget from "discourse/widgets/widget";
 import I18n from "discourse-i18n";
-import Widget from 'discourse/widgets/widget';
+import ElectionListControlsComponent from "../components/election-list-controls";
+import { ElectionStatuses } from "../lib/election";
 
 export default {
-  name: 'election-edits',
+  name: "election-edits",
   initialize(container) {
-    const siteSettings = container.lookup('site-settings:main');
+    const siteSettings = container.lookup("site-settings:main");
 
     if (siteSettings.elections_enabled) {
-      withPluginApi('0.8.7', (api) => {
-
+      withPluginApi("0.8.7", (api) => {
         // ok
         // 모델 수정: topic
         // api.modifyClass('model:topic', {
@@ -32,8 +33,10 @@ export default {
         //     });
         //   })
         // });
-        api.modifyClass("model:topic",
-          (Superclass) => class extends Superclass {
+        api.modifyClass(
+          "model:topic",
+          (Superclass) =>
+            class extends Superclass {
               // Tracked property
               @tracked election_status;
 
@@ -51,7 +54,6 @@ export default {
               // }
             }
         );
-
 
         // ok
         // 모델 수정: composer
@@ -96,7 +98,6 @@ export default {
         //     return (electionNominationStatement || post.election_nomination_statement) && post.election_is_nominee;
         //   }
         // });
-
 
         // ok
         // 컴포넌트 수정: composer-body
@@ -152,7 +153,6 @@ export default {
         //   }
         // });
 
-
         // ok
         // 위젯 수정: discourse-poll-container
         // api.reopenWidget('discourse-poll-container', {
@@ -190,66 +190,102 @@ export default {
         // });
 
         // 포스트 속성 포함
-        api.includePostAttributes("topic",
-                                  "election_post",
-                                  "election_nomination_statement",
-                                  "election_nominee_title",
-                                  "election_by_nominee");
+        api.includePostAttributes(
+          "topic",
+          "election_post",
+          "election_nomination_statement",
+          "election_nominee_title",
+          "election_by_nominee"
+        );
 
         // 포스트 클래스 콜백 추가
         api.addPostClassesCallback((attrs) => {
-          if (attrs.election_post)
+          if (attrs.election_post) {
             return ["election-post"];
-          else
+          } else {
             return [];
+          }
         });
 
         // ok
         // 위젯 꾸미기: poster-name:after
-        api.decorateWidget('poster-name:after', (helper) => {
+        api.decorateWidget("poster-name:after", (helper) => {
           const post = helper.attrs;
           let contents = [];
 
           if (post.election_by_nominee && post.election_nomination_statement) {
-            contents.push(helper.h('span.statement-post-label', I18n.t('election.post.nomination_statement')));
+            contents.push(
+              helper.h(
+                "span.statement-post-label",
+                I18n.t("election.post.nomination_statement")
+              )
+            );
           }
 
-          if (!post.election_by_nominee && post.election_nominee_title && siteSettings.elections_nominee_titles) {
-            contents.push(helper.h('span.nominee-title',
-              new RawHtml({ html: post.election_nominee_title })
-            ));
+          if (
+            !post.election_by_nominee &&
+            post.election_nominee_title &&
+            siteSettings.elections_nominee_titles
+          ) {
+            contents.push(
+              helper.h(
+                "span.nominee-title",
+                new RawHtml({ html: post.election_nominee_title })
+              )
+            );
           }
 
           return contents;
         });
 
-
         // ok
         // 위젯 꾸미기: post-avatar:after
-        api.decorateWidget('post-avatar:after', (helper) => {
+        api.decorateWidget("post-avatar:after", (helper) => {
           const post = helper.attrs;
           const flair = siteSettings.elections_nominee_avatar_flair;
           let contents = [];
 
           if (post.election_by_nominee && flair.length > 0) {
-            contents.push(helper.h('div.avatar-flair.nominee', helper.h('i', {
-              className: 'fa ' + flair,
-              title: I18n.t('election.post.nominee'),
-            })));
+            contents.push(
+              helper.h(
+                "div.avatar-flair.nominee",
+                helper.h("i", {
+                  className: "fa " + flair,
+                  title: I18n.t("election.post.nominee"),
+                })
+              )
+            );
           }
 
           return contents;
         });
 
-        // ok
+        // NOTE: election-controls has changed to Octane based widget, and does not consist with decorateWidget ...
+
         // 위젯 꾸미기: post-contents:after-cooked
-        api.decorateWidget('post-contents:after-cooked', (helper) => {
+        // ------------------------
+        api.decorateWidget("post-contents:after-cooked", (helper) => {
           const post = helper.attrs;
           const topic = post.topic;
-          if (topic.subtype === 'election' && post.firstPost) {
-            return helper.attach('election-controls', { topic });
+          if (topic.subtype === "election" && post.firstPost) {
+            return helper.attach("election-controls", { topic });
           }
         });
+
+        // api.decorateWidget("post-contents:after-cooked", (helper) => {
+        //   const post = helper.attrs;
+        //   const topic = post.topic;
+
+        //   console.log("helper", helper);
+        //   if (topic.subtype === "election" && post.firstPost) {
+        //     // 새로운 요소를 생성하고 컴포넌트를 렌더링
+        //     const container1 = document.createElement("div");
+        //     renderComponent("election-controls", container1, { topic });
+        //     helper.container.appendChild(container1);
+        //   }
+        // });
+
+        // ------------------------
 
         // 위젯 수정: notification-item
         // --> notification-item not found
@@ -280,7 +316,10 @@ export default {
         // });
       });
 
-      Composer.serializeOnCreate('election_nomination_statement', 'electionNominationStatement');
+      Composer.serializeOnCreate(
+        "election_nomination_statement",
+        "electionNominationStatement"
+      );
     }
-  }
+  },
 };

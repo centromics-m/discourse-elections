@@ -174,7 +174,7 @@ module DiscourseElections
       type = nil
       message = nil
 
-      params.each do |key|
+      params.keys.each do |key|
         if key && key.to_s.include?("message")
           message = params[key]
           parts = key.split("_")
