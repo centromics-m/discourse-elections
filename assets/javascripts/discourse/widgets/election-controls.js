@@ -66,19 +66,20 @@ export default createWidget("election-controls", {
         if (this.state) {
           this.state.startingPoll = false;
         }
+
         this.scheduleRerender();
       })
       .catch((e) => {
         if (e.jqXHR && e.jqXHR.responseText) {
           const responseText = e.jqXHR.responseText;
           //const message = responseText.substring(responseText.indexOf('>') + 1, responseText.indexOf('plugins'));
-          const message = responseText.substring(
-            0,
-            responseText.indexOf("):") + 2
-          );
+          // const message = responseText.substring(
+          //   0,
+          //   responseText.indexOf("):") + 2
+          // );
           //bootbox?.alert(message) ||
           //console.log(responseText)
-          alert(message);
+          alert(responseText);
         }
       })
       .finally(() => {

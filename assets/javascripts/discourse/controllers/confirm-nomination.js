@@ -48,17 +48,19 @@ export default class ConfirmNominationController extends Controller.extend(
       } catch (e) {
         if (e.jqXHR && e.jqXHR.responseText) {
           const responseText = e.jqXHR.responseText;
-          const message = responseText.substring(
-            responseText.indexOf(">") + 1,
-            responseText.indexOf("plugins")
-          );
-          bootbox.alert(message);
+          // const message = responseText.substring(
+          //   responseText.indexOf(">") + 1,
+          //   responseText.indexOf("plugins")
+          // );
+          // bootbox.alert(message);
+          alert(responseText);
         }
       } finally {
         this.loading = false;
       }
     },
   };
+
   @computed("model.topic.election_is_nominee")
   get prefix() {
     const isNominee = this.model.topic.election_is_nominee;

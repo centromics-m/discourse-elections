@@ -64,17 +64,20 @@ export default class ManageElectionModal extends Component {
       this.pollMessage = topic.election_poll_message;
       this.closedPollMessage = topic.election_closed_poll_message;
       this.sameMessage = topic.same_message;
-      this.pollOpen = topic.election_poll_open;
+
+      this.pollOpen = topic.election_poll_open; // == poll_open-enabled
       this.pollOpenAfter = topic.election_poll_open_after;
       this.pollOpenAfterHours = topic.election_poll_open_after_hours;
       this.pollOpenAfterNominations =
         topic.election_poll_open_after_nominations;
       this.pollOpenTime = topic.election_poll_open_time;
-      this.pollClose = topic.election_poll_close;
+
+      this.pollClose = topic.election_poll_close; // == poll_close-enabled
       this.pollCloseAfter = topic.election_poll_close_after;
       this.pollCloseAfterHours = topic.election_poll_close_after_hours;
       this.pollCloseAfterVoters = topic.election_poll_close_after_voters;
       this.pollCloseTime = topic.election_poll_close_time;
+
       this.winner = topic.election_winner;
     }
   }
@@ -89,7 +92,7 @@ export default class ManageElectionModal extends Component {
 
   @computed("usernamesString")
   get usernames() {
-    return this.usernamesString.split(",").map((s) => s.trim());
+    return (this.usernamesString || "").split(",").map((s) => s.trim());
   }
 
   set usernames(value) {

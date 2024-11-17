@@ -1,3 +1,5 @@
+// moved to components/election-list.js
+
 // import { h } from "virtual-dom";
 // import { ajax } from "discourse/lib/ajax";
 // import { createWidget } from "discourse/widgets/widget";

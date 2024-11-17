@@ -1,3 +1,5 @@
+// moved to components/election-list-controls.js
+
 // import showModal from "discourse/lib/show-modal";
 // import { createWidget } from "discourse/widgets/widget";
 
