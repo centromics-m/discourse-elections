@@ -14,9 +14,6 @@ module DiscourseElections
         raise StandardError.new I18n.t('election.errors.more_nominations')
       end
 
-      # pp '#############' + topic.election_nominations_usernames.to_s
-      # usernames = usernames - topic.election_nominations_usernames
-
       result = DiscourseElections::Nomination.set_by_username(params[:topic_id], usernames)
 
       render_result(result)
