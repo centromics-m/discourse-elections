@@ -28,7 +28,7 @@ ko:
         btn_label: "생성"
       status:
         label: "상태"
-        nomination: "지명 받는 중 Taking Nominations"
+        nomination: "지명 받는 중"
         poll: "투표 중"
         closed_poll: "투표 마감"
       nomination:
