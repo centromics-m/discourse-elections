@@ -2,21 +2,21 @@
 <div class="election-list">
   <span>{{i18n "election.list.label"}}:</span>
   {{#if this.loading}}
-    <span>{{i18n "election.list.loading"}}</span>
+  <span>{{i18n "election.list.loading"}}</span>
   {{else if this.elections.length}}
-    <ul>
-      {{#each this.electionListContent as |election|}}
-        <li>
-          {{#if election.separator}}
-            <span>{{election.separator}}</span>
-          {{/if}}
-          <a href="{{election.url}}">
-            <span>{{election.text}}</span>
-          </a>
-        </li>
-      {{/each}}
-    </ul>
+  <ul>
+    {{#each this.electionListContent as |election|}}
+    <li>
+      {{#if election.separator}}
+      <span>{{election.separator}}</span>
+      {{/if}}
+      <a href="{{election.url}}">
+        <span>{{election.text}}</span>
+      </a>
+    </li>
+    {{/each}}
+  </ul>
   {{else}}
-    <span>{{i18n "election.list.no_elections"}}</span>
+  <span>{{i18n "election.list.no_elections"}}</span>
   {{/if}}
 </div>

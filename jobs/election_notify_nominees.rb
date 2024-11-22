@@ -8,12 +8,8 @@ module Jobs
         user = User.find(user_id)
 
         if user
-          SystemMessage.create_from_system_user(user,
-            :election_status_changed,
-              status: status,
-              title: topic.title,
-              url: topic.url
-          )
+          SystemMessage.create_from_system_user(user, :election_status_changed,
+              status: status, title: topic.title, url: topic.url)
         end
       end
     end

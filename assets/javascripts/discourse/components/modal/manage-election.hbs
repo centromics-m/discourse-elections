@@ -1,25 +1,12 @@
-<DModal
-  @closeModal={{@closeModal}}
-  @title={{i18n "election.manage.label"}}
-  class="manage-election"
->
+<DModal @closeModal={{@closeModal}} @title={{i18n "election.manage.label" }} class="manage-election">
   <:body>
     <div class="control-group">
       <label>{{i18n "election.create.position"}}</label>
-      <Input
-        @value={{this.position}}
-        @onInput={{action (mut this.position) value="target.value"}}
-        class="input-medium"
-      />
+      <Input @value={{this.position}} @onInput={{action (mut this.position) value="target.value" }}
+        class="input-medium" />
       <div class="controls">
-        <ElectionSave
-          @property={{this.position}}
-          @name="position"
-          @invalid={{this.positionInvalid}}
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSave @property={{this.position}} @name="position" @invalid={{this.positionInvalid}}
+          @topic={{this.topic}} @error="error" @saved="saved" />
       </div>
     </div>
 
@@ -27,217 +14,106 @@
       <label>{{i18n "election.status.label"}}</label>
       <ComboBox @content={{this.electionStatuses}} @value={{this.status}} />
       <div class="controls">
-        <ElectionSave
-          @property={{this.status}}
-          @name="status"
-          @unchanged={{this.statusUnchanged}}
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSave @property={{this.status}} @name="status" @unchanged={{this.statusUnchanged}} @topic={{this.topic}}
+          @error="error" @saved="saved" />
       </div>
     </div>
 
-    <div class="control-group nominees">
+    {{!-- <div class="control-group nominees">
       <label>{{i18n "election.manage.nominees"}}</label>
       {{#if this.showSelector}}
-        {{!-- <UserChooser2 @usernames={{this.usernamesString}} /> --}}
-        {{!-- <UserSelector @usernames={{this.usernamesString}}
-          @onChange={{this.onUseranamesInput}}
-          @options={{hash allowUncategorized=false maximum=this.max}}
-        /> --}}
-        {{!-- <UserSelector
-          @usernames={{this.usernamesString}}
-          @onChange={{this.onUsernamesInput}}
-          @onSelect={{this.onUsernameSelect}}
-          @single={{false}}
-          @excludedUsernames={{this.blockedUsers}}
-        /> --}}
-
-        <Input
-          @value={{this.usernamesString}}
-          {{!-- @onInput={{action (mut this.usernamesString) value="target.value"}} --}}
-          class="input-medium"
-        /><br />
-        ＊
-        {{i18n "election.manage.nominees_help"}}
+      <Input @value={{this.usernamesString}} class="input-medium" /><br />
+      ＊
+      {{i18n "election.manage.nominees_help"}}
       {{/if}}
 
       <div class="controls">
-        <ElectionSaveUsernames
-          @property={{this.usernames}}
-          @name="nominations_usernames"
-          @unchanged={{this.usernamesUnchanged}}
-          @usernamesString={{this.usernamesString}}
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-          @showSelector={{this.showSelector}}
-        />
+        <ElectionSaveUsernames @property={{this.usernames}} @name="nominations_usernames"
+          @unchanged={{this.usernamesUnchanged}} @usernamesString={{this.usernamesString}} @topic={{this.topic}}
+          @error="error" @saved="saved" @showSelector={{this.showSelector}} />
       </div>
-    </div>
+    </div> --}}
 
-    <div class="control-group">
+    {{!-- <div class="control-group">
       <label>{{i18n "election.winner.label"}}</label>
-      {{!-- <UserSelector @usernames={{this.winner}} @single=true /> --}}
-      <Input
-        @value={{this.winner}}
-        {{!-- @onInput={{action (mut this.winner) value="target.value"}} --}}
-        class="input-medium"
-      /><br />
+      <Input @value={{this.winner}} class="input-medium" /><br />
       ＊
       {{i18n "election.winner.help"}}
 
       <div class="controls">
-        <ElectionSave
-          @property={{this.winner}}
-          @name="winner"
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSave @property={{this.winner}} @name="winner" @topic={{this.topic}} @error="error" @saved="saved" />
       </div>
-    </div>
+    </div> --}}
 
-    <div class="control-group">
-      {{!-- {{input type="checkbox" checked=selfNomination}} --}}
-      <Input
-        @type="checkbox"
-        @checked={{this.selfNomination}}
-        class="input-small"
-      />
+    {{!-- <div class="control-group">
+      <Input @type="checkbox" @checked={{this.selfNomination}} class="input-small" />
       <span>{{i18n "election.create.self_nomination_allowed"}}</span>
       <div class="controls">
-        <ElectionSave
-          @property={{this.selfNomination}}
-          @name="self_nomination_allowed"
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSave @property={{this.selfNomination}} @name="self_nomination_allowed" @topic={{this.topic}}
+          @error="error" @saved="saved" />
       </div>
-    </div>
+    </div> --}}
 
     <div class="control-group">
       <label>{{i18n "election.create.nomination_message"}}</label>
-      <DEditor
-        @value={{this.nominationMessage}}
-        @placeholder="election.create.nomination_message_placeholder"
-      />
+      <DEditor @value={{this.nominationMessage}} @placeholder="election.create.nomination_message_placeholder" />
       <div class="controls">
-        <ElectionSave
-          @property={{this.nominationMessage}}
-          @name="nomination_message"
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSave @property={{this.nominationMessage}} @name="nomination_message" @topic={{this.topic}}
+          @error="error" @saved="saved" />
       </div>
     </div>
 
     <div class="control-group">
       <label>{{i18n "election.create.poll_message"}}</label>
-      <DEditor
-        @value={{this.pollMessage}}
-        @placeholder="election.create.poll_message_placeholder"
-      />
+      <DEditor @value={{this.pollMessage}} @placeholder="election.create.poll_message_placeholder" />
       <div class="controls">
-        <ElectionSave
-          @property={{this.pollMessage}}
-          @name="poll_message"
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSave @property={{this.pollMessage}} @name="poll_message" @topic={{this.topic}} @error="error"
+          @saved="saved" />
       </div>
     </div>
 
     <div class="control-group">
       <label>{{i18n "election.create.closed_poll_message"}}</label>
-      <DEditor
-        @value={{this.closedPollMessage}}
-        @placeholder="election.create.closed_poll_message_placeholder"
-      />
+      <DEditor @value={{this.closedPollMessage}} @placeholder="election.create.closed_poll_message_placeholder" />
       <div class="controls">
-        <ElectionSave
-          @property={{this.closedPollMessage}}
-          @name="closed_poll_message"
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSave @property={{this.closedPollMessage}} @name="closed_poll_message" @topic={{this.topic}}
+          @error="error" @saved="saved" />
       </div>
     </div>
 
     <div class="control-group">
-      {{!-- {{input type="checkbox" checked=statusBanner}} --}}
-      <Input
-        @type="checkbox"
-        @checked={{this.statusBanner}}
-        class="input-small"
-      />
+      <Input @type="checkbox" @checked={{this.statusBanner}} class="input-small" />
       <span>{{i18n "election.status_banner.enable"}}</span>
       <div class="controls">
-        <ElectionSave
-          @property={{this.statusBanner}}
-          @name="status_banner"
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSave @property={{this.statusBanner}} @name="status_banner" @topic={{this.topic}} @error="error"
+          @saved="saved" />
       </div>
     </div>
 
     <div class="control-group">
       <span>{{i18n "election.status_banner.result_hours"}}</span>
-      <Input
-        @type="number"
-        @value={{this.statusBannerResultHours}}
-        class="input-small"
-      />
+      <Input @type="number" @value={{this.statusBannerResultHours}} class="input-small" />
       <div class="controls">
-        <ElectionSave
-          @property={{this.statusBannerResultHours}}
-          @name="status_banner_result_hours"
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSave @property={{this.statusBannerResultHours}} @name="status_banner_result_hours"
+          @topic={{this.topic}} @error="error" @saved="saved" />
       </div>
     </div>
 
     <!-- Poll open time enabled -->
     <div class="control-group">
-      <Input
-        @type="checkbox"
-        @checked={{this.pollOpen}}
-        class="input-small"
-      />{{i18n "election.poll.open_time"}}
+      <Input @type="checkbox" @checked={{this.pollOpen}} class="input-small" />{{i18n "election.poll.open_time"}}
 
       <div class="controls">
-        <ElectionSaveTime
-          @type="open"
-          @enabled={{this.pollOpen}}
-          @after={{this.pollOpenAfter}}
-          @hours={{this.pollOpenAfterHours}}
-          @nominations={{this.pollOpenAfterNominations}}
-          @time={{this.pollOpenTime}}
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSaveTime @type="open" @enabled={{this.pollOpen}} @after={{this.pollOpenAfter}}
+          @hours={{this.pollOpenAfterHours}} @nominations={{this.pollOpenAfterNominations}} @time={{this.pollOpenTime}}
+          @topic={{this.topic}} @error="error" @saved="saved" />
       </div>
     </div>
 
     {{#if this.pollOpen}}
-      <ElectionTime
-        @type="open"
-        @after={{this.pollOpenAfter}}
-        @hours={{this.pollOpenAfterHours}}
-        @nominations={{this.pollOpenAfterNominations}}
-        @time={{this.pollOpenTime}}
-        @setElectionTime={{this.setElectionTime_PollOpen}}
-      />
+    <ElectionTime @type="open" @after={{this.pollOpenAfter}} @hours={{this.pollOpenAfterHours}}
+      @nominations={{this.pollOpenAfterNominations}} @time={{this.pollOpenTime}}
+      @setElectionTime={{this.setElectionTime_PollOpen}} />
     {{/if}}
 
     <!-- Poll close time enabled -->
@@ -245,40 +121,23 @@
       <Input @type="checkbox" @checked={{this.pollClose}} class="input-small" />
       <span>{{i18n "election.poll.close_time"}}</span>
       <div class="controls">
-        <ElectionSaveTime
-          @type="close"
-          @enabled={{this.pollClose}}
-          @after={{this.pollCloseAfter}}
-          @hours={{this.pollCloseAfterHours}}
-          @voters={{this.pollCloseAfterVoters}}
-          @time={{this.pollCloseTime}}
-          @topic={{this.topic}}
-          @error="error"
-          @saved="saved"
-        />
+        <ElectionSaveTime @type="close" @enabled={{this.pollClose}} @after={{this.pollCloseAfter}}
+          @hours={{this.pollCloseAfterHours}} @voters={{this.pollCloseAfterVoters}} @time={{this.pollCloseTime}}
+          @topic={{this.topic}} @error="error" @saved="saved" />
       </div>
     </div>
 
     {{#if this.pollClose}}
-      <ElectionTime
-        @type="close"
-        @after={{this.pollCloseAfter}}
-        @hours={{this.pollCloseAfterHours}}
-        @voters={{this.pollCloseAfterVoters}}
-        @time={{this.pollCloseTime}}
-        @setElectionTime={{this.setElectionTime_PollClose}}
-      />
+    <ElectionTime @type="close" @after={{this.pollCloseAfter}} @hours={{this.pollCloseAfterHours}}
+      @voters={{this.pollCloseAfterVoters}} @time={{this.pollCloseTime}}
+      @setElectionTime={{this.setElectionTime_PollClose}} />
     {{/if}}
   </:body>
 
   <:footer>
     <div class="modal-footer">
-      <DButton
-        @title="election.manage.done"
-        @label="election.manage.done"
-        @action={{this.close}}
-        class="btn btn-primary"
-      />
+      <DButton @title="election.manage.done" @label="election.manage.done" @action={{this.close}}
+        class="btn btn-primary" />
     </div>
   </:footer>
 </DModal>

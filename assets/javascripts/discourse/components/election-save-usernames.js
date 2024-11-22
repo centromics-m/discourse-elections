@@ -55,9 +55,9 @@ export default class ElectionSaveUsernamesComponent extends ElectionSave {
           handleFail();
         } else {
           this.topic.election_nominations = result.user_ids;
-          this.topic.election_nominations_usernames = result.usernames;
-          this.topic.election_is_nominee =
-            result.user_ids.indexOf(this.currentUser.id) > -1;
+          //this.topic.election_nominations_usernames = result.usernames;
+          // this.topic.election_is_nominee =
+          //   result.user_ids.indexOf(this.currentUser.id) > -1;
         }
       })
       .catch((e) => {

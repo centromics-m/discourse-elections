@@ -24,11 +24,12 @@ enabled_site_setting :elections_enabled
 # added by etna
 # register_custom_field_type('category', 'for_elections', :boolean)
 
-
 after_initialize do
-  Topic.register_custom_field_type('election_self_nomination_allowed', :boolean)
+  #Topic.register_custom_field_type('election_self_nomination_allowed', :boolean)
+  Topic.register_custom_field_type('election_poll_mode', :string) # finding_answer, finding_winner
   Topic.register_custom_field_type('election_nominations', :integer)
-  Topic.register_custom_field_type('election_status', :integer)
+  #Topic.register_custom_field_type('election_poll_options', :string)
+  Topic.register_custom_field_type('election_status', :integer) # 1: nomination(-> gathering options), 2: polling, 3: closed
   Topic.register_custom_field_type('election_status_banner', :boolean)
   Topic.register_custom_field_type('election_status_banner_result_hours', :integer)
   Topic.register_custom_field_type('election_poll_open', :boolean)
@@ -42,7 +43,7 @@ after_initialize do
   Topic.register_custom_field_type('election_poll_close_after_voters', :integer)
   Topic.register_custom_field_type('election_poll_close_scheduled', :boolean)
   Category.register_custom_field_type('for_elections', :boolean)
-  Post.register_custom_field_type('election_nomination_statement', :boolean)
+  #Post.register_custom_field_type('election_nomination_statement', :boolean)
 
   require_relative "controllers/base"
   require_relative "controllers/election"
@@ -86,33 +87,40 @@ after_initialize do
   add_to_serializer(:topic_view, :election_position,
     include_condition: -> { object.topic&.election }) { object.topic&.election_position }
 
-  add_to_serializer(:topic_view, :election_nominations,
+  # add_to_serializer(:topic_view, :election_nominations,
+  #   include_condition: -> { object.topic&.election }) { object.topic&.election }
+
+  # add_to_serializer(:topic_view, :election_nominations_usernames,
+  #   include_condition: -> { object.topic&.election }) { object.topic&.election_nominations_usernames }
+
+  add_to_serializer(:topic_view, :election_poll_options,
     include_condition: -> { object.topic&.election }) { object.topic&.election }
 
-  add_to_serializer(:topic_view, :election_nominations_usernames,
-    include_condition: -> { object.topic&.election }) { object.topic&.election_nominations_usernames }
+  add_to_serializer(:topic_view, :election_poll_answer,
+    include_condition: -> { object.topic&.election }) { object.topic&.election }
 
-  add_to_serializer(:topic_view, :election_self_nomination_allowed,
-    include_condition: -> { object.topic&.election }) { object.topic&.election_self_nomination_allowed }
+  # add_to_serializer(:topic_view, :election_self_nomination_allowed,
+  #   include_condition: -> { object.topic&.election }) { object.topic&.election_self_nomination_allowed }
 
-  add_to_serializer(:topic_view, :election_can_self_nominate, include_condition: -> { object.topic&.election }) do
-    scope.user && !scope.user.anonymous? &&
-    (scope.is_admin? || scope.user.trust_level >= SiteSetting.elections_min_trust_to_self_nominate.to_i)
-  end
+  # add_to_serializer(:topic_view, :election_can_self_nominate, include_condition: -> { object.topic&.election }) do
+  #   scope.user && !scope.user.anonymous? &&
+  #   (scope.is_admin? || scope.user.trust_level >= SiteSetting.elections_min_trust_to_self_nominate.to_i)
+  # end
 
-  add_to_serializer(:topic_view, :election_is_nominee, include_condition: -> { object.topic&.election }) do
-    scope.user && object.topic&.election_nominations&.include?(scope.user.id)
-  end
+  # add_to_serializer(:topic_view, :election_is_nominee, include_condition: -> { object.topic&.election }) do
+  #   scope.user && object.topic&.election_nominations&.include?(scope.user.id)
+  # end
 
-  add_to_serializer(:topic_view, :election_nomination_statements,
-    include_condition: -> { object.topic&.election }) { object.topic&.election_nomination_statements }
+  # add_to_serializer(:topic_view, :election_nomination_statements,
+  #   include_condition: -> { object.topic&.election }) { object.topic&.election_nomination_statements }
 
-  add_to_serializer(:topic_view, :election_made_statement, include_condition: -> { object.topic&.election }) do
-    if scope.user
-      object.topic&.election_nomination_statements&.any? { |n| n['user_id'] == scope.user.id }
-    end
-  end
+  # add_to_serializer(:topic_view, :election_made_statement, include_condition: -> { object.topic&.election }) do
+  #   if scope.user
+  #     object.topic&.election_nomination_statements&.any? { |n| n['user_id'] == scope.user.id }
+  #   end
+  # end
 
+  # 본래의미에서 변경 --> gathering poll options message
   add_to_serializer(:topic_view, :election_nomination_message,
     include_condition: -> { object.topic&.election }) { object.topic.custom_fields['election_nomination_message'] }
 
@@ -167,8 +175,8 @@ after_initialize do
   add_to_serializer(:topic_view, :election_poll_close_scheduled,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_close_scheduled }
 
-  add_to_serializer(:topic_view, :election_winner,
-    include_condition: -> { object.topic&.election }) { object.topic&.election_winner }
+  # add_to_serializer(:topic_view, :election_winner,
+  #   include_condition: -> { object.topic&.election }) { object.topic&.election_winner }
 
   add_to_serializer(:basic_category, :for_elections) { object.custom_fields['for_elections'] }
 
@@ -180,22 +188,22 @@ after_initialize do
     "election_list",
   ].each do |key|
     Site.preloaded_category_custom_fields << key if Site.respond_to? :preloaded_category_custom_fields
-    # by etna
+
     Category.preloaded_category_custom_fields << key if Category.respond_to? :preloaded_category_custom_fields
   end
 
   add_to_serializer(:post, :election_post,
     include_condition: -> { object.topic&.election }) { object.is_first_post? }
 
-  add_to_serializer(:post, :election_nomination_statement,
-    include_condition: -> { object.topic&.election }) { object.election_nomination_statement }
+  # add_to_serializer(:post, :election_nomination_statement,
+  #   include_condition: -> { object.topic&.election }) { object.election_nomination_statement }
 
-  add_to_serializer(:post, :election_nominee_title,
-    include_condition: -> { object.topic&.election }) { object.user.election_nominee_title }
+  # add_to_serializer(:post, :election_nominee_title,
+  #   include_condition: -> { object.topic&.election }) { object.user.election_nominee_title }
 
-  add_to_serializer(:post, :election_by_nominee, include_condition: -> { object.topic&.election }) do
-    object.user && object.topic&.election_nominations&.include?(object.user.id)
-  end
+  # add_to_serializer(:post, :election_by_nominee, include_condition: -> { object.topic&.election }) do
+  #   object.user && object.topic&.election_nominations&.include?(object.user.id)
+  # end
 
   add_to_serializer(:current_user, :is_elections_admin) { object.is_elections_admin? }
 

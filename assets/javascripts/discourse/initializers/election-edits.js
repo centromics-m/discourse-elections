@@ -193,7 +193,7 @@ export default {
         api.includePostAttributes(
           "topic",
           "election_post",
-          "election_nomination_statement",
+          //"election_nomination_statement",
           "election_nominee_title",
           "election_by_nominee"
         );
@@ -213,14 +213,14 @@ export default {
           const post = helper.attrs;
           let contents = [];
 
-          if (post.election_by_nominee && post.election_nomination_statement) {
-            contents.push(
-              helper.h(
-                "span.statement-post-label",
-                I18n.t("election.post.nomination_statement")
-              )
-            );
-          }
+          // if (post.election_by_nominee && post.election_nomination_statement) {
+          //   contents.push(
+          //     helper.h(
+          //       "span.statement-post-label",
+          //       I18n.t("election.post.nomination_statement")
+          //     )
+          //   );
+          // }
 
           if (
             !post.election_by_nominee &&

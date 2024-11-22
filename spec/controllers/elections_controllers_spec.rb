@@ -51,8 +51,8 @@ describe ::DiscourseElections::ElectionController do
   end
 
   context "within election topic" do
-    let (:user) { Fabricate(:user) }
-    let (:topic) { Fabricate(:topic, subtype: 'election',
+    let(:user) { Fabricate(:user) }
+    let(:topic) { Fabricate(:topic, subtype: 'election',
                                      category_id: category.id,
                                      title: I18n.t('election.title', position: 'Moderator'),
                                      user: user,
@@ -60,7 +60,7 @@ describe ::DiscourseElections::ElectionController do
                                        position: 'Moderator',
                                        election_status: Topic.election_statuses[:nomination]
                                      })}
-    let (:post) { Fabricate(:post, topic: topic,
+    let(:post) { Fabricate(:post, topic: topic,
                                    post_number: 1,
                                    raw: I18n.t('election.nomination.default_message'),
                                    user: user) }

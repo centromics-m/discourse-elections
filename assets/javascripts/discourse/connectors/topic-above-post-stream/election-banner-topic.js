@@ -1,5 +1,5 @@
 import Component from "@glimmer/component";
-import { tracked } from "@glimmer/tracking";
+//import { tracked } from "@glimmer/tracking";
 import { service } from "@ember/service";
 //import SiteSettings from "discourse/lib/site-settings";
 

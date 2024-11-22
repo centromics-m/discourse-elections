@@ -55,8 +55,8 @@ export default class ManageElectionModal extends Component {
       this.showSelector = true;
       this.topic = topic;
       this.position = topic.election_position;
-      this.usernamesString = topic.election_nominations_usernames.join(", ");
-      this.selfNomination = topic.election_self_nomination_allowed;
+      //this.usernamesString = topic.election_nominations_usernames.join(", ");
+      //this.selfNomination = topic.election_self_nomination_allowed;
       this.statusBanner = topic.election_status_banner;
       this.statusBannerResultHours = topic.election_status_banner_result_hours;
       this.status = topic.election_status;
@@ -90,39 +90,39 @@ export default class ManageElectionModal extends Component {
     }));
   }
 
-  @computed("usernamesString")
-  get usernames() {
-    return (this.usernamesString || "").split(",").map((s) => s.trim());
-  }
+  // @computed("usernamesString")
+  // get usernames() {
+  //   return (this.usernamesString || "").split(",").map((s) => s.trim());
+  // }
 
-  set usernames(value) {
-    // setter 로직: 필요 시 구현
-    if (!value) {
-      this.usernamesString = "";
-    } else {
-      this.usernamesString = value.join(", ");
-    }
-  }
+  // set usernames(value) {
+  //   // setter 로직: 필요 시 구현
+  //   if (!value) {
+  //     this.usernamesString = "";
+  //   } else {
+  //     this.usernamesString = value.join(", ");
+  //   }
+  // }
 
-  @computed("usernames", "topic.election_nominations_usernames")
-  get usernamesUnchanged() {
-    const newUsernames = this.usernames.filter(Boolean);
-    const currentUsernames =
-      this.topic?.election_nominations_usernames.filter(Boolean) || [];
+  // @computed("usernames", "topic.election_nominations_usernames")
+  // get usernamesUnchanged() {
+  //   const newUsernames = this.usernames.filter(Boolean);
+  //   const currentUsernames =
+  //     this.topic?.election_nominations_usernames.filter(Boolean) || [];
 
-    if (newUsernames.length !== currentUsernames.length) {
-      return false;
-    }
+  //   if (newUsernames.length !== currentUsernames.length) {
+  //     return false;
+  //   }
 
-    return newUsernames.every((username) =>
-      currentUsernames.includes(username)
-    );
-  }
+  //   return newUsernames.every((username) =>
+  //     currentUsernames.includes(username)
+  //   );
+  // }
 
-  set usernamesUnchanged(value) {
-    // setter 로직: 필요 시 구현
-    console.warn("usernamesUnchanged was set:", value);
-  }
+  // set usernamesUnchanged(value) {
+  //   // setter 로직: 필요 시 구현
+  //   console.warn("usernamesUnchanged was set:", value);
+  // }
 
   @computed("position")
   get positionInvalid() {
@@ -148,34 +148,34 @@ export default class ManageElectionModal extends Component {
     return this.args.model;
   }
 
-  // @action
-  // onUseranamesInput(event) {
-  //   console.log('onUseranamesInput', event);
-  //   //this.usernamesString = event.target.value.join(',');
-  // }
-
-  @action
-  onUsernamesInput(usernames) {
-    // Join the usernames into a string if needed.
-    this.usernamesString = (usernames || []).filter(Boolean).join(", ");
-  }
+  // // @action
+  // // onUseranamesInput(event) {
+  // //   console.log('onUseranamesInput', event);
+  // //   //this.usernamesString = event.target.value.join(',');
+  // // }
 
   // @action
-  // onUsernameSelect(username) {
-  //   console.log("onUsernameSelect:", username);
-
-  //   if (username.trim() === "") {
-  //     alert("Please enter a username.");
-  //     return;
-  //   }
-
-  //   if (this.usernames.includes(username)) {
-  //     alert("Username already selected.");
-  //     return;
-  //   }
-
-  //   this.usernames.push(username);
+  // onUsernamesInput(usernames) {
+  //   // Join the usernames into a string if needed.
+  //   this.usernamesString = (usernames || []).filter(Boolean).join(", ");
   // }
+
+  // // @action
+  // // onUsernameSelect(username) {
+  // //   console.log("onUsernameSelect:", username);
+
+  // //   if (username.trim() === "") {
+  // //     alert("Please enter a username.");
+  // //     return;
+  // //   }
+
+  // //   if (this.usernames.includes(username)) {
+  // //     alert("Username already selected.");
+  // //     return;
+  // //   }
+
+  // //   this.usernames.push(username);
+  // // }
 
   @action
   setElectionTime_PollOpen(data) {

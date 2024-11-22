@@ -2,54 +2,29 @@
   {{! Set open time to x hours after x nominations }}
   <div class="election-time-control">
     <div class="election-time-control-title">
-      <Input
-        @type="checkbox"
-        @checked={{this.after}}
-        {{!-- {{on "change" (fn (mut this.after) this.checked)}} --}}
-        {{on "change" this.onAfterClicked}}
-      />
+      <Input @type="checkbox" @checked={{this.after}} {{on "change" this.onAfterClicked}} />
       <span>{{i18n this.afterTitle}}</span>
     </div>
 
     <div>
       <span> {{i18n "election.set_time.hours"}}</span>
-      <Input
-        @type="number"
-        @value={{this.hours}}
-        placeholder="0"
-        class="input-small"
-        {{!-- {{on "input" (fn (mut this.hours) this.value)}} --}}
-        {{on "input" this.sendElectionTime}}
-      />
+      <Input @type="number" @value={{this.hours}} placeholder="0" class="input-small" {{on "input"
+        this.sendElectionTime}} />
     </div>
 
     <div id="set_time-nominations">
       {{#if this.showNominations}}
-        <span>{{i18n "election.set_time.nominations"}}</span>
-        <Input
-          @type="number"
-          @value={{this.nominations}}
-          placeholder="0"
-          class="input-small"
-          {{!-- {{on "input" (fn (mut this.nominations) this.value)}}  --}}
-          {{!-- {{on "change" (withEventValue (fn (mut this.nominations)))}} --}}
-          {{!-- {{on "input" this.setNominations}} --}}
-          {{on "input" this.sendElectionTime}}
-        />
+      <span>{{i18n "election.set_time.nominations"}}</span>
+      <Input @type="number" @value={{this.nominations}} placeholder="0" class="input-small" {{on "input"
+        this.sendElectionTime}} />
       {{/if}}
     </div>
 
     <div id="set_time-voters">
       {{#if this.showVoters}}
-        <span>{{i18n "election.set_time.voters"}}</span>
-        <Input
-          @type="number"
-          @value={{this.voters}}
-          placeholder=""
-          class="input-small"
-          {{!-- {{on "input" (fn (mut this.voters) this.value)}} --}}
-          {{on "input" this.sendElectionTime}}
-        />
+      <span>{{i18n "election.set_time.voters"}}</span>
+      <Input @type="number" @value={{this.voters}} placeholder="" class="input-small" {{on "input"
+        this.sendElectionTime}} />
       {{/if}}
     </div>
   </div>
@@ -57,30 +32,19 @@
   {{! Set open time manually }}
   <div class="election-time-control">
     <div class="election-time-control-title">
-      <Input
-        @type="checkbox"
-        @checked={{this.manual}}
-        {{!-- {{on "change" (fn (mut this.manual) this.checked)}} --}}
-        {{!-- {{on "input" this.sendElectionTime}} --}}
-        {{on "change" this.onManualClicked}}
-      />
+      <Input @type="checkbox" @checked={{this.manual}} {{on "change" this.onManualClicked}} />
       <span>{{i18n this.manualTitle}}</span>
     </div>
 
-    <SetElectionTime
-      @dateTime={{this.time}}
-      @timeElementId={{this.timeId}}
-      @dateElementId={{this.dateId}}
-      @disabled={{this.after}}
-      @setTime={{this.setTime}}
-    />
+    <SetElectionTime @dateTime={{this.time}} @timeElementId={{this.timeId}} @dateElementId={{this.dateId}}
+      @disabled={{this.after}} @setTime={{this.setTime}} />
   </div>
 
   <div class="election-description">
     {{i18n "election.poll.criteria" action=this.type}}
     <ul>
       {{#each this.criteria as |c|}}
-        <li>{{c}}</li>
+      <li>{{c}}</li>
       {{/each}}
     </ul>
   </div>

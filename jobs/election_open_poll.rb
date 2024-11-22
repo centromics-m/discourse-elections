@@ -32,11 +32,8 @@ module Jobs
       if error
         DiscourseElections::ElectionTopic.moderators(args[:topic_id]).each do |user|
           if user
-            SystemMessage.create_from_system_user(user,
-              :error_starting_poll,
-                topic_id: args[:topic_id],
-                error: error
-            )
+            SystemMessage.create_from_system_user(user, :error_starting_poll,
+                topic_id: args[:topic_id], error: error)
           end
         end
       end
