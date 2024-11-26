@@ -5,14 +5,17 @@ import { on } from "@ember/modifier";
 import { action, computed, observer } from "@ember/object";
 import { service } from "@ember/service";
 import DButton from "discourse/components/d-button";
+//import PollUiBuilder from "discourse/components/modal/poll-ui-builder";
 import { ajax } from "discourse/lib/ajax";
 import DiscourseURL from "discourse/lib/url";
+import PollUiBuilderModal from "discourse/plugins/poll/discourse/components/modal/poll-ui-builder";
 
 export default class CreateElectionModal extends Component {
   @service siteSettings;
+  @service modal;
+
   @tracked
-  statusBannerResultHours =
-    this.siteSettings.elections_status_banner_default_result_hours;
+  statusBannerResultHours = this.siteSettings.elections_status_banner_default_result_hours;
   @tracked statusBanner = true;
   @tracked pollOpenAfter = true;
   @tracked pollOpenAfterHours = 48;
@@ -142,4 +145,25 @@ export default class CreateElectionModal extends Component {
       // Handle error as needed (e.g., show a message)
     }
   }
+
+  // @action
+  // openPollUiBuilderModal() {
+  //   this.modal.show(CreateElectionModal, {
+  //     model: {
+  //       toolbarEvent: null,
+  //       onInsertPoll: this.onInsertPoll,          // onInsertPoll(outputAsJson) (for standalone mode; used by external plugin)
+  //     },
+  //   });
+
+  //   // this.modal.show("create-election", {
+  //   //   model: {
+  //   //     categoryId: this.args.category.id,
+  //   //   },
+  //   // });
+  // }
+
+  // @action
+  // onInsertPoll(outputAsJson) {
+  //   console.log(outputAsJson);
+  // }
 }

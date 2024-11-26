@@ -1,5 +1,5 @@
 {{#if this.category.for_elections}}
-<div class="navigation-controls">
+<div class="navigation-controls" id="election-controls">
   {{#if this.isElectionsAdmin}}
   <DButton @icon="plus" @class="btn btn-icon-text btn-default" @label={{"election.create.label"}}
     @action={{this.createElection}} @actionParam={{this.category.id}} />

@@ -12,6 +12,7 @@ DiscourseElections::Engine.routes.draw do
   delete 'nomination' => 'nomination#remove'
 
   post 'create' => 'election#create'
+  put 'update' => 'election#update'
   put 'set-self-nomination-allowed' => 'election#set_self_nomination_allowed'
   put 'set-status-banner' => 'election#set_status_banner'
   put 'set-status-banner-result-hours' => 'election#set_status_banner_result_hours'

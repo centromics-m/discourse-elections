@@ -30,7 +30,47 @@ module DiscourseElections
       validate_create_time("open") if params[:poll_open] == "true"
       validate_create_time("close") if params[:poll_close] == "true"
 
-      result = DiscourseElections::ElectionTopic.create(current_user, params)
+      result = DiscourseElections::ElectionTopic.create(params[:topic_id], params)
+
+      if result[:error_message]
+        render json: failed_json.merge(message: result[:error_message])
+      else
+        render json: success_json.merge(url: result[:url])
+      end
+    end
+
+    def update
+      params.require(:topic_id)
+
+      topic = Topic.find(params[:topic_id])
+
+      params.require(:category_id)
+      params.require(:position)
+      params.permit(
+        #added by etna
+        :poll_mode,
+        :nomination_message, # 본래의미에서 변경 --> gathering poll options message
+        :poll_message,
+        :closed_poll_message,
+        #:self_nomination_allowed,
+        :status_banner,
+        :status_banner_result_hours,
+        :poll_open,
+        :poll_open_after,
+        :poll_open_after_hours,
+        :poll_open_after_nominations,
+        :poll_open_time,
+        :poll_close,
+        :poll_close_after,
+        :poll_close_after_hours,
+        :poll_close_after_voters,
+        :poll_close_time,
+      )
+
+      validate_create_time("open") if params[:poll_open] == "true"
+      validate_create_time("close") if params[:poll_close] == "true"
+
+      result = DiscourseElections::ElectionTopic.update(topic, params)
 
       if result[:error_message]
         render json: failed_json.merge(message: result[:error_message])
@@ -48,11 +88,7 @@ module DiscourseElections
         raise StandardError.new I18n.t("election.errors.more_nominations")
       end
 
-      new_status =
-        DiscourseElections::ElectionTopic.set_status(
-          params[:topic_id],
-          Topic.election_statuses[:poll]
-        )
+      new_status = DiscourseElections::ElectionTopic.set_status(params[:topic_id], Topic.election_statuses[:poll])
 
       if new_status != Topic.election_statuses[:poll]
         result = { error_message: I18n.t("election.errors.set_status_failed") }
@@ -249,21 +285,20 @@ module DiscourseElections
 
       topic = Topic.find(params[:topic_id])
 
-      # pp "##################### type #{type}"
-      # pp "##################### enabled #{enabled}"
-      # pp "##################### election_nominations #{topic.election_nominations}"
-      # pp "##################### nominations #{nominations}"
-      # pp "##################### topic.election_poll_voters #{topic.election_poll_voters}"
-      # pp "##################### voters #{voters}"
+      pp "##################### type #{type}"
+      pp "##################### enabled #{enabled}"
+      pp "##################### election_nominations #{topic.election_nominations}"
+      pp "##################### nominations #{nominations}"
+      pp "##################### topic.election_poll_voters #{topic.election_poll_voters}"
+      pp "##################### voters #{voters}"
 
       if type === "open" && enabled && after &&
            topic.election_nominations.length >= nominations
-        raise StandardError.new I18n.t(
-                                  "election.errors.nominations_already_met"
-                                )
+        raise StandardError.new I18n.t("election.errors.nominations_already_met")
       end
 
-      if after && topic.election_poll_voters >= voters
+      if type === "close" && enabled && after &&
+            topic.election_poll_voters >= voters
         raise StandardError.new I18n.t("election.errors.voters_already_met")
       end
 
@@ -364,9 +399,7 @@ module DiscourseElections
              (opts[:type] === "close" && opts[:voters].blank?)
           raise StandardError.new I18n.t("election.errors.poll_after")
         elsif opts[:type] === "open" && opts[:nominations].to_i < 2
-          raise StandardError.new I18n.t(
-                                    "election.errors.nominations_at_least_2"
-                                  )
+          raise StandardError.new I18n.t("election.errors.nominations_at_least_2")
         elsif opts[:type] === "close" && opts[:voters].to_i < 1
           raise StandardError.new I18n.t("election.errors.voters_at_least_1")
         end

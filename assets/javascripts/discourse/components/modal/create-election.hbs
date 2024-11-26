@@ -5,6 +5,12 @@
       <Input @value={{this.position}} class="input-medium" />
     </div>
 
+    {{!-- <div class="control-group">
+      <label>투표 만들기</label>
+      <DButton @title="투표 만들기" @label="투표 만들기" @action={{this.openPollUiBuilderModal}} class="btn btn-primary"
+        @disabled={{false}} />
+    </div> --}}
+
     <div class="control-group">
       <label>{{i18n "election.create.nomination_message"}}</label>
       <DEditor @value={{this.nominationMessage}} @placeholder="election.create.nomination_message_placeholder" />
@@ -20,16 +26,14 @@
       <DEditor @value={{this.closedPollMessage}} @placeholder="election.create.closed_poll_message_placeholder" />
     </div>
 
-    <div class="control-group">
+    {{!-- <div class="control-group">
       <input type="checkbox" checked={{this.selfNominationAllowed}} />{{i18n
       "election.create.self_nomination_allowed"
       }}
-    </div>
+    </div> --}}
 
     <div class="control-group">
-      <input type="checkbox" checked={{this.statusBanner}} />{{i18n
-      "election.status_banner.enable"
-      }}
+      <input type="checkbox" checked={{this.statusBanner}} />{{i18n "election.status_banner.enable"}}
     </div>
 
     <div class="control-group">

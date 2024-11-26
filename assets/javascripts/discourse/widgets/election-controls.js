@@ -2,6 +2,7 @@ import { h } from "virtual-dom";
 import { ajax } from "discourse/lib/ajax";
 import { createWidget } from "discourse/widgets/widget";
 import { getOwner } from "discourse-common/lib/get-owner";
+import PollUiBuilderModal from "discourse/plugins/poll/discourse/components/modal/poll-ui-builder";
 import ConfirmNominationModal from "../components/modal/confirm-normination";
 //import $ from "jquery";
 //console.log($);
@@ -29,22 +30,51 @@ export default createWidget("election-controls", {
     });
   },
 
-  makeStatement() {
-    const controller = getOwner(this).lookup("controller:composer");
-    const topic = this.attrs.topic;
+  openPollUiBuilder() {
+    console.log('this.attrs', this.attrs);
+    const topicId = this.attrs.topic.id;
+    const categoryId = this.attrs.topic.category_id;
+    const position = 'position';
+    console.log('this.attrs.topic', this.attrs.topic);
 
-    controller.open({
-      action: "reply",
-      draftKey: "reply",
-      draftSequence: 0,
-      topic,
+    this._showModal(PollUiBuilderModal, {
+      model: {
+        mode: 'election-manage',
+        // topic: this.attrs.topic,
+        // rerender: () => this.scheduleRerender(),
+        toolbarEvent: null,
+        onInsertPoll: this.onInsertPoll,          // onInsertPoll(outputAsJson) (for standalone mode; used by external plugin)
+        topicId,
+        categoryId,
+        position,
+        _this: this,
+      },
     });
-
-    controller.set("model.electionNominationStatement", true);
   },
 
+  onInsertPoll(_this, topicId, categoryId, position, outputAsJson) {
+    //const topicId = this.attrs.topic.id;
+    _this.updateTopic(topicId, categoryId, position, outputAsJson);
+  },
+
+  // makeStatement() {
+  //   const controller = getOwner(this).lookup("controller:composer");
+  //   const topic = this.attrs.topic;
+
+  //   controller.open({
+  //     action: "reply",
+  //     draftKey: "reply",
+  //     draftSequence: 0,
+  //     topic,
+  //   });
+
+  //   controller.set("model.electionNominationStatement", true);
+  // },
+
   manage() {
-    //showModal('manage-election', {
+    console.log('startPoll manage this.attrs', this.attrs);
+
+    //this._showModal('manage-election', {
     this._showModal(ManageElectionModal, {
       model: {
         topic: this.attrs.topic,
@@ -54,6 +84,7 @@ export default createWidget("election-controls", {
   },
 
   startPoll() {
+    console.log('startPoll this.attrs', this.attrs);
     const topicId = this.attrs.topic.id;
 
     ajax("/election/start-poll", { type: "PUT", data: { topic_id: topicId } })
@@ -98,6 +129,62 @@ export default createWidget("election-controls", {
     this.scheduleRerender();
   },
 
+  // pollType,
+  // pollResult,
+  // publicPoll,
+  // pollTitle,
+  // pollOptions,
+  // pollDataLinks,
+  // pollMin,
+  // pollMax,
+  // pollStep,
+  // pollGroups,
+  // pollAutoClose,
+  // score,
+  // chartType
+
+  updateTopic(topicId, categoryId, position, outputAsJson) {
+    console.log('topicId ouputAsJson1', topicId, categoryId, position, outputAsJson);
+
+    // let polldata = {
+    //   // :poll_mode,
+    //   poll_mode: outputAsJson.pollMode,
+    //   // :nomination_message, # 본래의미에서 변경 --> gathering poll options message
+
+    //   poll_message: outputAsJson.pollMessage,
+    //   // :closed_poll_message,
+    //   // #:self_nomination_allowed,
+    //   // :status_banner,
+    //   // :status_banner_result_hours,
+    //   // :poll_open,
+    //   // :poll_open_after,
+    //   // :poll_open_after_hours,
+    //   // :poll_open_after_nominations,
+    //   // :poll_open_time,
+    //   // :poll_close,
+    //   // :poll_close_after,
+    //   // :poll_close_after_hours,
+    //   // :poll_close_after_voters,
+    //   // :poll_close_time,
+    // };
+
+    //setTimeout(function () {
+
+    ajax("/election/update", {
+      type: "PUT",
+      data: {
+        topic_id: topicId,
+        category_id: categoryId,
+        position,
+        //category_id:
+        content: JSON.stringify(outputAsJson)
+      }
+    }).then((result) => {
+      console.log('updateTopic result', result);
+    });
+    //});
+  },
+
   html(attrs, state) {
     const topic = attrs.topic;
     const user = this.currentUser;
@@ -116,6 +203,14 @@ export default createWidget("election-controls", {
         })
       );
     }
+
+    contents.push(
+      this.attach("button", {
+        action: `openPollUiBuilder`,
+        label: 'openPollUiBuilder',
+        className: "btn-primary open-poll-ui-builder",
+      })
+    );
 
     // NOTE: disabled by etna (2024.10.22)
     // if (topic.election_is_nominee && !topic.election_made_statement) {
