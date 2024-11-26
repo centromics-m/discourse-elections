@@ -242,13 +242,17 @@ class DiscourseElections::ElectionPost
     ## We always skip the revision as these are system edits to a single post.
     revisor_opts.merge!(skip_revision: true)
 
+    pp "###################3" + content
+
     revise_result = revisor.revise!(election_post.user, { raw: content }, revisor_opts)
 
     if election_post.errors.any?
       if unattended
         message_moderators(topic.id, election_post.errors.messages.to_s)
       else
-        raise ::ActiveRecord::Rollback
+        #raise ::ActiveRecord::Rollback
+        raise ::ActiveRecord::Rollback.new(election_post.errors.full_messages.join(", "))
+        #raise election_post.errors.full_messages.join(", ")
       end
     end
 
@@ -257,7 +261,10 @@ class DiscourseElections::ElectionPost
         message_moderators(topic.id, I18n.t("election.errors.revisor_failed"))
       else
         election_post.errors.add(:base, I18n.t("election.errors.revisor_failed"))
-        raise ::ActiveRecord::Rollback
+
+        #raise ::ActiveRecord::Rollback
+        raise ::ActiveRecord::Rollback.new(election_post.errors.full_messages.join(", "))
+        #raise election_post.errors.full_messages.join(", ")
       end
     end
 

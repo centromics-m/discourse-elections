@@ -292,7 +292,13 @@ class DiscourseElections::ElectionTopic
     # {"pollType":"regular","pollResult":"always","publicPoll":true,"pollTitle":"","pollMin":1,"pollMax":2,"pollStep":1,"score":100,"chartType":"bar","pollDataLinks":[{"url":"","title":"","content":""}],"name":"poll","pollOutput":"[poll type=regular results=always public=true chartType=bar score=100]\n* ㅁㄴㅇㄹ\n* ㅁㄴㅇㄻ\n* ㅁㄴㅇㄻㅇㄹ\n[/poll]\n[poll_data_link]\n\n[/poll_data_link]\n"}
     pp "################################# " + opts['content']
     content_parsed = JSON.parse(opts['content'])
-    DiscourseElections::ElectionPost.update_election_post(topic, content_parsed['pollOutput'], true)
+    result2 = DiscourseElections::ElectionPost.update_election_post(topic, content_parsed['pollOutput'])
+    pp "##########result2 #{result2}"
+    # if result2.success?
+    #   { url: topic.relative_url }
+    # else
+    #   { error_message: I18n.t("election.errors.create_failed") }
+    # end
 
     if result.success?
       { url: topic.relative_url }

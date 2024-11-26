@@ -1,5 +1,6 @@
 import { h } from "virtual-dom";
 import { ajax } from "discourse/lib/ajax";
+import Topic from "discourse/models/topic";
 import { createWidget } from "discourse/widgets/widget";
 import { getOwner } from "discourse-common/lib/get-owner";
 import PollUiBuilderModal from "discourse/plugins/poll/discourse/components/modal/poll-ui-builder";
@@ -30,12 +31,52 @@ export default createWidget("election-controls", {
     });
   },
 
-  openPollUiBuilder() {
+  async fetchFirstPosts(topicId) {
+    const topic = await Topic.find(topicId, {});
+    console.log('topic', topic);
+    let allPosts = topic.post_stream.posts;
+    let post = null;
+    if (allPosts.length > 0) { post = allPosts[0]; }
+    else { post = null; }
+    return post;
+  },
+
+  async openPollUiBuilder() {
     console.log('this.attrs', this.attrs);
     const topicId = this.attrs.topic.id;
     const categoryId = this.attrs.topic.category_id;
     const position = 'position';
     console.log('this.attrs.topic', this.attrs.topic);
+
+    // alert('투표 상태를 먼저 열기 상태로 전환해주세요. 닫기 상태에서는 저장되지 않습니다. ' +
+    //   'Please change the poll state to OPEN state. In closed mode poll will not be saved.');
+
+    const post = await this.fetchFirstPosts(topicId);
+    console.log('post', post);
+
+    const poll = post.polls?.length > 0 ? post.polls[0] : null;
+    let polldata = {};
+    if (poll != null) {
+      polldata = {
+        id: poll.id,
+        name: poll.name,
+        pollType: poll.type,
+        pollTitle: poll.title,
+        pollOptions: poll.options,
+        pollOptionsText: '',
+        pollDataLinks: poll.poll_data_link,
+        pollMin: undefined,
+        pollMax: undefined,
+        pollStep: undefined,
+        pollGroups: undefined,
+        pollAutoClose: undefined,
+        pollResult: poll.result,
+        score: poll.score,
+        defaultScore: undefined,
+        chartType: poll.chart_type,
+        status: poll.status,
+      };
+    }
 
     this._showModal(PollUiBuilderModal, {
       model: {
@@ -48,13 +89,14 @@ export default createWidget("election-controls", {
         categoryId,
         position,
         _this: this,
+        polldata,
       },
     });
   },
 
-  onInsertPoll(_this, topicId, categoryId, position, outputAsJson) {
+  async onInsertPoll(_this, topicId, categoryId, position, outputAsJson) {
     //const topicId = this.attrs.topic.id;
-    _this.updateTopic(topicId, categoryId, position, outputAsJson);
+    return await _this.updateTopic(topicId, categoryId, position, outputAsJson);
   },
 
   // makeStatement() {
@@ -143,7 +185,7 @@ export default createWidget("election-controls", {
   // score,
   // chartType
 
-  updateTopic(topicId, categoryId, position, outputAsJson) {
+  async updateTopic(topicId, categoryId, position, outputAsJson) {
     console.log('topicId ouputAsJson1', topicId, categoryId, position, outputAsJson);
 
     // let polldata = {
@@ -170,7 +212,9 @@ export default createWidget("election-controls", {
 
     //setTimeout(function () {
 
-    ajax("/election/update", {
+    let result1 = null;
+
+    await ajax("/election/update", {
       type: "PUT",
       data: {
         topic_id: topicId,
@@ -179,10 +223,25 @@ export default createWidget("election-controls", {
         //category_id:
         content: JSON.stringify(outputAsJson)
       }
+
     }).then((result) => {
-      console.log('updateTopic result', result);
+      //console.log('updateTopic result', result);
+      result1 = result;
+    }).catch((error) => {
+      console.error('Failed to updateTopic:', error);
+      result1 = error;
+      const resp = error.jqXHR;
+      alert(resp.responseText);
+      // if (resp.responseJSON.error) {
+      //   alert(resp.responseJSON.error);
+      // } else {
+      //   alert(resp.responseText);
+      // }
+
     });
     //});
+
+    return result1;
   },
 
   html(attrs, state) {
