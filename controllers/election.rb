@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DiscourseElections
   class ElectionController < BaseController
     before_action :ensure_is_elections_admin
@@ -30,7 +31,8 @@ module DiscourseElections
       validate_create_time("open") if params[:poll_open] == "true"
       validate_create_time("close") if params[:poll_close] == "true"
 
-      result = DiscourseElections::ElectionTopic.create(params[:topic_id], params)
+      #params[:topic_id]
+      result = DiscourseElections::ElectionTopic.create(current_user, params)
 
       if result[:error_message]
         render json: failed_json.merge(message: result[:error_message])
@@ -65,6 +67,8 @@ module DiscourseElections
         :poll_close_after_hours,
         :poll_close_after_voters,
         :poll_close_time,
+        # NOTE: params 내에 poll 관련 옵션이 JSON으로 인코딩되어 들어 있음. ElectionPost::update 참고
+        :content
       )
 
       validate_create_time("open") if params[:poll_open] == "true"
@@ -84,9 +88,10 @@ module DiscourseElections
 
       topic = Topic.find(params[:topic_id])
 
-      if topic.election_nominations.length < 2
-        raise StandardError.new I18n.t("election.errors.more_nominations")
-      end
+      # 선거를 실행하려면 더 많은 후보가 필요합니다. 무시
+      # if topic.election_nominations.length < 2
+      #   raise StandardError.new I18n.t("election.errors.more_nominations")
+      # end
 
       new_status = DiscourseElections::ElectionTopic.set_status(params[:topic_id], Topic.election_statuses[:poll])
 
@@ -111,14 +116,14 @@ module DiscourseElections
         raise StandardError.new I18n.t("election.errors.not_changed")
       end
 
-      if status != Topic.election_statuses[:nomination] &&
-           topic.election_nominations.length < 2
+      # 선거를 실행하려면 더 많은 후보가 필요합니다. 무시
+      # if status != Topic.election_statuses[:nomination] &&
+      #      topic.election_nominations.length < 2
 
-        raise StandardError.new I18n.t("election.errors.more_nominations")
-      end
+      #   raise StandardError.new I18n.t("election.errors.more_nominations")
+      # end
 
-      new_status =
-        DiscourseElections::ElectionTopic.set_status(params[:topic_id], status)
+      new_status = DiscourseElections::ElectionTopic.set_status(params[:topic_id], status)
 
       if new_status == existing_status
         result = { error_message: I18n.t("election.errors.set_status_failed") }
@@ -143,11 +148,7 @@ module DiscourseElections
       topic.custom_fields["election_status_banner"] = params[:status_banner]
       topic.save_custom_fields(true)
 
-      DiscourseElections::ElectionCategory.update_election_list(
-        topic.category_id,
-        topic.id,
-        banner: params[:status_banner]
-      )
+      DiscourseElections::ElectionCategory.update_election_list(topic.category_id, topic.id, banner: params[:status_banner])
 
       render_result(value: topic.custom_fields["election_status_banner"])
     end
@@ -163,9 +164,7 @@ module DiscourseElections
         raise StandardError.new I18n.t("election.errors.not_changed")
       end
 
-      topic.custom_fields["election_status_banner_result_hours"] = params[
-        :status_banner_result_hours
-      ]
+      topic.custom_fields["election_status_banner_result_hours"] = params[:status_banner_result_hours]
       topic.save_custom_fields(true)
 
       render_result(
@@ -221,12 +220,7 @@ module DiscourseElections
       end
 
       if type && message &&
-           success =
-             DiscourseElections::ElectionTopic.set_message(
-               params[:topic_id],
-               message,
-               type
-             )
+           success = DiscourseElections::ElectionTopic.set_message(params[:topic_id], message, type)
         result = { value: message }
       else
         result = { error_message: I18n.t("election.errors.set_message_failed") }
@@ -243,11 +237,7 @@ module DiscourseElections
         raise StandardError.new I18n.t("election.errors.position_too_short")
       end
 
-      if success =
-           DiscourseElections::ElectionTopic.set_position(
-             params[:topic_id],
-             params[:position]
-           )
+      if success = DiscourseElections::ElectionTopic.set_position(params[:topic_id], params[:position])
         result = { value: params[:position] }
       else
         result = {
@@ -328,21 +318,12 @@ module DiscourseElections
       if saved = topic.save_custom_fields(true)
         if topic.send(enabled_str)
           if (topic.send(after_str))
-            DiscourseElections::ElectionTime.send(
-              "cancel_scheduled_poll_#{type}",
-              topic
-            )
+            DiscourseElections::ElectionTime.send("cancel_scheduled_poll_#{type}", topic)
           else
-            DiscourseElections::ElectionTime.send(
-              "schedule_poll_#{type}",
-              topic
-            )
+            DiscourseElections::ElectionTime.send("schedule_poll_#{type}", topic)
           end
         else
-          DiscourseElections::ElectionTime.send(
-            "cancel_scheduled_poll_#{type}",
-            topic
-          )
+          DiscourseElections::ElectionTime.send("cancel_scheduled_poll_#{type}", topic)
         end
       end
 

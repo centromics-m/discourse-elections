@@ -7,9 +7,10 @@ module Jobs
         if topic && !topic.closed
           error = nil
 
-          if topic.election_nominations.length < 2
-            error = I18n.t('election.errors.more_nominations')
-          end
+          # 선거를 실행하려면 더 많은 후보가 필요합니다. 무시
+          # if topic.election_nominations.length < 2
+          #   error = I18n.t('election.errors.more_nominations')
+          # end
 
           if !error && topic.election_status === Topic.election_statuses[:poll]
             error = I18n.t('election.errors.incorrect_status')

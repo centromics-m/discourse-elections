@@ -76,6 +76,8 @@ class DiscourseElections::ElectionPost
     topic.reload
     status = topic.election_status
 
+    content = ""
+
     #content = ''
 
     # if topic.election_winner.present?
@@ -96,7 +98,7 @@ class DiscourseElections::ElectionPost
     topic.reload
     status = topic.election_status
 
-    #content = ''
+    content = ''
 
     # if topic.election_winner.present?
     #   user = User.find_by(username: topic.election_winner)
@@ -114,6 +116,16 @@ class DiscourseElections::ElectionPost
 
   private
 
+
+# [poll type=regular results=always public=true chartType=bar score=100]
+# * poll1
+# * poll2 [correct]
+# * poll3
+# [/poll]
+# [poll_data_link]
+
+# [/poll_data_link]
+
   def self.build_poll(content, topic, unattended)
     nominations = topic.election_nominations
     status = topic.election_status
@@ -122,13 +134,13 @@ class DiscourseElections::ElectionPost
 
     poll_status = ''
 
-    # if status === Topic.election_statuses[:poll]
-    #   poll_status = 'open'
-    # else
-    #   poll_status = 'closed'
-    # end
+    if status === Topic.election_statuses[:poll]
+      poll_status = 'open'
+    else
+      poll_status = 'closed'
+    end
 
-    # poll_options = ''
+    poll_options = ''
 
     # nominations.each do |n|
     #   # Nominee username is added as a placeholder. Without the username,
@@ -141,18 +153,18 @@ class DiscourseElections::ElectionPost
     #   poll_options << build_nominee(topic, user)
     # end
 
-    # content << "[poll type=regular status=#{poll_status}]#{poll_options}\n[/poll]"
+    content << "[poll type=regular status=#{poll_status}]#{poll_options}\n[/poll]"
 
-    # message = nil
-    # if status === Topic.election_statuses[:poll]
-    #   message = topic.custom_fields['election_poll_message']
-    # else
-    #   message = topic.custom_fields['election_closed_poll_message']
-    # end
+    message = nil
+    if status === Topic.election_statuses[:poll]
+      message = topic.custom_fields['election_poll_message']
+    else
+      message = topic.custom_fields['election_closed_poll_message']
+    end
 
-    # if message
-    #   content << "\n\n #{message}"
-    # end
+    if message
+      content << "\n\n #{message}"
+    end
 
     update_election_post(topic, content, unattended)
   end

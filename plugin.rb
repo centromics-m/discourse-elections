@@ -45,6 +45,19 @@ after_initialize do
   Category.register_custom_field_type('for_elections', :boolean)
   #Post.register_custom_field_type('election_nomination_statement', :boolean)
 
+  # added by etna --> 그냥 post의 것을 사용
+  # Topic.register_custom_field_type('election_content_poll_name', :string) # poll
+  # Topic.register_custom_field_type('election_content_poll_type', :string) # regular
+  # Topic.register_custom_field_type('election_content_poll_results', :string) # always
+  # Topic.register_custom_field_type('election_content_poll_public', :boolean) # true
+  # Topic.register_custom_field_type('election_content_poll_chart_type', :string) # bar
+  # Topic.register_custom_field_type('election_content_poll_min', :integer) # bar
+  # Topic.register_custom_field_type('election_content_poll_max', :integer) # bar
+  # Topic.register_custom_field_type('election_content_poll_step', :integer) # bar
+  # Topic.register_custom_field_type('election_content_poll_score', :integer) # bar
+  # Topic.register_custom_field_type('election_content_poll_options_str', :string) # string converted options: JSON of [ { option, correct } ]
+  # Topic.register_custom_field_type('election_content_poll_datalinks_str', :string) # JSON of [ { url, title, content } ]
+
   require_relative "controllers/base"
   require_relative "controllers/election"
   require_relative "controllers/list"

@@ -17,7 +17,7 @@
   },
   "[ruby]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "LoranKloeze.ruby-rubocop-revived"
+    "editor.defaultFormatter": "rubocop.vscode-rubocop"
   },
   "[handlebars]": {
     "editor.defaultFormatter": "vscode.html-language-features",

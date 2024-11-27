@@ -212,6 +212,8 @@ export default createWidget("election-controls", {
 
     //setTimeout(function () {
 
+    console.log('JSON.stringify(outputAsJson)', JSON.stringify(outputAsJson));
+
     let result1 = null;
 
     await ajax("/election/update", {

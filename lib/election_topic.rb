@@ -206,6 +206,9 @@ class DiscourseElections::ElectionTopic
 
     topic.save!(validate: false)
 
+    # NOTE:
+    # 생성시에는 poll 은 저장하지 않음.
+
     if topic.election_poll_open && !topic.election_poll_open_after && topic.election_poll_open_time
       DiscourseElections::ElectionTime.schedule_poll_open(topic)
     end
@@ -286,12 +289,31 @@ class DiscourseElections::ElectionTopic
     DiscourseElections::ElectionCategory.update_election_list(topic.category_id, topic.id, status: topic.election_status)
 
 
+    ###################################
+    # poll 정보 수정
+    # NOTE: poll 은 post 에 저장되어 있으나, election poll의 경우, 현재 topic당 1개만 허용하기 때문에 그냥 topic의 custom_field에 저장함.
+
     # etna
-    content = 'test'
     #JSON.parse(opts)
     # {"pollType":"regular","pollResult":"always","publicPoll":true,"pollTitle":"","pollMin":1,"pollMax":2,"pollStep":1,"score":100,"chartType":"bar","pollDataLinks":[{"url":"","title":"","content":""}],"name":"poll","pollOutput":"[poll type=regular results=always public=true chartType=bar score=100]\n* ㅁㄴㅇㄹ\n* ㅁㄴㅇㄻ\n* ㅁㄴㅇㄻㅇㄹ\n[/poll]\n[poll_data_link]\n\n[/poll_data_link]\n"}
     pp "################################# " + opts['content']
     content_parsed = JSON.parse(opts['content'])
+
+    # topic.custom_fields["election_content_poll_name"] = content_parsed[:name]
+    # topic.custom_fields["election_content_poll_type"] = content_parsed[:pollType]
+    # topic.custom_fields["election_content_poll_results"] = content_parsed[:pollResult]
+    # topic.custom_fields["election_content_poll_public"] = content_parsed[:publicPoll]&.lowercase == 'true'
+    # topic.custom_fields["election_content_poll_min"] = content_parsed[:pollMin]&.to_i
+    # topic.custom_fields["election_content_poll_max"] = content_parsed[:pollMax]&.to_i
+    # topic.custom_fields["election_content_poll_step"] = content_parsed[:pollStep]&.to_i
+    # topic.custom_fields["election_content_poll_score"] = content_parsed[:score]&.to_i
+    # topic.custom_fields["election_content_poll_chart_type"] = content_parsed[:chartType]
+    # topic.custom_fields["election_content_poll_options_str"] = content_parsed[:pollOptions]
+    # topic.custom_fields["election_content_poll_datalinks_str"] = content_parsed[:pollDataLinks]
+    # topic.save!(validate: false)
+
+    # TODO: custom_fields 로부터 직접 pollOutput을 생성하여 집어넣기 (for data일관성)
+
     result2 = DiscourseElections::ElectionPost.update_election_post(topic, content_parsed['pollOutput'])
     pp "##########result2 #{result2}"
     # if result2.success?
@@ -299,6 +321,7 @@ class DiscourseElections::ElectionTopic
     # else
     #   { error_message: I18n.t("election.errors.create_failed") }
     # end
+    ###################################
 
     if result.success?
       { url: topic.relative_url }

@@ -22,7 +22,7 @@ ko:
         nomination_message_placeholder: "지명 과정에서 주제의 첫 번째 게시물에 추가되었습니다. Added to the first post of topic during the nomination process."
         poll_message: "투표 내용"
         poll_message_placeholder: "투표가 열리면 주제의 첫 번째 게시물에 추가됩니다 Added to the first post of topic when the poll is open."
-        closed_poll_message: "폐쇄 투표 메시지"
+        closed_poll_message: "투표 종료 메시지"
         closed_poll_message_placeholder: "투표가 마감되면 주제의 첫 번째 게시물에 추가됩니다. Added to the first post of topic when the poll has closed."
         self_nomination_allowed: "회원이 자신을 지명할 수 있도록 함"
         btn_label: "생성"
