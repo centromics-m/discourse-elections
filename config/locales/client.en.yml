@@ -93,3 +93,5 @@ en:
       winner:
         label: "Winner"
         help: "Enter username(ID) (only 1) (e.g. admin)"
+      open-poll-ui-builder:
+        label: "Open Poll UI Builder"

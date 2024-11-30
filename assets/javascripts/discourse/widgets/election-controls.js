@@ -64,7 +64,7 @@ export default createWidget("election-controls", {
         pollTitle: poll.title,
         pollOptions: poll.options,
         pollOptionsText: '',
-        pollDataLinks: poll.poll_data_link,
+        pollDataLinks: poll.poll_data_links,
         pollMin: undefined,
         pollMax: undefined,
         pollStep: undefined,
@@ -265,14 +265,6 @@ export default createWidget("election-controls", {
       );
     }
 
-    contents.push(
-      this.attach("button", {
-        action: `openPollUiBuilder`,
-        label: 'openPollUiBuilder',
-        className: "btn-primary open-poll-ui-builder",
-      })
-    );
-
     // NOTE: disabled by etna (2024.10.22)
     // if (topic.election_is_nominee && !topic.election_made_statement) {
     //   contents.push(this.attach('button', {
@@ -288,6 +280,19 @@ export default createWidget("election-controls", {
           action: "manage",
           label: "election.manage.label",
           className: "btn-primary manage-election",
+        })
+      );
+    }
+
+    if (user &&
+      user.is_elections_admin &&
+      topic.election_status === ElectionStatuses["nomination"]
+    ) {
+      contents.push(
+        this.attach("button", {
+          action: `openPollUiBuilder`,
+          label: 'election.open-poll-ui-builder.label',
+          className: "btn-primary open-poll-ui-builder",
         })
       );
     }

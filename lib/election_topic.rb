@@ -213,6 +213,8 @@ class DiscourseElections::ElectionTopic
       DiscourseElections::ElectionTime.schedule_poll_open(topic)
     end
 
+    # 초기 메시지 "이 선거는 현재 후보 지명을 받고 있습니다." 를 출력하지 않음
+    # 주석처리 -->
     raw = opts[:nomination_message]
     raw = I18n.t("election.nomination.default_message") if raw.blank?
 
@@ -280,11 +282,13 @@ class DiscourseElections::ElectionTopic
       DiscourseElections::ElectionTime.schedule_poll_open(topic)
     end
 
-    raw = opts[:nomination_message]
-    raw = I18n.t("election.nomination.default_message") if raw.blank?
+    # 초기 메시지 "이 선거는 현재 후보 지명을 받고 있습니다." 를 출력하지 않음
+    # 주석처리 -->
+    # raw = opts[:nomination_message]
+    # raw = I18n.t("election.nomination.default_message") if raw.blank?
 
-    manager = NewPostManager.new(Discourse.system_user, raw: raw, topic_id: topic.id, skip_validations: true)
-    result = manager.perform
+    # manager = NewPostManager.new(Discourse.system_user, raw: raw, topic_id: topic.id, skip_validations: true)
+    # result = manager.perform
 
     DiscourseElections::ElectionCategory.update_election_list(topic.category_id, topic.id, status: topic.election_status)
 
@@ -296,26 +300,23 @@ class DiscourseElections::ElectionTopic
     # etna
     #JSON.parse(opts)
     # {"pollType":"regular","pollResult":"always","publicPoll":true,"pollTitle":"","pollMin":1,"pollMax":2,"pollStep":1,"score":100,"chartType":"bar","pollDataLinks":[{"url":"","title":"","content":""}],"name":"poll","pollOutput":"[poll type=regular results=always public=true chartType=bar score=100]\n* ㅁㄴㅇㄹ\n* ㅁㄴㅇㄻ\n* ㅁㄴㅇㄻㅇㄹ\n[/poll]\n[poll_data_link]\n\n[/poll_data_link]\n"}
-    pp "################################# " + opts['content']
+    #pp "################################# " + opts['content']
     content_parsed = JSON.parse(opts['content'])
 
-    # topic.custom_fields["election_content_poll_name"] = content_parsed[:name]
-    # topic.custom_fields["election_content_poll_type"] = content_parsed[:pollType]
-    # topic.custom_fields["election_content_poll_results"] = content_parsed[:pollResult]
-    # topic.custom_fields["election_content_poll_public"] = content_parsed[:publicPoll]&.lowercase == 'true'
-    # topic.custom_fields["election_content_poll_min"] = content_parsed[:pollMin]&.to_i
-    # topic.custom_fields["election_content_poll_max"] = content_parsed[:pollMax]&.to_i
-    # topic.custom_fields["election_content_poll_step"] = content_parsed[:pollStep]&.to_i
-    # topic.custom_fields["election_content_poll_score"] = content_parsed[:score]&.to_i
-    # topic.custom_fields["election_content_poll_chart_type"] = content_parsed[:chartType]
-    # topic.custom_fields["election_content_poll_options_str"] = content_parsed[:pollOptions]
-    # topic.custom_fields["election_content_poll_datalinks_str"] = content_parsed[:pollDataLinks]
-    # topic.save!(validate: false)
+    election_post = topic.election_post
+    old_content = election_post.raw
 
-    # TODO: custom_fields 로부터 직접 pollOutput을 생성하여 집어넣기 (for data일관성)
+    new_content = ''
+    if old_content.blank? || old_content !~ %r{\[\/poll\]}
+      new_content += content_parsed['pollOutput']
+    else
+      # TODO: poll 이 여러개일 경우?
+      #new_content = election_post.raw.gsub(%r{(\[poll\s.*\[\/poll\])}m, content_parsed['pollOutput'])
+      new_content = election_post.raw.gsub(%r{(\[poll\s.*\[\/poll_data_link\])}m, content_parsed['pollOutput'])
+    end
 
-    result2 = DiscourseElections::ElectionPost.update_election_post(topic, content_parsed['pollOutput'])
-    pp "##########result2 #{result2}"
+    result2 = DiscourseElections::ElectionPost.update_election_post(topic, new_content)
+    #pp "##########result2 #{result2}"
     # if result2.success?
     #   { url: topic.relative_url }
     # else
@@ -323,11 +324,11 @@ class DiscourseElections::ElectionTopic
     # end
     ###################################
 
-    if result.success?
+    #if result.success?
       { url: topic.relative_url }
-    else
-      { error_message: I18n.t("election.errors.create_failed") }
-    end
+    # else
+    #   { error_message: I18n.t("election.errors.create_failed") }
+    # end
   end
 
   # def self.set_content(topic_id, content)

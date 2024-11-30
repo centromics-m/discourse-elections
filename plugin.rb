@@ -188,8 +188,8 @@ after_initialize do
   add_to_serializer(:topic_view, :election_poll_close_scheduled,
     include_condition: -> { object.topic&.election }) { object.topic&.election_poll_close_scheduled }
 
-  # add_to_serializer(:topic_view, :election_winner,
-  #   include_condition: -> { object.topic&.election }) { object.topic&.election_winner }
+  add_to_serializer(:topic_view, :election_winner,
+    include_condition: -> { object.topic&.election }) { object.topic&.election_winner }
 
   add_to_serializer(:basic_category, :for_elections) { object.custom_fields['for_elections'] }
 

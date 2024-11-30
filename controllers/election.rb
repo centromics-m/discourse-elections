@@ -74,7 +74,16 @@ module DiscourseElections
       validate_create_time("open") if params[:poll_open] == "true"
       validate_create_time("close") if params[:poll_close] == "true"
 
-      result = DiscourseElections::ElectionTopic.update(topic, params)
+      
+      begin
+        
+        result = DiscourseElections::ElectionTopic.update(topic, params)
+
+      rescue => e
+        pp("Error during PostRevisor revise1: #{e.message}")
+        pp(e.backtrace.join("\n"))
+        raise
+      end
 
       if result[:error_message]
         render json: failed_json.merge(message: result[:error_message])

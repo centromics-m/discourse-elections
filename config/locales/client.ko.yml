@@ -93,3 +93,5 @@ ko:
       winner:
         label: "당선자"
         help: "username(ID)를 입력(1개만) (예, admin)"
+      open-poll-ui-builder:
+        label: "PollUIBuider열기"

@@ -94,26 +94,6 @@ class DiscourseElections::ElectionPost
     # end
   end
 
-  def self.update_election_post(topic, content)
-    topic.reload
-    status = topic.election_status
-
-    content = ''
-
-    # if topic.election_winner.present?
-    #   user = User.find_by(username: topic.election_winner)
-    #   content << "<div class='title'>#{I18n.t('election.post.winner')}</div>"
-    #   content << build_winner(user)
-    #   content << "\n\n"
-    # end
-
-    # if status == Topic.election_statuses[:nomination]
-    #   build_nominations(content, topic, unattended)
-    # else
-      build_poll(content, topic, unattended)
-    # end
-  end
-
   private
 
 
@@ -254,10 +234,11 @@ class DiscourseElections::ElectionPost
     ## We always skip the revision as these are system edits to a single post.
     revisor_opts.merge!(skip_revision: true)
 
-    pp "###################3" + content
+    pp "###################3 content: " + content
+    pp "###################4 revisor_opts:" + revisor_opts.to_s
 
     revise_result = revisor.revise!(election_post.user, { raw: content }, revisor_opts)
-
+  
     if election_post.errors.any?
       if unattended
         message_moderators(topic.id, election_post.errors.messages.to_s)
