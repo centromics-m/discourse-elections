@@ -5,8 +5,8 @@ const ElectionStatuses = {
 	nomination: 1,
 	poll: 2,
 	closed_poll: 3,
-	finding_winner_poll: 4,
-	closed_finding_winner_poll: 5
+	// finding_winner_poll: 4,
+	// closed_finding_winner_poll: 5
 };
 
 // 시간 포맷팅 함수 정의
