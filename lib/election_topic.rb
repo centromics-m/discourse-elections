@@ -3,12 +3,23 @@ class ::Topic
   attr_accessor :election_status_changed, :election_status, :election_post
   after_save :handle_election_status_change, if: :election_status_changed
 
+  attr_accessor :election_poll_current_stage_changed
+  after_save :handle_election_poll_current_stage_change, if: :election_poll_current_stage_changed
+  
   def election
     Topic.election_statuses.has_value? election_status
   end
 
   def election_post
     posts.find_by(post_number: 1)
+  end
+
+  def election_poll_enabled_stages
+    self.custom_fields["election_poll_enabled_stages"]
+  end 
+
+  def election_poll_current_stage
+    self.custom_fields["election_poll_current_stage"]
   end
 
   def election_status
@@ -121,6 +132,10 @@ class ::Topic
     election_status_changed = false
   end
 
+  def handle_election_poll_current_stage_change
+    # TODO - implement
+  end
+
   def election_nominations
     if custom_fields["election_nominations"]
       [*custom_fields["election_nominations"]]
@@ -159,6 +174,8 @@ class ::Topic
 end
 
 class DiscourseElections::ElectionTopic
+  AVAILABLE_STAGES = %w(finding_answer finding_winner)
+
   def self.create(user, opts)
     title = opts[:title] || I18n.t("election.title", position: opts[:position].capitalize)
     topic = Topic.new(title: title, user: user, category_id: opts[:category_id])
@@ -166,7 +183,19 @@ class DiscourseElections::ElectionTopic
     topic.skip_callbacks = true
     poll_open = ActiveModel::Type::Boolean.new.cast(opts[:poll_open])
     poll_close = ActiveModel::Type::Boolean.new.cast(opts[:poll_close])
+
+    # etna
+    opts[:poll_enabled_stages].split(',').map(&:strip).delete_if(&:blank?).each do |stage|
+      unless AVAILABLE_STAGES.include?(stage)
+        raise StandardError.new I18n.t("election.errors.invalid_poll_stage")
+      end
+    end
+    opts[:poll_enabled_stages] = 'finding_answer' if opts[:poll_enabled_stages] == ''
+    opts[:poll_current_stage] = opts[:poll_enabled_stages].split(',').map(&:strip).first if opts[:poll_current_stage].blank?
+
     custom_fields = {
+      election_poll_enabled_stages: opts[:poll_enabled_stages],
+      election_poll_current_stage: opts[:poll_current_stage],
       election_status: Topic.election_statuses[:nomination],
       election_position: opts[:position],
       election_self_nomination_allowed: ActiveModel::Type::Boolean.new.cast(opts[:self_nomination_allowed]),
@@ -204,6 +233,7 @@ class DiscourseElections::ElectionTopic
       end
     end
 
+    pp '--------------------------------------------------------------------'
     topic.save!(validate: false)
 
     # NOTE:
@@ -355,6 +385,28 @@ class DiscourseElections::ElectionTopic
   #   DiscourseElections::ElectionPost.update_election_post(topic, content)
   # end
 
+  
+  def self.set_election_poll_current_stage(topic_id, poll_current_stage)
+    topic = Topic.find(topic_id)
+    existing_poll_current_stage = topic.election_poll_current_stage
+
+    saved = false
+    TopicCustomField.transaction do
+      topic.custom_fields["election_poll_current_stage"] = poll_current_stage
+      topic.election_poll_current_stage_changed = existing_poll_current_stage != poll_current_stage
+      saved = topic.save! ## need to save whole topic here as it triggers status change handlers - see 'handle_election_status_change' above
+
+      # if saved && existing_poll_current_stage != poll_current_stage
+      #   DiscourseElections::ElectionPost.rebuild_election_post(topic, unattended)
+      # end
+    end
+
+    # if !saved || topic.election_post.errors.any?
+    #   raise StandardError.new I18n.t("election.errors.set_status_failed")
+    # end
+
+    topic.election_poll_current_stage
+  end
 
   def self.set_status(topic_id, status, unattended = false)
     topic = Topic.find(topic_id)

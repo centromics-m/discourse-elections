@@ -25,6 +25,8 @@ DiscourseElections::Engine.routes.draw do
   put 'set-winner' => 'election#set_winner'
   put 'start-poll' => 'election#start_poll'
   get 'category-list' => 'list#category_list'
+
+  put 'set-poll-current-stage' => 'election#set_poll_current_stage'
 end
 
 Discourse::Application.routes.append do

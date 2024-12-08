@@ -1,15 +1,28 @@
 <DModal @closeModal={{@closeModal}} @title={{i18n "election.create.label" }} class="close-topic-modal">
   <:body>
+
+    <div class="control-group">
+      <label>Stages</label>
+      <label for="pollEnabledStages_FindingAnswer">
+        <input type="checkbox" checked={{this.pollEnabledStages_FindingAnswer}} class="input-small" {{on "change"
+          this.updateValue}} id='pollEnabledStages_FindingAnswer' />
+        Finding Answer</label>
+      <label for="pollEnabledStages_FindingWinner">
+        <input type="checkbox" checked={{this.pollEnabledStages_FindingWinner}} class="input-small" {{on "change"
+          this.updateValue}} id='pollEnabledStages_FindingWinner' />
+        Finding Winner</label>
+
+      <p>* available stages: {{ this.pollAvailableStages }}</p>
+    </div>
+
+    <hr>
+
     <div class="control-group">
       <label>{{i18n "election.create.position"}}</label>
       <Input @value={{this.position}} class="input-medium" />
     </div>
 
-    {{!-- <div class="control-group">
-      <label>투표 만들기</label>
-      <DButton @title="투표 만들기" @label="투표 만들기" @action={{this.openPollUiBuilderModal}} class="btn btn-primary"
-        @disabled={{false}} />
-    </div> --}}
+    {{#if this.pollEnabledStages_include_FindingWinnner }}
 
     <div class="control-group">
       <label>{{i18n "election.create.nomination_message"}}</label>
@@ -26,11 +39,10 @@
       <DEditor @value={{this.closedPollMessage}} @placeholder="election.create.closed_poll_message_placeholder" />
     </div>
 
-    {{!-- <div class="control-group">
-      <input type="checkbox" checked={{this.selfNominationAllowed}} />{{i18n
-      "election.create.self_nomination_allowed"
-      }}
-    </div> --}}
+    <div class="control-group">
+      <input type="checkbox" checked={{this.selfNominationAllowed}} />
+      {{i18n "election.create.self_nomination_allowed"}}
+    </div>
 
     <div class="control-group">
       <input type="checkbox" checked={{this.statusBanner}} />{{i18n "election.status_banner.enable"}}
@@ -59,6 +71,9 @@
     <ElectionTime @type="close" @after={{this.pollCloseAfter}} @hours={{this.pollCloseAfterHours}}
       @voters={{this.pollCloseAfterVoters}} @time={{this.pollCloseTime}} />
     {{/if}}
+
+    {{/if}} <!-- if this.pollCurrentStage_FindingWinner -->
+
   </:body>
 
   <:footer>

@@ -9,10 +9,15 @@ const ElectionStatuses = {
 	// closed_finding_winner_poll: 5
 };
 
+const ElectionPollAvailableStages = [
+	'finding_answer',
+	'finding_winner'
+];
+
 // 시간 포맷팅 함수 정의
 function formatTime(time) {
 	return moment(time).format("MMMM Do, h:mm a"); // moment.js를 사용하여 시간 포맷팅
 }
 
 // ElectionStatuses와 formatTime을 ES6 모듈로 내보내기
-export { ElectionStatuses, formatTime };
+export { ElectionStatuses, ElectionPollAvailableStages, formatTime };

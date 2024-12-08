@@ -1,6 +1,18 @@
 <DModal @closeModal={{@closeModal}} @title={{i18n "election.manage.label" }} class="manage-election">
   <:body>
     <div class="control-group">
+      <label>Current Stage</label>
+      <ComboBox @content={{this.pollEnabledStagesOptions}} @value={{this.pollCurrentStage}} />
+      <div class="controls">
+        <ElectionSave @property={{this.pollCurrentStage}} @name="poll_current_stage" {{!--
+          @unchanged={{this.pollCurrentStageUnchanged}} --}} @topic={{this.topic}} @error="error" @saved="saved" />
+      </div>
+      <p>* available stages: {{ this.pollAvailableStages }}</p>
+    </div>
+
+    <hr>
+
+    <div class="control-group">
       <label>{{i18n "election.create.position"}}</label>
       <Input @value={{this.position}} @onInput={{action (mut this.position) value="target.value" }}
         class="input-medium" />
@@ -9,6 +21,9 @@
           @topic={{this.topic}} @error="error" @saved="saved" />
       </div>
     </div>
+
+    {{#if this.pollCurrentStage_FindingWinner }}
+    <p>* 아래는 주로 FindingWinner 모드에서 동작하는 설정값들임.</p>
 
     <div class="control-group">
       <label>{{i18n "election.status.label"}}</label>
@@ -19,7 +34,7 @@
       </div>
     </div>
 
-    {{!-- <div class="control-group nominees">
+    <div class="control-group nominees">
       <label>{{i18n "election.manage.nominees"}}</label>
       {{#if this.showSelector}}
       <Input @value={{this.usernamesString}} class="input-medium" /><br />
@@ -32,9 +47,9 @@
           @unchanged={{this.usernamesUnchanged}} @usernamesString={{this.usernamesString}} @topic={{this.topic}}
           @error="error" @saved="saved" @showSelector={{this.showSelector}} />
       </div>
-    </div> --}}
+    </div>
 
-    {{!-- <div class="control-group">
+    <div class="control-group">
       <label>{{i18n "election.winner.label"}}</label>
       <Input @value={{this.winner}} class="input-medium" /><br />
       ＊
@@ -43,16 +58,16 @@
       <div class="controls">
         <ElectionSave @property={{this.winner}} @name="winner" @topic={{this.topic}} @error="error" @saved="saved" />
       </div>
-    </div> --}}
+    </div>
 
-    {{!-- <div class="control-group">
+    <div class="control-group">
       <Input @type="checkbox" @checked={{this.selfNomination}} class="input-small" />
       <span>{{i18n "election.create.self_nomination_allowed"}}</span>
       <div class="controls">
         <ElectionSave @property={{this.selfNomination}} @name="self_nomination_allowed" @topic={{this.topic}}
           @error="error" @saved="saved" />
       </div>
-    </div> --}}
+    </div>
 
     <div class="control-group">
       <label>{{i18n "election.create.nomination_message"}}</label>
@@ -132,6 +147,8 @@
       @voters={{this.pollCloseAfterVoters}} @time={{this.pollCloseTime}}
       @setElectionTime={{this.setElectionTime_PollClose}} />
     {{/if}}
+
+    {{/if}} <!-- if this.pollCurrentStage == 'finding_winner' -->
   </:body>
 
   <:footer>

@@ -9,11 +9,13 @@ module DiscourseElections
       params.require(:position)
       params.permit(
         #added by etna
-        :poll_mode,
+        :poll_enabled_stages,
+        :poll_current_stage,
+
         :nomination_message, # 본래의미에서 변경 --> gathering poll options message
         :poll_message,
         :closed_poll_message,
-        #:self_nomination_allowed,
+        :self_nomination_allowed,
         :status_banner,
         :status_banner_result_hours,
         :poll_open,
@@ -50,11 +52,13 @@ module DiscourseElections
       params.require(:position)
       params.permit(
         #added by etna
-        :poll_mode,
+        :poll_enabled_stages,
+        :poll_current_stage,
+
         :nomination_message, # 본래의미에서 변경 --> gathering poll options message
         :poll_message,
         :closed_poll_message,
-        #:self_nomination_allowed,
+        :self_nomination_allowed,
         :status_banner,
         :status_banner_result_hours,
         :poll_open,
@@ -74,9 +78,9 @@ module DiscourseElections
       validate_create_time("open") if params[:poll_open] == "true"
       validate_create_time("close") if params[:poll_close] == "true"
 
-      
+
       begin
-        
+
         result = DiscourseElections::ElectionTopic.update(topic, params)
 
       rescue => e
@@ -97,10 +101,10 @@ module DiscourseElections
 
       topic = Topic.find(params[:topic_id])
 
-      # 선거를 실행하려면 더 많은 후보가 필요합니다. 무시
-      # if topic.election_nominations.length < 2
-      #   raise StandardError.new I18n.t("election.errors.more_nominations")
-      # end
+      # 선거를 실행하려면 더 많은 후보가 필요합니다.
+      if topic.election_nominations.length < 2
+        raise StandardError.new I18n.t("election.errors.more_nominations")
+      end
 
       new_status = DiscourseElections::ElectionTopic.set_status(params[:topic_id], Topic.election_statuses[:poll])
 
@@ -112,6 +116,29 @@ module DiscourseElections
 
       render_result(result)
     end
+    
+    def set_poll_current_stage
+      topic_id = params.require(:topic_id)
+      poll_current_stage = params.require(:poll_current_stage)
+
+      topic = Topic.find(params[:topic_id])      
+      existing_poll_current_stage = topic.election_poll_current_stage
+
+      if poll_current_stage == existing_poll_current_stage
+        raise StandardError.new I18n.t("election.errors.not_changed")
+      end
+
+      new_status = DiscourseElections::ElectionTopic.set_election_poll_current_stage(params[:topic_id], poll_current_stage)
+
+      if new_status == existing_poll_current_stage
+        result = { error_message: I18n.t("election.errors.set_election_poll_current_stage_failed") }
+      else
+        result = { value: new_status }
+      end
+
+      render_result(result)
+    end
+
 
     def set_status
       params.require(:topic_id)
@@ -125,12 +152,12 @@ module DiscourseElections
         raise StandardError.new I18n.t("election.errors.not_changed")
       end
 
-      # 선거를 실행하려면 더 많은 후보가 필요합니다. 무시
-      # if status != Topic.election_statuses[:nomination] &&
-      #      topic.election_nominations.length < 2
+      # 선거를 실행하려면 더 많은 후보가 필요합니다.
+      if status != Topic.election_statuses[:nomination] &&
+           topic.election_nominations.length < 2
 
-      #   raise StandardError.new I18n.t("election.errors.more_nominations")
-      # end
+        raise StandardError.new I18n.t("election.errors.more_nominations")
+      end
 
       new_status = DiscourseElections::ElectionTopic.set_status(params[:topic_id], status)
 
@@ -181,36 +208,36 @@ module DiscourseElections
       )
     end
 
-    # def set_self_nomination_allowed
-    #   params.require(:topic_id)
-    #   params.require(:self_nomination_allowed)
+    def set_self_nomination_allowed
+      params.require(:topic_id)
+      params.require(:self_nomination_allowed)
 
-    #   topic = Topic.find(params[:topic_id])
-    #   existing_state = topic.custom_fields["election_self_nomination_allowed"]
+      topic = Topic.find(params[:topic_id])
+      existing_state = topic.custom_fields["election_self_nomination_allowed"]
 
-    #   if params[:self_nomination_allowed].to_s == existing_state.to_s
-    #     raise StandardError.new I18n.t(
-    #                               "election.errors.self_nomination_state_not_changed"
-    #                             )
-    #   end
+      if params[:self_nomination_allowed].to_s == existing_state.to_s
+        raise StandardError.new I18n.t(
+                                  "election.errors.self_nomination_state_not_changed"
+                                )
+      end
 
-    #   response =
-    #     DiscourseElections::Nomination.set_self_nomination(
-    #       params[:topic_id],
-    #       params[:self_nomination_allowed]
-    #     )
+      response =
+        DiscourseElections::Nomination.set_self_nomination(
+          params[:topic_id],
+          params[:self_nomination_allowed]
+        )
 
-    #   if response == existing_state
-    #     result = {
-    #       error_message:
-    #         I18n.t("election.errors.self_nomination_state_not_changed")
-    #     }
-    #   else
-    #     result = { value: response }
-    #   end
+      if response == existing_state
+        result = {
+          error_message:
+            I18n.t("election.errors.self_nomination_state_not_changed")
+        }
+      else
+        result = { value: response }
+      end
 
-    #   render_result(result)
-    # end
+      render_result(result)
+    end
 
     def set_message
       params.require(:topic_id)

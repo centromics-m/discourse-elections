@@ -74,9 +74,9 @@ module DiscourseElections
       nominations = topic.election_nominations
 
       ### TODO: 코드 오류 확인 removed_nominations ???
-      # if nominations.include?(user_id)
-      #   nominations = topic.election_nominations - removed_nominations
-      # end
+      if nominations.include?(user_id)
+        nominations = topic.election_nominations - removed_nominations
+      end
 
       saved = false
       TopicCustomField.transaction do

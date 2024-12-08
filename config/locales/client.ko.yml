@@ -80,12 +80,12 @@ ko:
       time_label: "Set Time"
       manage:
         label: "선거관리"
-        nominees: "Select the nominees for this election."
+        nominees: "이 선거에 대한 후보를 입력하세요."
         nominees_help: "username(ID)를 쉼표로 나누어 입력 (예, admin, user1, user2)"
         save: "Save"
         done: "Done"
       post:
-        nominee: "Nominee in this election"
+        nominee: "이 선거에서의 후보"
         nomination_statement: "nomination statement"
       notification:
         poll: "{{description}}"
