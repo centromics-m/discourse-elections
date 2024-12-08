@@ -78,20 +78,23 @@ class DiscourseElections::ElectionPost
 
     content = ""
 
-    #content = ''
+    if topic.election_poll_current_stage == 'finding_winner'      
+      if topic.election_winner.present?
+        user = User.find_by(username: topic.election_winner)
+        content << "<div class='title'>#{I18n.t('election.post.winner')}</div>"
+        content << build_winner(user)
+        content << "\n\n"
+      end
 
-    # if topic.election_winner.present?
-    #   user = User.find_by(username: topic.election_winner)
-    #   content << "<div class='title'>#{I18n.t('election.post.winner')}</div>"
-    #   content << build_winner(user)
-    #   content << "\n\n"
-    # end
-
-    # if status == Topic.election_statuses[:nomination]
-    #   build_nominations(content, topic, unattended)
-    # else
-      build_poll(content, topic, unattended)
-    # end
+      if status == Topic.election_statuses[:nomination]
+        build_nominations(content, topic, unattended)
+      else
+        build_poll__winner(content, topic, unattended)
+      end
+    
+    else # finding_answer
+      build_poll__default(content, topic, unattended)
+    end
   end
 
   private
@@ -106,7 +109,7 @@ class DiscourseElections::ElectionPost
 
 # [/poll_data_link]
 
-  def self.build_poll(content, topic, unattended)
+  def self.build_poll__default(content, topic, unattended)
     nominations = topic.election_nominations
     status = topic.election_status
 
@@ -122,16 +125,48 @@ class DiscourseElections::ElectionPost
 
     poll_options = ''
 
-    # nominations.each do |n|
-    #   # Nominee username is added as a placeholder. Without the username,
-    #   # the 'content' of the token in discourse-markdown/poll is blank
-    #   # which leads to the md5Hash being identical for each option.
-    #   # the username placeholder is removed on the client before render.
+    content << "[poll type=regular status=#{poll_status}]#{poll_options}\n[/poll]"
 
-    #   user = User.find(n)
-    #   poll_options << "\n- #{user.username}"
-    #   poll_options << build_nominee(topic, user)
-    # end
+    message = nil
+    if status === Topic.election_statuses[:poll]
+      message = topic.custom_fields['election_poll_message']
+    else
+      message = topic.custom_fields['election_closed_poll_message']
+    end
+
+    if message
+      content << "\n\n #{message}"
+    end
+
+    update_election_post(topic, content, unattended, null, content_type: 'finding_answer')
+  end
+  
+  def self.build_poll__winner(content, topic, unattended)
+    nominations = topic.election_nominations
+    status = topic.election_status
+
+    return if nominations.length < 2
+
+    poll_status = ''
+
+    if status === Topic.election_statuses[:poll]
+      poll_status = 'open'
+    else
+      poll_status = 'closed'
+    end
+
+    poll_options = ''
+
+    nominations.each do |n|
+      # Nominee username is added as a placeholder. Without the username,
+      # the 'content' of the token in discourse-markdown/poll is blank
+      # which leads to the md5Hash being identical for each option.
+      # the username placeholder is removed on the client before render.
+
+      user = User.find(n)
+      poll_options << "\n- #{user.username}"
+      poll_options << build_nominee(topic, user)
+    end
 
     content << "[poll type=regular status=#{poll_status}]#{poll_options}\n[/poll]"
 
@@ -146,82 +181,84 @@ class DiscourseElections::ElectionPost
       content << "\n\n #{message}"
     end
 
-    update_election_post(topic, content, unattended)
+    update_election_post(topic, content, unattended, null, content_type: 'finding_winner')
   end
 
-  # def self.build_nominations(content, topic, unattended)
-  #   nominations = topic.election_nominations
 
-  #   if nominations.any?
-  #     content << "<div class='title'>#{I18n.t('election.post.nominated')}</div>"
+  def self.build_nominations(content, topic, unattended)
+    nominations = topic.election_nominations
 
-  #     content << "<div class='nomination-list'>"
+    if nominations.any?
+      content << "<div class='title'>#{I18n.t('election.post.nominated')}</div>"
 
-  #     nominations.each do |n|
-  #       user = User.find(n)
-  #       content << build_nominee(topic, user)
-  #     end
+      content << "<div class='nomination-list'>"
 
-  #     content << "</div>"
-  #   end
+      nominations.each do |n|
+        user = User.find(n)
+        content << build_nominee(topic, user)
+      end
 
-  #   message = topic.custom_fields['election_nomination_message']
+      content << "</div>"
+    end
 
-  #   if message.blank?
-  #     message = I18n.t('election.nomination.default_message')
-  #   end
+    message = topic.custom_fields['election_nomination_message']
 
-  #   content << "\n\n #{message}"
+    if message.blank?
+      message = I18n.t('election.nomination.default_message')
+    end
 
-  #   revisor_opts = { skip_validations: true }
+    content << "\n\n #{message}"
 
-  #   update_election_post(topic, content, unattended, revisor_opts)
-  # end
+    revisor_opts = { skip_validations: true }
 
-  # def self.build_winner(user)
-  #   avatar_url = user&.avatar_template_url&.gsub("{size}", "50") || ""
+    update_election_post(topic, content, unattended, revisor_opts, content_type: 'finding_winner')
+  end
 
-  #   html = "<div class='winner'><span>"
+  def self.build_winner(user)
+    avatar_url = user&.avatar_template_url&.gsub("{size}", "50") || ""
 
-  #   html << "<div class='winner-user'>"
-  #   html << "<div class='trigger-user-card' href='/u/#{user.username}' data-user-card='#{user.username}'>"
-  #   html << "<img alt='' width='25' height='25' src='#{avatar_url}' class='avatar'>"
-  #   html << "<a class='mention'>@#{user.username}</a>"
-  #   html << "</div>"
-  #   html << "</div>"
+    html = "<div class='winner'><span>"
 
-  #   html << "</span></div>"
+    html << "<div class='winner-user'>"
+    html << "<div class='trigger-user-card' href='/u/#{user.username}' data-user-card='#{user.username}'>"
+    html << "<img alt='' width='25' height='25' src='#{avatar_url}' class='avatar'>"
+    html << "<a class='mention'>@#{user.username}</a>"
+    html << "</div>"
+    html << "</div>"
 
-  #   html
-  # end
+    html << "</span></div>"
 
-  # def self.build_nominee(topic, user)
-  #   nomination_statements = topic.election_nomination_statements
-  #   avatar_url = user&.avatar_template_url&.gsub("{size}", "50") || ""
+    html
+  end
 
-  #   html = "<div class='nomination'><span>"
+  def self.build_nominee(topic, user)
+    nomination_statements = topic.election_nomination_statements
+    avatar_url = user&.avatar_template_url&.gsub("{size}", "50") || ""
 
-  #   html << "<div class='nomination-user'>"
-  #   html << "<div class='trigger-user-card' href='/u/#{user.username}' data-user-card='#{user.username}'>"
-  #   html << "<img alt='' width='25' height='25' src='#{avatar_url}' class='avatar'>"
-  #   html << "<a class='mention'>@#{user.username}</a>"
-  #   html << "</div>"
-  #   html << "</div>"
+    html = "<div class='nomination'><span>"
 
-  #   html << "<div class='nomination-statement'>"
-  #   statement = nomination_statements.find { |s| s['user_id'] == user.id }
-  #   if statement
-  #     post = Post.find(statement['post_id'])
-  #     html << "<a href='#{post.url}'>#{statement['excerpt']}</a>"
-  #   end
-  #   html << "</div>"
+    html << "<div class='nomination-user'>"
+    html << "<div class='trigger-user-card' href='/u/#{user.username}' data-user-card='#{user.username}'>"
+    html << "<img alt='' width='25' height='25' src='#{avatar_url}' class='avatar'>"
+    html << "<a class='mention'>@#{user.username}</a>"
+    html << "</div>"
+    html << "</div>"
 
-  #   html << "</span></div>"
+    html << "<div class='nomination-statement'>"
+    statement = nomination_statements.find { |s| s['user_id'] == user.id }
+    if statement
+      post = Post.find(statement['post_id'])
+      html << "<a href='#{post.url}'>#{statement['excerpt']}</a>"
+    end
+    html << "</div>"
 
-  #   html
-  # end
+    html << "</span></div>"
 
-  def self.update_election_post(topic, content, unattended = false, revisor_opts = {})
+    html
+  end  
+
+  # content_type: 'finding_answer' or 'finding_winner'
+  def self.update_election_post(topic, content, unattended = false, revisor_opts = {}, content_type: 'finding_answer')
     election_post = topic.election_post
 
     pp "###################1" + election_post.raw
@@ -237,7 +274,22 @@ class DiscourseElections::ElectionPost
     pp "###################3 content: " + content
     pp "###################4 revisor_opts:" + revisor_opts.to_s
 
-    revise_result = revisor.revise!(election_post.user, { raw: content }, revisor_opts)
+    content_raw = election_post.raw
+
+    if content_type == 'finding_answer'
+      # content2 = content_raw.gsub(%r{<!--POLL_DEFAULT-->.*<!--\/POLL_DEFAULT-->}m, '')
+      # pp "------------------------1 #{content2}-----------------------"
+      # content2 = "<!--POLL_DEFAULT-->\n" + content + "\n<!--/POLL_DEFAULT-->\n" + content2
+      content2 = "<!--POLL_DEFAULT-->\n" + content + "\n<!--/POLL_DEFAULT-->\n"
+
+    else
+      content2 = content_raw.gsub(%r{<!--POLL_ELECTION-->.*<!--\/POLL_ELECTION-->}m, '')      
+      pp "------------------------2 #{content2}------------------------"
+      content2 = content2 + "\n<!--POLL_ELECTION-->\n" + content + "\n<!--/POLL_ELECTION-->\n"
+    end
+    pp "###################4 content2:" + content2
+
+    revise_result = revisor.revise!(election_post.user, { raw: content2 }, revisor_opts)
   
     if election_post.errors.any?
       if unattended
