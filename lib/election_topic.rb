@@ -145,12 +145,23 @@ class ::Topic
   end
 
   def election_nominations_usernames
+    if custom_fields["election_nominations_usernames"]
+      [*custom_fields["election_nominations_usernames"]]
+    else      
+      _election_nominations_usernames_from_users
+    end
+  end
+
+  # users table에서 user_id를 통해 읽어와서 배열로 변환
+  def _election_nominations_usernames_from_users
     if election_nominations.any?
       usernames = []
       election_nominations.each do |user_id|
-        usernames.push(User.find(user_id).username) if user_id
+        usernames.push([user_id, User.find(user_id).username]) if user_id.present? && user_id != 0
       end
-      usernames
+      usernames.map do |user_id, username| 
+        { user_id:, username:,  desscription: "" }
+      end
     else
       []
     end

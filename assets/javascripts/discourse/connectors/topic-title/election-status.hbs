@@ -1,6 +1,10 @@
 {{#if this.showStatus}}
 <div class="election-status-label">
+  {{#if this.currentStage_FindingWinner }}
   <span>{{i18n (concat "election.status." this.model.electionStatusName)}}</span>
+  {{else}}
+  <span>기본 투표 중</span>
+  {{/if}}
 </div>
 <election-time-status topic={{this.model}} />
 {{/if}}

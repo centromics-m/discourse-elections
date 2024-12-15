@@ -19,11 +19,20 @@ module DiscourseElections
     end
 
     def render_result(result = {})
-      if result[:error_message]
-        render json: failed_json.merge(message: result[:error_message])
-      else
-        render json: success_json.merge(result)
-      end
+      #if result.present?
+        pp "DDDDDDDDDDDDDDDDDDD #{result}"
+        if result.present? && result[:error_message].present?
+          render json: failed_json.merge(message: result[:error_message])
+        else
+          render json: success_json.merge(result)
+        end
+      # else 
+      #   render json: failed_json.merge(message: I18n.t("election.errors.missing_result"))
+      # end
+    rescue StandardError => e
+      puts e.message
+      puts e.backtrace.join("\n") if Rails.env.development?
+      raise
     end
 
     private

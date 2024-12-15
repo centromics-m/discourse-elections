@@ -7,7 +7,9 @@
         <ElectionSave @property={{this.pollCurrentStage}} @name="poll_current_stage" {{!--
           @unchanged={{this.pollCurrentStageUnchanged}} --}} @topic={{this.topic}} @error="error" @saved="saved" />
       </div>
-      <p>* available stages: {{ this.pollAvailableStages }}</p>
+      <p>* available stages: {{ this.pollAvailableStagesString }}<br>
+        * enabled stages: {{ this.pollEnabledStagesString }}
+      </p>
     </div>
 
     <hr>
@@ -37,15 +39,22 @@
     <div class="control-group nominees">
       <label>{{i18n "election.manage.nominees"}}</label>
       {{#if this.showSelector}}
-      <Input @value={{this.usernamesString}} class="input-medium" /><br />
+      {{!-- <Input @value={{this.usernamesString}} class="input-medium" /><br /> --}}
+      <Textarea @value={{this.nominationsUsernamesString}} class="input-medium" rows="5" {{!--
+        @onInput={{this.onNominationsStringInput}} --}} {{on "input" this.onNominationsUsernamesStringInput}}>
+      </Textarea><br />
       ＊
       {{i18n "election.manage.nominees_help"}}
       {{/if}}
 
       <div class="controls">
+        {{!--
         <ElectionSaveUsernames @property={{this.usernames}} @name="nominations_usernames"
           @unchanged={{this.usernamesUnchanged}} @usernamesString={{this.usernamesString}} @topic={{this.topic}}
-          @error="error" @saved="saved" @showSelector={{this.showSelector}} />
+          @error="error" @saved="saved" @showSelector={{this.showSelector}} /> --}}
+        <ElectionSaveUsernames @property={{this.nominationsUsernames}} @name="nominations_usernames"
+          @unchanged={{this.nominationsUsernamesUnchanged}} @topic={{this.topic}} @error="error" @saved="saved"
+          @showSelector={{this.showSelector}} />
       </div>
     </div>
 

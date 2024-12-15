@@ -93,6 +93,9 @@ class DiscourseElections::ElectionPost
       end
     
     else # finding_answer
+      if content.blank?
+        content = "<p class='poll_msg'>PollUiBuilder를 열어서 poll 내용을 구성해주세요.\n\n</p>"
+      end
       build_poll__default(content, topic, unattended)
     end
   end
@@ -138,7 +141,8 @@ class DiscourseElections::ElectionPost
       content << "\n\n #{message}"
     end
 
-    update_election_post(topic, content, unattended, null, content_type: 'finding_answer')
+    revisor_opts = {  }
+    update_election_post(topic, content, unattended, revisor_opts, content_type: 'finding_answer')
   end
   
   def self.build_poll__winner(content, topic, unattended)
@@ -181,7 +185,8 @@ class DiscourseElections::ElectionPost
       content << "\n\n #{message}"
     end
 
-    update_election_post(topic, content, unattended, null, content_type: 'finding_winner')
+    revisor_opts = {  }
+    update_election_post(topic, content, unattended, revisor_opts, content_type: 'finding_winner')
   end
 
 

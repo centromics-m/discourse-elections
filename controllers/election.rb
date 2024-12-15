@@ -136,6 +136,8 @@ module DiscourseElections
         result = { value: new_status }
       end
 
+      topic.reload
+      
       render_result(result)
     end
 

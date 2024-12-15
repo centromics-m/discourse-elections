@@ -22,6 +22,7 @@ after_initialize do
   Topic.register_custom_field_type('election_poll_enabled_stages', :string) # finding_answer, finding_winner
   Topic.register_custom_field_type('election_poll_current_stage', :string) # finding_answer
   Topic.register_custom_field_type('election_nominations', :integer)
+  Topic.register_custom_field_type('election_nominations_usernames', :json)
   Topic.register_custom_field_type('election_status', :integer) # 1: nomination(-> gathering options), 2: polling, 3: closed
   Topic.register_custom_field_type('election_status_banner', :boolean)
   Topic.register_custom_field_type('election_status_banner_result_hours', :integer)
@@ -90,16 +91,16 @@ after_initialize do
     include_condition: -> { object.topic&.election }) { object.topic&.election_position }
 
   add_to_serializer(:topic_view, :election_nominations,
-    include_condition: -> { object.topic&.election }) { object.topic&.election }
+    include_condition: -> { object.topic&.election }) { object.topic&.election_nominations }
 
   add_to_serializer(:topic_view, :election_nominations_usernames,
     include_condition: -> { object.topic&.election }) { object.topic&.election_nominations_usernames }
 
-  add_to_serializer(:topic_view, :election_poll_options,
-    include_condition: -> { object.topic&.election }) { object.topic&.election }
+  # add_to_serializer(:topic_view, :election_poll_options,
+  #   include_condition: -> { object.topic&.election }) { object.topic&.election_poll_options }
 
-  add_to_serializer(:topic_view, :election_poll_answer,
-    include_condition: -> { object.topic&.election }) { object.topic&.election }
+  # add_to_serializer(:topic_view, :election_poll_answer,
+  #   include_condition: -> { object.topic&.election }) { object.topic&.election_poll_answer }
 
   add_to_serializer(:topic_view, :election_self_nomination_allowed,
     include_condition: -> { object.topic&.election }) { object.topic&.election_self_nomination_allowed }

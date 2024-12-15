@@ -11,10 +11,13 @@ import ElectionTime from "../election-time";
 export default class ManageElectionModal extends Component {
   @service flashMessages; // To display error messages
 
-  @tracked topic; // = this.args.model.topic;
-  @tracked usernamesString; // = this.topic.election_nominations_usernames.join(",");
-  @tracked position; // = this.topic.election_position;
   @tracked status; // = this.topic.election_status;
+
+  @tracked topic; // = this.args.model.topic;
+  //@tracked usernamesString; // = this.topic.election_nominations_usernames.join(",");
+  @tracked nominations = this.topic.election_nominations;
+  @tracked nominationsUsernames;
+  @tracked position; // = this.topic.election_position;
 
   @tracked pollEnabledStages; // finding_answer, finding_winner
   @tracked pollEnabledStagesStr = "";
@@ -25,7 +28,6 @@ export default class ManageElectionModal extends Component {
   @tracked pollCloseAfter = true;
   @tracked usernamesString = '';
   @tracked selfNomination = false;
-  @tracked position = '';
   @tracked statusBanner = false;
   @tracked statusBannerResultHours = 0;
   @tracked nominationMessage = "";
@@ -69,7 +71,8 @@ export default class ManageElectionModal extends Component {
       if (!pollCurrentStage) { pollCurrentStage = this.pollEnabledStages[0]; }
       this.pollCurrentStage = pollCurrentStage;
 
-      this.usernamesString = topic.election_nominations_usernames.join(", ");
+      this.nominationsUsernames = this.prepareNominationsUsernamesVar(topic.election_nominations_usernames);
+      this.nominationsUsernamesString = this.prepareNominationsUsernamesInput(topic.election_nominations_usernames);
       this.selfNomination = topic.election_self_nomination_allowed;
       this.statusBanner = topic.election_status_banner;
       this.statusBannerResultHours = topic.election_status_banner_result_hours;
@@ -97,9 +100,9 @@ export default class ManageElectionModal extends Component {
   }
 
   // @computed("pollEnabledStages")
-  // get pollEnabledStagesStr() {
-  //   return this.pollEnabledStages.join(",");
-  // }
+  get pollEnabledStagesStr() {
+    return this.pollEnabledStages.join(",");
+  }
 
   //@computed("pollEnabledStages")
   get pollEnabledStagesOptions() {
@@ -137,39 +140,94 @@ export default class ManageElectionModal extends Component {
     }));
   }
 
-  @computed("usernamesString")
-  get usernames() {
-    return (this.usernamesString || "").split(",").map((s) => s.trim());
+  prepareNominationsUsernamesVar(nominations_usernames) {
+    console.log('prepareNominationsUsernamesVar nomination_usernames', nominations_usernames);
+    const str = nominations_usernames
+      .filter(Boolean)
+      .map((v) => {
+        return { username: v.username, description: v.description };
+      });
+    console.log('prepareNominationsUsernamesVar nominationselection_nomination_string', str);
+    return str;
   }
 
-  set usernames(value) {
-    // setter 로직: 필요 시 구현
-    if (!value) {
-      this.usernamesString = "";
-    } else {
-      this.usernamesString = value.join(", ");
-    }
+  // this.topic.election_nomination_string
+  prepareNominationsUsernamesInput(nominations_usernames) {
+    console.log('prepareNominationsUsernamesInput nomination_usernames', nominations_usernames);
+    const str = nominations_usernames
+      .filter((v) => (v.username != null && v.username !== ''))
+      .map((v) => v.username + '=' + (v.description ?? '')).join("\n");
+    console.log('prepareNominationsUsernamesInput nominationselection_nomination_string', str);
+    return str;
   }
 
-  @computed("usernames", "topic.election_nominations_usernames")
-  get usernamesUnchanged() {
-    const newUsernames = this.usernames.filter(Boolean);
-    const currentUsernames =
-      this.topic?.election_nominations_usernames.filter(Boolean) || [];
+  buildNominationsUsernamesFromNominationsUsernamesString(nominationsUsernamesString) {
+    if (nominationsUsernamesString == '') { return []; }
 
-    if (newUsernames.length !== currentUsernames.length) {
+    return nominationsUsernamesString.split("\n")
+      .map((v) => {
+        try {
+          const [username, description] = v.split('=');
+          return { username, description };
+        } catch (e) { return null; }
+      })
+      .filter(Boolean);
+  }
+
+  @computed("nominations", "topic.election_nominations")
+  get nominationsUsernamesUnchanged() {
+    const original = this.prepareNominationsUsernamesVar(this.topic?.election_nominations_usernames) || [];
+    const current = this.buildNominationsUsernamesFromNominationsUsernamesString(this.nominationsUsernamesString);
+
+    console.log('nominationsUnchanged original current', original, current);
+
+    if (original.length !== current.length) {
       return false;
     }
 
-    return newUsernames.every((username) =>
-      currentUsernames.includes(username)
+    return current.every((item) =>
+      original.some((v) => v.username === item.username && v.description === item.description)
     );
   }
 
-  set usernamesUnchanged(value) {
+  set nominationsUsernamesUnchanged(value) {
     // setter 로직: 필요 시 구현
-    console.warn("usernamesUnchanged was set:", value);
+    console.warn("nominationsUsernamesUnchanged was set:", value);
   }
+
+  // @computed("usernamesString")
+  // get usernames() {
+  //   return (this.usernamesString || "").split(",").map((s) => s.trim());
+  // }
+
+  // set usernames(value) {
+  //   // setter 로직: 필요 시 구현
+  //   if (!value) {
+  //     this.usernamesString = "";
+  //   } else {
+  //     this.usernamesString = value.join(", ");
+  //   }
+  // }
+
+  // @computed("usernames", "topic.election_nominations_usernames")
+  // get usernamesUnchanged() {
+  //   const newUsernames = this.usernames.filter(Boolean);
+  //   const currentUsernames =
+  //     this.topic?.election_nominations_usernames.filter(Boolean) || [];
+
+  //   if (newUsernames.length !== currentUsernames.length) {
+  //     return false;
+  //   }
+
+  //   return newUsernames.every((username) =>
+  //     currentUsernames.includes(username)
+  //   );
+  // }
+
+  // set usernamesUnchanged(value) {
+  //   // setter 로직: 필요 시 구현
+  //   console.warn("usernamesUnchanged was set:", value);
+  // }
 
   @computed("position")
   get positionInvalid() {
@@ -195,10 +253,18 @@ export default class ManageElectionModal extends Component {
     return this.args.model;
   }
 
+  // @action
+  // onUsernamesInput(usernames) {
+  //   // Join the usernames into a string if needed.
+  //   this.usernamesString = (usernames || []).filter(Boolean).join(", ");
+  // }
+
   @action
-  onUsernamesInput(usernames) {
-    // Join the usernames into a string if needed.
-    this.usernamesString = (usernames || []).filter(Boolean).join(", ");
+  onNominationsUsernamesStringInput(e) {
+    const nominationsString = e.target.value;
+    console.log('onNominationsUsernamesStringInput', nominationsString);
+    this.nominationsUsernames = this.buildNominationsUsernamesFromNominationsUsernamesString(nominationsString);
+    console.log('onNominationsUsernamesStringInput nominationsUsernames', this.nominationsUsernames);
   }
 
   @action

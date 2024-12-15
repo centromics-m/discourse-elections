@@ -6,7 +6,7 @@ import { ajax } from "discourse/lib/ajax";
 import ElectionSave from "./election-save";
 
 export default class ElectionSaveUsernamesComponent extends ElectionSave {
-  @tracked usernamesString = "";
+  //@tracked usernamesString = "";
   @tracked showSelector = false;
   layoutName = "components/election-save";
 
@@ -20,8 +20,8 @@ export default class ElectionSaveUsernamesComponent extends ElectionSave {
 
     const data = {
       topic_id: this.topic.id,
-      //[this.name]: this.property,
-      usernames: this.property,
+      [this.name]: this.property, // nominations_usernames
+      //usernamesString: this.usernamesString, // usernamesString
     };
 
     return data;
@@ -54,10 +54,10 @@ export default class ElectionSaveUsernamesComponent extends ElectionSave {
         if (result.failed) {
           handleFail();
         } else {
-          this.topic.election_nominations = result.user_ids;
-          //this.topic.election_nominations_usernames = result.usernames;
-          // this.topic.election_is_nominee =
-          //   result.user_ids.indexOf(this.currentUser.id) > -1;
+          const user_ids = result.nominations_usernames.map((u) => u.id);
+          this.topic.election_nominations = user_ids;
+          this.topic.election_nominations_usernames = result.nominations_usernames;
+          this.topic.election_is_nominee = user_ids.indexOf(this.currentUser.id) > -1;
         }
       })
       .catch((e) => {
