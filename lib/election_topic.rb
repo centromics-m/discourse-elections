@@ -218,6 +218,13 @@ class DiscourseElections::ElectionTopic
       election_closed_poll_message: opts[:closed_poll_message] || ""
     }
 
+    
+    pp '----------------------'
+    pp opts 
+    pp custom_fields
+    pp '----------------------'
+    
+
     topic.custom_fields = custom_fields
 
     if opts[:status_banner]
@@ -257,7 +264,7 @@ class DiscourseElections::ElectionTopic
     # 초기 메시지 "이 선거는 현재 후보 지명을 받고 있습니다." 를 출력하지 않음
     # 주석처리 -->
     raw = opts[:nomination_message]
-    raw = I18n.t("election.nomination.default_message") if raw.blank?
+    #raw = I18n.t("election.nomination.default_message") if raw.blank?
 
     manager = NewPostManager.new(Discourse.system_user, raw: raw, topic_id: topic.id, skip_validations: true)
     result = manager.perform
@@ -292,6 +299,8 @@ class DiscourseElections::ElectionTopic
       election_poll_message: opts[:poll_message] || "",
       election_closed_poll_message: opts[:closed_poll_message] || ""
     }
+
+    pp "################# custom_fields #{custom_fields}"
 
     topic.custom_fields = custom_fields
 

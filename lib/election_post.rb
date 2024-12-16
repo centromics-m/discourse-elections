@@ -128,7 +128,7 @@ class DiscourseElections::ElectionPost
 
     poll_options = ''
 
-    content << "[poll type=regular status=#{poll_status}]#{poll_options}\n[/poll]"
+    content << "\n[poll type=regular status=#{poll_status}]#{poll_options}\n[/poll]"
 
     message = nil
     if status === Topic.election_statuses[:poll]
@@ -144,7 +144,21 @@ class DiscourseElections::ElectionPost
     revisor_opts = {  }
     update_election_post(topic, content, unattended, revisor_opts, content_type: 'finding_answer')
   end
-  
+
+  def self.get_user_description(topic, username)
+    nominations_usernames = topic.election_nominations_usernames
+
+    pp "################### #{nominations_usernames}"
+
+    nominations_usernames.each do |n|
+      if n['username'] == username
+        return n['description']
+      end
+    end
+
+    ''
+  end
+    
   def self.build_poll__winner(content, topic, unattended)
     nominations = topic.election_nominations
     status = topic.election_status
@@ -168,7 +182,8 @@ class DiscourseElections::ElectionPost
       # the username placeholder is removed on the client before render.
 
       user = User.find(n)
-      poll_options << "\n- #{user.username}"
+      poll_options << "\n- #{user.username}: #{user.description}"
+      poll_options << "\n#{get_user_description(topic, user.username)}"
       poll_options << build_nominee(topic, user)
     end
 
@@ -246,6 +261,7 @@ class DiscourseElections::ElectionPost
     html << "<div class='trigger-user-card' href='/u/#{user.username}' data-user-card='#{user.username}'>"
     html << "<img alt='' width='25' height='25' src='#{avatar_url}' class='avatar'>"
     html << "<a class='mention'>@#{user.username}</a>"
+    html << "<p>description: #{get_user_description(topic, user.username)}</p>"
     html << "</div>"
     html << "</div>"
 

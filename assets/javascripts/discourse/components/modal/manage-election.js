@@ -1,3 +1,5 @@
+"use strict";
+
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action, computed, observer } from "@ember/object";
@@ -20,7 +22,7 @@ export default class ManageElectionModal extends Component {
   @tracked position; // = this.topic.election_position;
 
   @tracked pollEnabledStages; // finding_answer, finding_winner
-  @tracked pollEnabledStagesStr = "";
+  //@tracked pollEnabledStagesString = "";
   @tracked pollCurrentStage = "";
 
   @tracked showSelector = false;
@@ -99,9 +101,13 @@ export default class ManageElectionModal extends Component {
     }
   }
 
+  get pollAvailableStagesString() {
+    return ElectionPollAvailableStages.join(', ');
+  }
+
   // @computed("pollEnabledStages")
-  get pollEnabledStagesStr() {
-    return this.pollEnabledStages.join(",");
+  get pollEnabledStagesString() {
+    return this.pollEnabledStages.join(", ");
   }
 
   //@computed("pollEnabledStages")
@@ -116,7 +122,7 @@ export default class ManageElectionModal extends Component {
 
   //@computed("pollCurrentStage")
   get pollCurrentStageUnchanged() {
-    return this.topic?.election_poll_current_stage == this.pollCurrentStage;
+    return this.topic?.election_poll_current_stage === this.pollCurrentStage;
   }
 
   set pollCurrentStageUnchanged(value) {
@@ -124,12 +130,8 @@ export default class ManageElectionModal extends Component {
     console.warn("pollCurrentStageUnchanged was set:", value);
   }
 
-  get pollAvailableStages() {
-    return ElectionPollAvailableStages.join(', ');
-  }
-
   get pollCurrentStage_FindingWinner() {
-    return this.pollCurrentStage == 'finding_winner';
+    return this.pollCurrentStage === 'finding_winner';
   }
 
   @computed
@@ -162,7 +164,9 @@ export default class ManageElectionModal extends Component {
   }
 
   buildNominationsUsernamesFromNominationsUsernamesString(nominationsUsernamesString) {
-    if (nominationsUsernamesString == '') { return []; }
+    if (nominationsUsernamesString == null || nominationsUsernamesString === '') {
+      return [];
+    }
 
     return nominationsUsernamesString.split("\n")
       .map((v) => {

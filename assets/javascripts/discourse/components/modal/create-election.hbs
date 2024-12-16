@@ -1,4 +1,4 @@
-<DModal @closeModal={{@closeModal}} @title={{i18n "election.create.label" }} class="close-topic-modal">
+<DModal @closeModal={{this.close}} @title={{i18n "election.create.label" }} class="close-topic-modal">
   <:body>
 
     <div class="control-group">
@@ -13,6 +13,7 @@
         Finding Winner</label>
 
       <p>* available stages: {{ this.pollAvailableStagesString }}</p>
+      <p>* enabled stages: {{ this.pollEnabledStagesString }}</p>
     </div>
 
     <hr>
@@ -84,7 +85,7 @@
       {{#if this.loading}}
       {{loading-spinner size="small"}}
       {{else}}
-      <a {{on "click" @closeModal}}>{{i18n "cancel"}}</a>
+      <a {{on "click" this.close}}>{{i18n "cancel"}}</a>
       {{/if}}
     </div>
   </:footer>

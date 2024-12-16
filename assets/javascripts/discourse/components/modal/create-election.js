@@ -1,3 +1,5 @@
+//"use strict";
+
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { fn } from "@ember/helper";
@@ -102,6 +104,10 @@ export default class CreateElectionModal extends Component {
 
   get pollEnabledStagesString() {
     return this.pollEnabledStages.join(",");
+  }
+
+  get pollAvailableStagesString() {
+    return ElectionPollAvailableStages.join(', ');
   }
 
   @computed("pollEnabledStages")

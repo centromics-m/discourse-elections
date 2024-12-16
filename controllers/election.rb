@@ -33,7 +33,6 @@ module DiscourseElections
       validate_create_time("open") if params[:poll_open] == "true"
       validate_create_time("close") if params[:poll_close] == "true"
 
-      #params[:topic_id]
       result = DiscourseElections::ElectionTopic.create(current_user, params)
 
       if result[:error_message]
@@ -78,9 +77,7 @@ module DiscourseElections
       validate_create_time("open") if params[:poll_open] == "true"
       validate_create_time("close") if params[:poll_close] == "true"
 
-
       begin
-
         result = DiscourseElections::ElectionTopic.update(topic, params)
 
       rescue => e

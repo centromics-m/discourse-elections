@@ -3,6 +3,7 @@ import Component from "@glimmer/component";
 export default class ElectionStatusComponent extends Component {
   get showStatus() {
     console.log("ElectionStatusComponent: stages", this.model);
+    console.log("ElectionStatusComponent: currentStage_FindingAnswer", this.currentStage_FindingAnswer);
     return this.model.subtype === "election";
     // && this.model.election_poll_current_stage == 'finding_winner';
   }
@@ -11,8 +12,12 @@ export default class ElectionStatusComponent extends Component {
     return this.model.election_poll_current_stage;
   }
 
+  get currentStage_FindingAnswer() {
+    return this.model.election_poll_current_stage === "finding_answer";
+  }
+
   get currentStage_FindingWinner() {
-    return this.currentStage == "finding_winner";
+    return this.model.election_poll_current_stage === "finding_winner";
   }
 
   get model() {
