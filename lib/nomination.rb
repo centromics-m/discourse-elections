@@ -55,28 +55,31 @@ module DiscourseElections
       TopicCustomField.transaction do
         if saved = Nomination.save(topic, new_nominations, new_nominations_usernames)
           # only
-          removed_nomination_ids = existing_nominations.reject { |n| !n || new_nominations.include?(n) }
-          added_nomination_ids = new_nominations.reject { |u| !u || existing_nominations.include?(u) }
+          removed_nomination_ids = existing_nominations.reject { |n| !n || new_nominations.include?(n.to_i) }
+          added_nomination_ids = new_nominations.reject { |u| !u || existing_nominations.include?(u.to_i) }
 
-          pp "##################### [1] #{removed_nomination_ids} #{added_nomination_ids}"
+          pp "##################### set_by_username[1] #{removed_nomination_ids} #{added_nomination_ids}"
 
           if added_nomination_ids.any?
             Nomination.handle_new(topic, added_nomination_ids)
           end
-          pp "##################### [2]"
+          pp "##################### set_by_username[2]"
 
           if removed_nomination_ids.any?
             Nomination.handle_remove(topic, removed_nomination_ids)
           end
-          pp "##################### [3]"
+          pp "##################### set_by_username[3]"
         end
       end
 
       if !saved || topic.election_post.errors.any?
-        pp "##################### [4] #{saved}"
+        pp "##################### set_by_username[4] #{saved}"
         pp topic.election_post.errors.full_messages
         #raise StandardError.new I18n.t('election.errors.set_nominations_failed')
       end
+
+      # post refresh      
+      DiscourseElections::ElectionPost.rebuild_election_post(topic)
 
       # example of return values
       # {
@@ -150,7 +153,7 @@ module DiscourseElections
     end
 
     # removed_nominations: ids of new nominations
-    def self.handle_new(topic, new_nomination_ids)
+    def self.handle_new(topic, new_nomination_ids, rebuild_post: false)
       existing_statements = NominationStatement.retrieve(topic.id, new_nomination_ids)
 
       if existing_statements.any?
@@ -159,7 +162,7 @@ module DiscourseElections
         end
       end
 
-      ElectionPost.rebuild_election_post(topic)
+      ElectionPost.rebuild_election_post(topic) if rebuild_post
 
       if topic.election_nominations.length >= topic.election_poll_open_after_nominations
         ElectionTime.set_poll_open_after(topic)
@@ -167,12 +170,12 @@ module DiscourseElections
     end
 
     # removed_nominations: ids of removed nominations
-    def self.handle_remove(topic, removed_nomination_ids)
+    def self.handle_remove(topic, removed_nomination_ids, rebuild_post: false)
       topic.reload.election_nominations
 
       NominationStatement.remove(topic, removed_nomination_ids, false)
 
-      ElectionPost.rebuild_election_post(topic)
+      ElectionPost.rebuild_election_post(topic) if rebuild_post
 
       if topic.election_nominations.length < topic.election_poll_open_after_nominations
         ElectionTime.cancel_scheduled_poll_open(topic)

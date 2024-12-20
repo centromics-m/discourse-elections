@@ -5,7 +5,7 @@ class ::Topic
 
   attr_accessor :election_poll_current_stage_changed
   after_save :handle_election_poll_current_stage_change, if: :election_poll_current_stage_changed
-  
+
   def election
     Topic.election_statuses.has_value? election_status
   end
@@ -16,7 +16,7 @@ class ::Topic
 
   def election_poll_enabled_stages
     self.custom_fields["election_poll_enabled_stages"]
-  end 
+  end
 
   def election_poll_current_stage
     self.custom_fields["election_poll_current_stage"]
@@ -147,7 +147,7 @@ class ::Topic
   def election_nominations_usernames
     if custom_fields["election_nominations_usernames"]
       [*custom_fields["election_nominations_usernames"]]
-    else      
+    else
       _election_nominations_usernames_from_users
     end
   end
@@ -159,7 +159,7 @@ class ::Topic
       election_nominations.each do |user_id|
         usernames.push([user_id, User.find(user_id).username]) if user_id.present? && user_id != 0
       end
-      usernames.map do |user_id, username| 
+      usernames.map do |user_id, username|
         { user_id:, username:,  desscription: "" }
       end
     else
@@ -218,12 +218,12 @@ class DiscourseElections::ElectionTopic
       election_closed_poll_message: opts[:closed_poll_message] || ""
     }
 
-    
+
     pp '----------------------'
-    pp opts 
+    pp opts
     pp custom_fields
     pp '----------------------'
-    
+
 
     topic.custom_fields = custom_fields
 
@@ -280,70 +280,77 @@ class DiscourseElections::ElectionTopic
     end
   end
 
+
   def self.update(topic, opts)
     title = opts[:title] || I18n.t("election.title", position: opts[:position].capitalize)
-    #topic = Topic.new(title: title, user: user, category_id: opts[:category_id])
 
-    topic.subtype = "election"
-    topic.skip_callbacks = true
-    poll_open = ActiveModel::Type::Boolean.new.cast(opts[:poll_open])
-    poll_close = ActiveModel::Type::Boolean.new.cast(opts[:poll_close])
-    custom_fields = {
-      election_status: Topic.election_statuses[:nomination],
-      election_position: opts[:position],
-      election_self_nomination_allowed: ActiveModel::Type::Boolean.new.cast(opts[:self_nomination_allowed]),
-      election_status_banner: ActiveModel::Type::Boolean.new.cast(opts[:status_banner]),
-      election_poll_open: poll_open,
-      election_poll_close: poll_close,
-      election_nomination_message: opts[:nomination_message] || "",
-      election_poll_message: opts[:poll_message] || "",
-      election_closed_poll_message: opts[:closed_poll_message] || ""
-    }
+    pp "##################### self.update opts: #{opts}"
 
-    pp "################# custom_fields #{custom_fields}"
+    if opts[:content].present?
+      result2 = self.update_poll_only(topic, opts)
 
-    topic.custom_fields = custom_fields
+    else
+      topic.subtype = "election"
+      topic.skip_callbacks = true
+      poll_open = ActiveModel::Type::Boolean.new.cast(opts[:poll_open])
+      poll_close = ActiveModel::Type::Boolean.new.cast(opts[:poll_close])
+      custom_fields = {
+        election_status: Topic.election_statuses[:nomination],
+        election_position: opts[:position],
+        election_self_nomination_allowed: ActiveModel::Type::Boolean.new.cast(opts[:self_nomination_allowed]),
+        election_status_banner: ActiveModel::Type::Boolean.new.cast(opts[:status_banner]),
+        election_poll_open: poll_open,
+        election_poll_close: poll_close,
+        election_nomination_message: opts[:nomination_message] || "",
+        election_poll_message: opts[:poll_message] || "",
+        election_closed_poll_message: opts[:closed_poll_message] || ""
+      }
 
-    if opts[:status_banner]
-      topic.custom_fields["election_status_banner_result_hours"] = opts[:status_banner_result_hours].to_i
-    end
+      topic.custom_fields = custom_fields
 
-    if poll_open
-      if topic.custom_fields["election_poll_open_after"] = ActiveModel::Type::Boolean.new.cast(opts[:poll_open_after])
-        topic.custom_fields["election_poll_open_after_hours"] = opts[:poll_open_after_hours].to_i
-        topic.custom_fields["election_poll_open_after_nominations"] = opts[:poll_open_after_nominations].to_i
-      else
-        topic.custom_fields["election_poll_open_time"] = opts[:poll_open_time]
+      if opts[:status_banner]
+        topic.custom_fields["election_status_banner_result_hours"] = opts[:status_banner_result_hours].to_i
       end
-    end
 
-    if poll_close
-      if topic.custom_fields["election_poll_close_after"] = ActiveModel::Type::Boolean.new.cast(opts[:poll_close_after])
-        topic.custom_fields["election_poll_close_after_hours"] = opts[:poll_close_after_hours].to_i
-        topic.custom_fields["election_poll_close_after_voters"] = opts[:poll_close_after_voters].to_i
-      else
-        topic.custom_fields["election_poll_close_time"] = opts[:poll_close_time]
+      if poll_open
+        if topic.custom_fields["election_poll_open_after"] = ActiveModel::Type::Boolean.new.cast(opts[:poll_open_after])
+          topic.custom_fields["election_poll_open_after_hours"] = opts[:poll_open_after_hours].to_i
+          topic.custom_fields["election_poll_open_after_nominations"] = opts[:poll_open_after_nominations].to_i
+        else
+          topic.custom_fields["election_poll_open_time"] = opts[:poll_open_time]
+        end
       end
+
+      if poll_close
+        if topic.custom_fields["election_poll_close_after"] = ActiveModel::Type::Boolean.new.cast(opts[:poll_close_after])
+          topic.custom_fields["election_poll_close_after_hours"] = opts[:poll_close_after_hours].to_i
+          topic.custom_fields["election_poll_close_after_voters"] = opts[:poll_close_after_voters].to_i
+        else
+          topic.custom_fields["election_poll_close_time"] = opts[:poll_close_time]
+        end
+      end
+
+      topic.save!(validate: false)
+
+      if topic.election_poll_open && !topic.election_poll_open_after && topic.election_poll_open_time
+        DiscourseElections::ElectionTime.schedule_poll_open(topic)
+      end
+
+      # 초기 메시지 "이 선거는 현재 후보 지명을 받고 있습니다." 를 출력하지 않음
+      # 주석처리 -->
+      # raw = opts[:nomination_message]
+      # raw = I18n.t("election.nomination.default_message") if raw.blank?
+
+      # manager = NewPostManager.new(Discourse.system_user, raw: raw, topic_id: topic.id, skip_validations: true)
+      # result = manager.perform
+
+      DiscourseElections::ElectionCategory.update_election_list(topic.category_id, topic.id, status: topic.election_status)
     end
 
-    topic.save!(validate: false)
+    { url: topic.relative_url }
+  end
 
-    if topic.election_poll_open && !topic.election_poll_open_after && topic.election_poll_open_time
-      DiscourseElections::ElectionTime.schedule_poll_open(topic)
-    end
-
-    # 초기 메시지 "이 선거는 현재 후보 지명을 받고 있습니다." 를 출력하지 않음
-    # 주석처리 -->
-    # raw = opts[:nomination_message]
-    # raw = I18n.t("election.nomination.default_message") if raw.blank?
-
-    # manager = NewPostManager.new(Discourse.system_user, raw: raw, topic_id: topic.id, skip_validations: true)
-    # result = manager.perform
-
-    DiscourseElections::ElectionCategory.update_election_list(topic.category_id, topic.id, status: topic.election_status)
-
-
-    ###################################
+  def self.update_poll_only(topic, opts)
     # poll 정보 수정
     # NOTE: poll 은 post 에 저장되어 있으나, election poll의 경우, 현재 topic당 1개만 허용하기 때문에 그냥 topic의 custom_field에 저장함.
 
@@ -365,21 +372,15 @@ class DiscourseElections::ElectionTopic
       new_content = election_post.raw.gsub(%r{(\[poll\s.*\[\/poll_data_link\])}m, content_parsed['pollOutput'])
     end
 
-    result2 = DiscourseElections::ElectionPost.update_election_post(topic, new_content)
-    #pp "##########result2 #{result2}"
-    # if result2.success?
-    #   { url: topic.relative_url }
-    # else
-    #   { error_message: I18n.t("election.errors.create_failed") }
-    # end
-    ###################################
+    contents = { 
+      finding_answer: new_content, 
+      finding_winner: DiscourseElections::ElectionPost.build_content_for_finding_winner(topic, topic.election_status)
+    }
+    result2 = DiscourseElections::ElectionPost.update_election_post(topic, contents, unattended = false, revisor_opts = {}, target_stage: 'finding_answer')
 
-    #if result.success?
-      { url: topic.relative_url }
-    # else
-    #   { error_message: I18n.t("election.errors.create_failed") }
-    # end
+    result2
   end
+
 
   # def self.set_content(topic_id, content)
   #   topic = Topic.find(topic_id)
@@ -405,7 +406,6 @@ class DiscourseElections::ElectionTopic
   #   DiscourseElections::ElectionPost.update_election_post(topic, content)
   # end
 
-  
   def self.set_election_poll_current_stage(topic_id, poll_current_stage)
     topic = Topic.find(topic_id)
     existing_poll_current_stage = topic.election_poll_current_stage
@@ -413,19 +413,25 @@ class DiscourseElections::ElectionTopic
     saved = false
     TopicCustomField.transaction do
       topic.custom_fields["election_poll_current_stage"] = poll_current_stage
-      topic.election_poll_current_stage_changed = existing_poll_current_stage != poll_current_stage
+      topic.election_poll_current_stage_changed = (existing_poll_current_stage != poll_current_stage)
+
+      topic.save_custom_fields(true)
       saved = topic.save! ## need to save whole topic here as it triggers status change handlers - see 'handle_election_status_change' above
 
-      # if saved && existing_poll_current_stage != poll_current_stage
-      #   DiscourseElections::ElectionPost.rebuild_election_post(topic, unattended)
-      # end
+      pp "##################### saved #{saved} poll_current_stage:#{poll_current_stage}"
+      if saved && existing_poll_current_stage != poll_current_stage
+        DiscourseElections::ElectionPost.rebuild_election_post(topic)
+      end
+
+      self.refresh(topic_id)
+
+      poll_current_stage
+    rescue => e
+      pp "Transaction failed: #{e.message}"
+      pp "Backtrace: #{e.backtrace[0..5]}" # 첫 5줄만 출력
+      #raise e # 트랜잭션 롤백을 유지하려면 다시 예외를 던져야 합니다.
+      raise StandardError.new e.message
     end
-
-    # if !saved || topic.election_post.errors.any?
-    #   raise StandardError.new I18n.t("election.errors.set_status_failed")
-    # end
-
-    topic.election_poll_current_stage
   end
 
   def self.set_status(topic_id, status, unattended = false)

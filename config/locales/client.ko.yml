@@ -4,7 +4,7 @@ ko:
       for_elections: "이 카테고리에서 선거 생성 허용"
     election:
       label: "선거"
-      start: "투표 시작"
+      start: "(선거)투표 시작"
       status_banner:
         enable: "선거 상태 배너 사용."
         result_hours: "Hours result displayed for in election status banner"

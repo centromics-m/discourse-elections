@@ -45,7 +45,7 @@ export default createWidget("election-controls", {
     console.log('this.attrs', this.attrs);
     const topicId = this.attrs.topic.id;
     const categoryId = this.attrs.topic.category_id;
-    const position = 'position';
+    const position = this.attrs.topic.election_position;
     console.log('this.attrs.topic', this.attrs.topic);
 
     // alert('투표 상태를 먼저 열기 상태로 전환해주세요. 닫기 상태에서는 저장되지 않습니다. ' +

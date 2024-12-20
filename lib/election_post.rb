@@ -76,9 +76,26 @@ class DiscourseElections::ElectionPost
     topic.reload
     status = topic.election_status
 
-    content = ""
+    contents = {
+      default: nil,
+      finding_answer: build_content_for_finding_answer(topic, status, unattended),
+      finding_winner: build_content_for_finding_winner(topic, status, unattended)
+    }
+    
+    if contents[:finding_answer].blank? && contents[:finding_winner].blank?
+      content[:default] = "<p class='poll_msg'>제대로 입력이 안되고 있으면, 옵션을 체크해주세요.</p>"
+    end
 
-    if topic.election_poll_current_stage == 'finding_winner'      
+    revisor_opts = {}
+    update_election_post(topic, contents, unattended, revisor_opts, target_stage: topic.election_poll_current_stage, status: status)
+  end
+
+
+  def self.build_content_for_finding_winner(topic, status, unattended = false)
+    content = ''
+
+    # finding_winner
+    if topic.election_poll_enabled_stages.include?('finding_winner') && topic.election_poll_current_stage == 'finding_winner'
       if topic.election_winner.present?
         user = User.find_by(username: topic.election_winner)
         content << "<div class='title'>#{I18n.t('election.post.winner')}</div>"
@@ -87,21 +104,29 @@ class DiscourseElections::ElectionPost
       end
 
       if status == Topic.election_statuses[:nomination]
-        build_nominations(content, topic, unattended)
+        content = build_nominations(content, topic, unattended)
       else
-        build_poll__winner(content, topic, unattended)
+        content = build_poll__winner(content, topic, unattended)
       end
-    
-    else # finding_answer
+    end
+
+    content
+  end
+
+  def self.build_content_for_finding_answer(topic, status, unattended = false)
+    content = ''
+
+    # finding_answer    
+    if topic.election_poll_enabled_stages.include?('finding_answer')
       if content.blank?
         content = "<p class='poll_msg'>PollUiBuilder를 열어서 poll 내용을 구성해주세요.\n\n</p>"
       end
-      build_poll__default(content, topic, unattended)
+      content = build_poll__default(content, topic, unattended)      
     end
-  end
+    content
+  end    
 
   private
-
 
 # [poll type=regular results=always public=true chartType=bar score=100]
 # * poll1
@@ -113,22 +138,29 @@ class DiscourseElections::ElectionPost
 # [/poll_data_link]
 
   def self.build_poll__default(content, topic, unattended)
-    nominations = topic.election_nominations
+    #nominations = topic.election_nominations
     status = topic.election_status
 
-    return if nominations.length < 2
+    #return if nominations.length < 2
 
-    poll_status = ''
+    # poll_status = ''
 
-    if status === Topic.election_statuses[:poll]
-      poll_status = 'open'
-    else
-      poll_status = 'closed'
+    # if status === Topic.election_statuses[:poll]
+    #   poll_status = 'open'
+    # else
+    #   poll_status = 'closed'
+    # end
+
+    # poll_options = _build_poll_markups(topic)
+
+    # if poll_options.present?
+    #   content << "\n[poll type=regular status=#{poll_status} _generator=default]#{poll_options}\n[/poll]"
+    # end
+
+    poll_markups = _build_poll_markups(topic)
+    if poll_markups.present?
+      content << "\n#{poll_markups}"
     end
-
-    poll_options = ''
-
-    content << "\n[poll type=regular status=#{poll_status}]#{poll_options}\n[/poll]"
 
     message = nil
     if status === Topic.election_statuses[:poll]
@@ -141,8 +173,56 @@ class DiscourseElections::ElectionPost
       content << "\n\n #{message}"
     end
 
-    revisor_opts = {  }
-    update_election_post(topic, content, unattended, revisor_opts, content_type: 'finding_answer')
+    # revisor_opts = {  }
+    # update_election_post(topic, content, unattended, revisor_opts, content_type: 'finding_answer')
+    content
+  end
+
+  def self._build_poll_markups(topic)
+    posts = topic.posts
+
+    content = ''
+    posts.each do |post|
+      post.polls.each do |poll|
+        content << _build_poll_markup_for_poll(poll, 'default')
+      end
+    end
+
+    content
+  end
+
+  def self._build_poll_markup_for_poll(poll, _generator='default')
+    attrs = %w[type status results visibility min max steps chart_type score]
+    attrs_strs = []
+    attrs.each do |attr|
+      attrs_strs << "#{attr}='#{poll[attr]}'" if poll[attr].present?
+    end
+
+    content = ''
+    poll_hd = "[poll #{attrs_strs.join(' ')} _generator=#{_generator}]\n"
+    poll.poll_options.each do |option|
+      if option['correct']
+        content << "* #{option['html']} [correct]\n"
+      else
+        content << "* #{option['html']}\n"
+      end
+    end
+    poll_tl = "[/poll]\n"
+
+    content2 = ''
+    poll.poll_data_links.each do |link|
+      content2 << "[poll_data_link]\n"
+      if link['url'].present?
+        content2 << "[#{link.title}](#{link.url})\n"
+      end
+      if link.content.present?
+        content2 << "#{link.content}\n"
+      end
+      content2 << "[/poll_data_link]\n"
+    end
+
+    poll_content = poll_hd + content + poll_tl + content2
+    poll_content
   end
 
   def self.get_user_description(topic, username)
@@ -158,7 +238,7 @@ class DiscourseElections::ElectionPost
 
     ''
   end
-    
+
   def self.build_poll__winner(content, topic, unattended)
     nominations = topic.election_nominations
     status = topic.election_status
@@ -182,12 +262,12 @@ class DiscourseElections::ElectionPost
       # the username placeholder is removed on the client before render.
 
       user = User.find(n)
-      poll_options << "\n- #{user.username}: #{user.description}"
-      poll_options << "\n#{get_user_description(topic, user.username)}"
+      # poll_options << "\n- #{user.username}: "
+      # poll_options << "#{get_user_description(topic, user.username)}"
       poll_options << build_nominee(topic, user)
     end
 
-    content << "[poll type=regular status=#{poll_status}]#{poll_options}\n[/poll]"
+    content << "\n[poll type=regular status=#{poll_status} _generator=winner]#{poll_options}\n[/poll]"
 
     message = nil
     if status === Topic.election_statuses[:poll]
@@ -197,13 +277,13 @@ class DiscourseElections::ElectionPost
     end
 
     if message
-      content << "\n\n #{message}"
+      content << "\n\n#{message}"
     end
 
-    revisor_opts = {  }
-    update_election_post(topic, content, unattended, revisor_opts, content_type: 'finding_winner')
+    # revisor_opts = {  }
+    # update_election_post(topic, content, unattended, revisor_opts, content_type: 'finding_winner')
+    content
   end
-
 
   def self.build_nominations(content, topic, unattended)
     nominations = topic.election_nominations
@@ -229,9 +309,9 @@ class DiscourseElections::ElectionPost
 
     content << "\n\n #{message}"
 
-    revisor_opts = { skip_validations: true }
-
-    update_election_post(topic, content, unattended, revisor_opts, content_type: 'finding_winner')
+    # revisor_opts = { skip_validations: true }
+    # update_election_post(topic, content, unattended, revisor_opts, content_type: 'finding_winner')
+    content
   end
 
   def self.build_winner(user)
@@ -261,7 +341,7 @@ class DiscourseElections::ElectionPost
     html << "<div class='trigger-user-card' href='/u/#{user.username}' data-user-card='#{user.username}'>"
     html << "<img alt='' width='25' height='25' src='#{avatar_url}' class='avatar'>"
     html << "<a class='mention'>@#{user.username}</a>"
-    html << "<p>description: #{get_user_description(topic, user.username)}</p>"
+    html << "<p>#{get_user_description(topic, user.username)}</p>"
     html << "</div>"
     html << "</div>"
 
@@ -276,42 +356,77 @@ class DiscourseElections::ElectionPost
     html << "</span></div>"
 
     html
-  end  
+  end
 
   # content_type: 'finding_answer' or 'finding_winner'
-  def self.update_election_post(topic, content, unattended = false, revisor_opts = {}, content_type: 'finding_answer')
+  def self.update_election_post(topic, contents, unattended = false, revisor_opts = {}, target_stage: 'finding_answer', status: nil)
     election_post = topic.election_post
 
-    pp "###################1" + election_post.raw
-    pp "###################2" + content
+    pp "###################update_election_post 1" 
+    pp election_post.raw
+    pp "###################update_election_post 2" 
+    pp contents
 
-    return if !election_post || election_post.raw == content
+    return if !election_post #|| election_post.raw == content
 
     revisor = PostRevisor.new(election_post, topic)
 
-    ## We always skip the revision as these are system edits to a single post.
-    revisor_opts.merge!(skip_revision: true)
+    pp "###################update_election_post 4 revisor_opts:" + revisor_opts.to_s
 
-    pp "###################3 content: " + content
-    pp "###################4 revisor_opts:" + revisor_opts.to_s
+    # if content_type == 'finding_answer'
+    #   # content2 = content_raw.gsub(%r{<!--POLL_DEFAULT-->.*<!--\/POLL_DEFAULT-->}m, '')
+    #   # pp "------------------------1 #{content2}-----------------------"
+    #   # content2 = "<!--POLL_DEFAULT-->\n" + content + "\n<!--/POLL_DEFAULT-->\n" + content2
+    #   content2 = "<!--POLL_DEFAULT-->\n" + content + "\n<!--/POLL_DEFAULT-->\n"
+
+    # else
+    #   content2 = content_raw.gsub(%r{<!--POLL_ELECTION-->.*<!--\/POLL_ELECTION-->}m, '')
+    #   pp "------------------------2 #{content2}------------------------"
+    #   content2 = content2 + "\n<!--POLL_ELECTION-->\n" + content + "\n<!--/POLL_ELECTION-->\n"
+    # end
+    # pp "###################4 content2:" + content2
 
     content_raw = election_post.raw
+    #content = content_raw
 
-    if content_type == 'finding_answer'
-      # content2 = content_raw.gsub(%r{<!--POLL_DEFAULT-->.*<!--\/POLL_DEFAULT-->}m, '')
-      # pp "------------------------1 #{content2}-----------------------"
-      # content2 = "<!--POLL_DEFAULT-->\n" + content + "\n<!--/POLL_DEFAULT-->\n" + content2
-      content2 = "<!--POLL_DEFAULT-->\n" + content + "\n<!--/POLL_DEFAULT-->\n"
-
-    else
-      content2 = content_raw.gsub(%r{<!--POLL_ELECTION-->.*<!--\/POLL_ELECTION-->}m, '')      
-      pp "------------------------2 #{content2}------------------------"
-      content2 = content2 + "\n<!--POLL_ELECTION-->\n" + content + "\n<!--/POLL_ELECTION-->\n"
+    content1 = ''
+    if target_stage == 'finding_answer' && contents[:finding_answer].present?
+      #matches = content.match(%r{<!--POLL_DEFAULT-->.*<!--\/POLL_DEFAULT-->}m)
+      #if matches.present? then content1 = matches[0]
+      if status != Topic.election_statuses[:nomination]
+        content1 = "\n<!--POLL_DEFAULT-->\n" + remove_poll_tags(contents[:finding_answer].to_s) + "\n<!--/POLL_DEFAULT-->\n"
+      else
+        # NOTE: 20글자 이상 채워야 함.
+        content1 = "\n(현재 상태가 nomination이 아니므로 선거지명자 명단은 숨겨집니다.)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n"
+      end
+      pp "###################5 finding_answer: #{content1}"
     end
-    pp "###################4 content2:" + content2
 
-    revise_result = revisor.revise!(election_post.user, { raw: content2 }, revisor_opts)
-  
+    content2 = ''
+    if ['finding_winner', 'finding_answer'].include?(target_stage) && contents[:finding_winner].present?
+      #content = content.gsub(%r{<!--POLL_ELECTION-->.*<!--\/POLL_ELECTION-->}m, '')
+      content2 = "\n<!--POLL_ELECTION-->\n" + remove_poll_tags(contents[:finding_winner].to_s) + "\n<!--/POLL_ELECTION-->\n"
+      pp "###################update_election_post 6 finding_winner: #{content2}"
+    end
+
+    content3 = contents[:default].to_s
+
+    content_out = "#{content1}\n#{content2}\n#{content3}"
+    
+    content_out = "(본문이 없습니다.) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" if content_out.blank?
+
+    puts "################### 본문: #{content_out}"
+
+    # 똑같음 -> 무시
+    if election_post.raw == content_out
+      puts "########################update_election_post same content ignore: election_post.raw == content "
+      return
+    end
+
+    ## We always skip the revision as these are system edits to a single post.
+    revisor_opts.merge!(skip_revision: true)
+    revise_result = revisor.revise!(election_post.user, { raw: content_out }, revisor_opts)
+
     if election_post.errors.any?
       if unattended
         message_moderators(topic.id, election_post.errors.messages.to_s)
@@ -342,6 +457,11 @@ class DiscourseElections::ElectionPost
       SystemMessage.create_from_system_user(user, :error_updating_election_post,
         topic_id: topic_id, error: error)
     end
+  end
+
+  def self.remove_poll_tags(content)
+    content.gsub(%r{<!--/?POLL_DEFAULT-->}m, '')
+          .gsub(%r{<!--/?POLL_ELECTION-->}m, '')
   end
 end
 

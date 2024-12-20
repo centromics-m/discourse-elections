@@ -112,13 +112,18 @@ module DiscourseElections
       end
 
       render_result(result)
+
+    rescue => e
+      pp("Error in start_poll: #{e.message}")
+      pp(e.backtrace.join("\n"))
+      raise
     end
-    
+
     def set_poll_current_stage
       topic_id = params.require(:topic_id)
       poll_current_stage = params.require(:poll_current_stage)
 
-      topic = Topic.find(params[:topic_id])      
+      topic = Topic.find(params[:topic_id])
       existing_poll_current_stage = topic.election_poll_current_stage
 
       if poll_current_stage == existing_poll_current_stage
@@ -127,17 +132,21 @@ module DiscourseElections
 
       new_status = DiscourseElections::ElectionTopic.set_election_poll_current_stage(params[:topic_id], poll_current_stage)
 
-      if new_status == existing_poll_current_stage
+      if new_status == nil || new_status == existing_poll_current_stage
         result = { error_message: I18n.t("election.errors.set_election_poll_current_stage_failed") }
       else
         result = { value: new_status }
       end
 
-      topic.reload
-      
-      render_result(result)
-    end
+      #topic.reload
 
+      render_result(result)
+
+    rescue => e
+      pp("Error in set_poll_current_stage: #{e.message}")
+      pp(e.backtrace.join("\n"))
+      raise
+    end
 
     def set_status
       params.require(:topic_id)
@@ -167,6 +176,11 @@ module DiscourseElections
       end
 
       render_result(result)
+
+    rescue => e
+      pp("Error in set_status: #{e.message}")
+      pp(e.backtrace.join("\n"))
+      raise
     end
 
     def set_status_banner
@@ -186,6 +200,11 @@ module DiscourseElections
       DiscourseElections::ElectionCategory.update_election_list(topic.category_id, topic.id, banner: params[:status_banner])
 
       render_result(value: topic.custom_fields["election_status_banner"])
+
+    rescue => e
+      pp("Error in set_status_banner: #{e.message}")
+      pp(e.backtrace.join("\n"))
+      raise
     end
 
     def set_status_banner_result_hours
@@ -205,6 +224,11 @@ module DiscourseElections
       render_result(
         value: topic.custom_fields["election_status_banner_result_hours"]
       )
+
+    rescue => e
+      pp("Error in set_status_banner_result_hours: #{e.message}")
+      pp(e.backtrace.join("\n"))
+      raise
     end
 
     def set_self_nomination_allowed
@@ -317,13 +341,11 @@ module DiscourseElections
       pp "##################### topic.election_poll_voters #{topic.election_poll_voters}"
       pp "##################### voters #{voters}"
 
-      if type === "open" && enabled && after &&
-           topic.election_nominations.length >= nominations
+      if type === "open" && enabled && after && topic.election_nominations.length >= nominations
         raise StandardError.new I18n.t("election.errors.nominations_already_met")
       end
 
-      if type === "close" && enabled && after &&
-            topic.election_poll_voters >= voters
+      if type === "close" && enabled && after && topic.election_poll_voters >= voters
         raise StandardError.new I18n.t("election.errors.voters_already_met")
       end
 
@@ -334,8 +356,7 @@ module DiscourseElections
       voters_str = "election_poll_#{type}_after_voters"
       time_str = "election_poll_#{type}_time"
 
-      topic.custom_fields[enabled_str] = enabled if enabled !=
-        topic.send(enabled_str)
+      topic.custom_fields[enabled_str] = enabled if enabled != topic.send(enabled_str)
       topic.custom_fields[after_str] = after if after != topic.send(after_str)
 
       if after
