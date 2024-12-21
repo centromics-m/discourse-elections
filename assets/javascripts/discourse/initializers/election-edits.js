@@ -33,6 +33,8 @@ export default {
         //     });
         //   })
         // });
+
+        // NOTE: Octane style class로 수정
         api.modifyClass(
           "model:topic",
           (Superclass) =>
@@ -213,14 +215,14 @@ export default {
           const post = helper.attrs;
           let contents = [];
 
-          // if (post.election_by_nominee && post.election_nomination_statement) {
-          //   contents.push(
-          //     helper.h(
-          //       "span.statement-post-label",
-          //       I18n.t("election.post.nomination_statement")
-          //     )
-          //   );
-          // }
+          if (post.election_by_nominee && post.election_nomination_statement) {
+            contents.push(
+              helper.h(
+                "span.statement-post-label",
+                I18n.t("election.post.nomination_statement")
+              )
+            );
+          }
 
           if (
             !post.election_by_nominee &&

@@ -100,19 +100,19 @@ export default createWidget("election-controls", {
     return await _this.updateTopic(topicId, categoryId, position, outputAsJson);
   },
 
-  // makeStatement() {
-  //   const controller = getOwner(this).lookup("controller:composer");
-  //   const topic = this.attrs.topic;
+  makeStatement() {
+    const controller = getOwner(this).lookup("controller:composer");
+    const topic = this.attrs.topic;
 
-  //   controller.open({
-  //     action: "reply",
-  //     draftKey: "reply",
-  //     draftSequence: 0,
-  //     topic,
-  //   });
+    controller.open({
+      action: "reply",
+      draftKey: "reply",
+      draftSequence: 0,
+      topic,
+    });
 
-  //   controller.set("model.electionNominationStatement", true);
-  // },
+    //controller.set("model.electionNominationStatement", true);
+  },
 
   manage() {
     console.log('startPoll manage this.attrs', this.attrs);
@@ -255,10 +255,6 @@ export default createWidget("election-controls", {
       topic.election_can_self_nominate
     ) {
 
-      // const user_ids = topic.election_nominations || [];
-      // // NOTE: 값이 정확하지 않은 것 같아서 재확인
-      // topic.election_is_nominee = user_ids.indexOf(this.currentUser.id) > -1;
-
       contents.push(
         this.attach("button", {
           action: `toggleNomination`,
@@ -269,13 +265,13 @@ export default createWidget("election-controls", {
     }
 
     // NOTE: disabled by etna (2024.10.22)
-    // if (topic.election_is_nominee && !topic.election_made_statement) {
-    //   contents.push(this.attach('button', {
-    //     action: 'makeStatement',
-    //     label: `election.nomination.statement.add`,
-    //     className: 'btn-primary add-statement'
-    //   }));
-    // }
+    if (topic.election_is_nominee && !topic.election_made_statement) {
+      contents.push(this.attach('button', {
+        action: 'makeStatement',
+        label: `election.nomination.statement.add`,
+        className: 'btn-primary add-statement'
+      }));
+    }
 
     if (user && user.is_elections_admin) {
       contents.push(

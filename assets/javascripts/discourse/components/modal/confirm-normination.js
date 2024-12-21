@@ -47,23 +47,12 @@ export default class ConfirmNorminationModal extends Component {
   async toggleNomination() {
     console.log('toggleNomination');
 
-    //this.args.toggleNomination();
     await this._toggleNomination();
-
-    // await ajax("/election/rebuild-election-post", {
-    //   data: {
-    //     topic_id: this.model.topic.id,
-    //     //is_nominee: this.model.topic.election_is_nominee
-    //   }
-    // }).then(() => {
-    //   this.model.topic.reload();
-
 
     // post 재구성
     await ajax("/election/rebuild-election-post", {
       data: {
         topic_id: this.model.topic.id,
-        //is_nominee: this.model.topic.election_is_nominee
       }
     }).then(() => {
       this.model.topic.reload();
@@ -75,7 +64,6 @@ export default class ConfirmNorminationModal extends Component {
       this.model.rerender();
       this.close();
     }, 300);
-    //});
   }
 
   async _toggleNomination() {

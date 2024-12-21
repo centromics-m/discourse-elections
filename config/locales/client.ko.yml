@@ -41,8 +41,8 @@ ko:
           body: "지명을 철회하고 싶으면 확인 버튼을 클릭하세요: [{{position}}] (분류: {{categoryName}})"
           btn: "나는 자신에 대한 지명을 철회합니다"
         statement:
-          add: "진술 추가 Add Statement"
-          label: "지명 지술 Nomination Statement"
+          add: "지명 진술 추가"
+          label: "지명 진술"
       set_time:
         hours: "Hours"
         days: "Days"
