@@ -400,7 +400,7 @@ module DiscourseElections
       winner = params[:winner] || ""
       winner_obj = User.find_by(username: winner)
 
-      if winner.present? && winner_obj = nil
+      if winner.present? && winner_obj == nil
         raise "User(#{winner}) not found"
       end
 
@@ -415,6 +415,20 @@ module DiscourseElections
 
       render_result(result)
     end
+
+    def rebuild_election_post
+      params.require(:topic_id)
+
+      topic = Topic.find(params[:topic_id])
+
+      if DiscourseElections::ElectionPost.rebuild_election_post(topic, unattended: false)
+        result = { value: true }
+      else
+        result = { error_message: I18n.t("election.errors.rebuild_election_post_failed") }
+      end
+
+      render_result(result)
+    end 
 
     private
 

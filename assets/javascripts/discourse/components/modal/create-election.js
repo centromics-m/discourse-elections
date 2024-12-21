@@ -130,12 +130,15 @@ export default class CreateElectionModal extends Component {
   @computed("pollOpenTime", "pollCloseTime")
   get pollTimesValid() {
     const { pollOpenTime, pollCloseTime } = this;
+
     if (pollOpenTime && moment().isAfter(pollOpenTime)) {
       return false;
     }
+
     if (pollCloseTime && moment().isAfter(pollCloseTime)) {
       return false;
     }
+
     if (
       pollOpenTime &&
       pollCloseTime &&

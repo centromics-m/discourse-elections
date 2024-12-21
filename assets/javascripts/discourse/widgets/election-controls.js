@@ -26,7 +26,8 @@ export default createWidget("election-controls", {
     this._showModal(ConfirmNominationModal, {
       model: {
         topic: this.attrs.topic,
-        rerender: () => this.scheduleRerender(),
+        rerender: () => //this.router.refresh(),
+          this.scheduleRerender(),
       },
     });
   },
@@ -234,12 +235,6 @@ export default createWidget("election-controls", {
       result1 = error;
       const resp = error.jqXHR;
       alert(resp.responseText);
-      // if (resp.responseJSON.error) {
-      //   alert(resp.responseJSON.error);
-      // } else {
-      //   alert(resp.responseText);
-      // }
-
     });
     //});
 
@@ -251,11 +246,19 @@ export default createWidget("election-controls", {
     const user = this.currentUser;
     let contents = [];
 
+    console.log('render election controls', topic);
+    console.log('this.currentUser.id', this.currentUser.id);
+
     if (
       topic.election_status === ElectionStatuses["nomination"] &&
       topic.election_self_nomination_allowed &&
       topic.election_can_self_nominate
     ) {
+
+      // const user_ids = topic.election_nominations || [];
+      // // NOTE: 값이 정확하지 않은 것 같아서 재확인
+      // topic.election_is_nominee = user_ids.indexOf(this.currentUser.id) > -1;
+
       contents.push(
         this.attach("button", {
           action: `toggleNomination`,

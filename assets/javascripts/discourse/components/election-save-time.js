@@ -102,6 +102,7 @@ export default class ElectionSaveTimeComponent extends ElectionSave {
         this.topic.election_poll_close_after_voters = this.voters;
       }
       this.toggleProperty("topicUpdated");
+
     } else if (result.failed) {
       this.icon = "times";
       this.enabled = this.topic[`election_poll_${type}`];

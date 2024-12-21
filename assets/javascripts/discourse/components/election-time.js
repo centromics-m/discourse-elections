@@ -58,7 +58,7 @@ export default class ElectionTimeComponent extends Component {
   onAfterClicked(e) {
     //console.log("onAfterClicked", e);
     this.after = e.target.checked; // NOTE: 나중에 반영되는데 미리 여기서 입력함.
-    this.toggleManual;
+    this.toggleManual();
     this.sendElectionTime();
   }
 

@@ -1,4 +1,4 @@
-<DModal @closeModal={{@closeModal}} @title={{i18n "election.nomination.add.label" }} class="close-topic-modal">
+<DModal @closeModal={{this.close}} @title={{i18n (concat this.prefix 'label' ) }} class="close-topic-modal">
   <:body>
     <div class="control-group">
       <label>
@@ -7,14 +7,15 @@
       </label>
     </div>
   </:body>
+
   <:footer>
     <div class="modal-footer">
-      <DButton @title={{'submit'}} @label={{'submit' }} @action={{this.toggleNomination}} @class='btn btn-primary' />
+      <DButton @title={{'submit'}} @label={{'submit'}} @action={{this.toggleNomination}} @class='btn btn-primary' />
 
       {{#if this.loading}}
       {{loading-spinner size="small"}}
       {{else}}
-      <a {{on "click" @closeModal}}>{{i18n "cancel"}}</a>
+      <a {{on "click" this.close}}>{{i18n "cancel"}}</a>
       {{/if}}
     </div>
   </:footer>

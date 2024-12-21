@@ -25,6 +25,12 @@ export default class ConfirmNorminationModal extends Component {
     return this.args.model.model;
   }
 
+  @action
+  close() {
+    //this.send('closeModal');
+    this.args.closeModal();
+  }
+
   @computed("model.topic.election_is_nominee")
   get prefix() {
     const isNominee = this.model.topic.election_is_nominee;
@@ -38,9 +44,38 @@ export default class ConfirmNorminationModal extends Component {
   }
 
   @action
-  toggleNomination() {
+  async toggleNomination() {
+    console.log('toggleNomination');
+
     //this.args.toggleNomination();
-    this._toggleNomination();
+    await this._toggleNomination();
+
+    // await ajax("/election/rebuild-election-post", {
+    //   data: {
+    //     topic_id: this.model.topic.id,
+    //     //is_nominee: this.model.topic.election_is_nominee
+    //   }
+    // }).then(() => {
+    //   this.model.topic.reload();
+
+
+    // post 재구성
+    await ajax("/election/rebuild-election-post", {
+      data: {
+        topic_id: this.model.topic.id,
+        //is_nominee: this.model.topic.election_is_nominee
+      }
+    }).then(() => {
+      this.model.topic.reload();
+    });
+
+    // TODO: 다른 함수로 교체
+    //location.reload();
+    setTimeout(() => {
+      this.model.rerender();
+      this.close();
+    }, 300);
+    //});
   }
 
   async _toggleNomination() {
@@ -58,6 +93,7 @@ export default class ConfirmNorminationModal extends Component {
 
       if (result.failed) {
         this.flash(result.message, "error");
+
       } else {
         const user = this.currentUser;
         let nominations = this.model.topic.election_nominations;
@@ -74,8 +110,10 @@ export default class ConfirmNorminationModal extends Component {
         this.set("model.topic.election_nominations_usernames", usernames);
         this.set("model.topic.election_nominations", nominations);
         this.set("model.topic.election_is_nominee", !isNominee);
-        this.model.rerender();
-        this.send("closeModal");
+
+        console.log('model.topic.election_is_nominee', this.model.topic.election_is_nominee);
+
+        //this.send("closeModal");
       }
 
     } catch (e) {

@@ -217,14 +217,7 @@ class DiscourseElections::ElectionTopic
       election_poll_message: opts[:poll_message] || "",
       election_closed_poll_message: opts[:closed_poll_message] || ""
     }
-
-
-    pp '----------------------'
-    pp opts
-    pp custom_fields
-    pp '----------------------'
-
-
+    
     topic.custom_fields = custom_fields
 
     if opts[:status_banner]

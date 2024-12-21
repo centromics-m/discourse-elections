@@ -1,6 +1,5 @@
 module DiscourseElections
   class Nomination
-
     # nominations_usernames
     # [
     # {
@@ -16,26 +15,28 @@ module DiscourseElections
       topic = Topic.find(topic_id)
       existing_nominations = topic.election_nominations
       existing_nominations_usernames = topic.election_nominations_usernames
-      
-      new_nominations_usernames = []
 
-      pp "################ set_by_username #{nominations_usernames}"
-      if nominations_usernames.present?
-        nominations_usernames.each do |u|
-          pp "############## user #{u}"
-          if u.present? && u['username'].present?
-            user = User.find_by(username: u['username'])
-            if user
-              new_nominations_usernames.push(u.dup.merge('id': user.id))              
-            else
-              raise StandardError.new I18n.t('election.errors.user_was_not_found', user: u)
-            end
-          end
-        end
-      end
+      # new_nominations_usernames = []
+
+      # pp "################ set_by_username #{nominations_usernames}"
+      # if nominations_usernames.present?
+      #   nominations_usernames.each do |u|
+      #     pp "############## user #{u}"
+      #     if u.present? && u["username"].present?
+      #       user = User.find_by(username: u["username"])
+      #       if user
+      #         new_nominations_usernames.push(u.dup.merge(id: user.id))
+      #       else
+      #         raise StandardError.new I18n.t("election.errors.user_was_not_found", user: u)
+      #       end
+      #     end
+      #   end
+      # end
+
+      new_nominations_usernames = rebuild_nominations_usernames(existing_nominations_usernames, added_usernames: nominations_usernames)
 
       if Set.new(existing_nominations_usernames) == Set.new(new_nominations_usernames)
-        raise StandardError.new I18n.t('election.errors.nominations_not_changed')
+        raise StandardError.new I18n.t("election.errors.nominations_not_changed")
       end
 
       pp "##################### existing_nominations #{existing_nominations}"
@@ -45,9 +46,12 @@ module DiscourseElections
       # existing_nominations_ids = existing_nominations_usernames.map { |u|
       #   begin u['id'] rescue nil end
       # }.filter(&:present?).sort!
-      new_nominations = new_nominations_usernames.map { |u|
-        begin u['id'] rescue nil end
-      }.filter(&:present?).sort!
+      new_nominations = new_nominations_usernames
+          .map do |u|
+            begin u["id"] rescue StandardError; nil end            
+          end
+          .filter(&:present?)
+          .sort!
 
       pp "##################### new_nominations #{new_nominations}"
       pp "##################### new_nominations_usernames #{new_nominations_usernames}"
@@ -55,19 +59,17 @@ module DiscourseElections
       TopicCustomField.transaction do
         if saved = Nomination.save(topic, new_nominations, new_nominations_usernames)
           # only
-          removed_nomination_ids = existing_nominations.reject { |n| !n || new_nominations.include?(n.to_i) }
-          added_nomination_ids = new_nominations.reject { |u| !u || existing_nominations.include?(u.to_i) }
+          removed_nomination_ids =
+            existing_nominations.reject { |n| !n || new_nominations.include?(n.to_i) }
+          added_nomination_ids =
+            new_nominations.reject { |u| !u || existing_nominations.include?(u.to_i) }
 
           pp "##################### set_by_username[1] #{removed_nomination_ids} #{added_nomination_ids}"
 
-          if added_nomination_ids.any?
-            Nomination.handle_new(topic, added_nomination_ids)
-          end
+          Nomination.handle_new(topic, added_nomination_ids) if added_nomination_ids.any?
           pp "##################### set_by_username[2]"
 
-          if removed_nomination_ids.any?
-            Nomination.handle_remove(topic, removed_nomination_ids)
-          end
+          Nomination.handle_remove(topic, removed_nomination_ids) if removed_nomination_ids.any?
           pp "##################### set_by_username[3]"
         end
       end
@@ -78,7 +80,7 @@ module DiscourseElections
         #raise StandardError.new I18n.t('election.errors.set_nominations_failed')
       end
 
-      # post refresh      
+      # post refresh
       DiscourseElections::ElectionPost.rebuild_election_post(topic)
 
       # example of return values
@@ -101,54 +103,63 @@ module DiscourseElections
     end
 
     def self.add_user(topic_id, user_id)
+      pp "################ add_user : #{topic_id}, #{user_id}"
+
       topic = Topic.find(topic_id)
       nominations = topic.election_nominations
+      nominations_usernames = topic.election_nominations_usernames
+      added_user_ids = [user_id]
 
-      if !nominations.include?(user_id)
+      if !nominations.include?(user_id)        
         nominations.push(user_id)
-      end
-
-      saved = false
-      TopicCustomField.transaction do
-        if saved = Nomination.save(topic, nominations)
-          Nomination.handle_new(topic, [user_id])
-        end
-      end
-
-      if !saved || topic.election_post.errors.any?
-        raise StandardError.new I18n.t('election.errors.set_nominations_failed')
-      end
-
-      topic.election_nominations
-    end
-
-    def self.remove_user(topic_id, user_id)
-      topic = Topic.find(topic_id)
-      nominations = topic.election_nominations
-
-      ### TODO: 코드 오류 확인 removed_nominations ???
-      if nominations.include?(user_id)
-        nominations = topic.election_nominations - removed_nominations
+        nominations_usernames = rebuild_nominations_usernames_by_id(nominations_usernames, added_user_ids: added_user_ids)
       end
 
       saved = false
       TopicCustomField.transaction do
         if saved = Nomination.save(topic, nominations, nominations_usernames)
-          Nomination.handle_remove(topic, [user_id])
+          Nomination.handle_new(topic, added_user_ids)
         end
       end
 
       if !saved || topic.election_post.errors.any?
-        raise StandardError.new I18n.t('election.errors.set_nominations_failed')
+        raise StandardError.new I18n.t("election.errors.set_nominations_failed")
       end
 
-      topic.election_nominations
+      nominations
+    end
+
+    def self.remove_user(topic_id, user_id)
+      pp "################ remove_user : #{topic_id}, #{user_id}"
+
+      topic = Topic.find(topic_id)
+      nominations = topic.election_nominations
+      nominations_usernames = topic.election_nominations_usernames
+      removed_user_ids = [user_id]
+
+      if nominations.include?(user_id)
+        nominations = topic.election_nominations - removed_user_ids        
+        nominations_usernames = rebuild_nominations_usernames_by_id(topic.election_nominations_usernames, removed_user_ids: removed_user_ids)
+      end
+
+      saved = false
+      TopicCustomField.transaction do
+        if saved = Nomination.save(topic, nominations, nominations_usernames)
+          Nomination.handle_remove(topic, removed_user_ids)
+        end
+      end
+
+      if !saved || topic.election_post.errors.any?
+        raise StandardError.new I18n.t("election.errors.set_nominations_failed")
+      end
+
+      nominations
     end
 
     def self.save(topic, nominations, nominations_usernames)
       pp "################ save nominations : #{nominations}, #{nominations_usernames}"
-      topic.custom_fields['election_nominations'] = nominations 
-      topic.custom_fields['election_nominations_usernames'] = nominations_usernames
+      topic.custom_fields["election_nominations"] = nominations
+      topic.custom_fields["election_nominations_usernames"] = nominations_usernames
       topic.save_custom_fields(true)
     end
 
@@ -157,9 +168,7 @@ module DiscourseElections
       existing_statements = NominationStatement.retrieve(topic.id, new_nomination_ids)
 
       if existing_statements.any?
-        existing_statements.each do |statement|
-          NominationStatement.update(statement, false)
-        end
+        existing_statements.each { |statement| NominationStatement.update(statement, false) }
       end
 
       ElectionPost.rebuild_election_post(topic) if rebuild_post
@@ -184,18 +193,88 @@ module DiscourseElections
 
     def self.set_self_nomination(topic_id, state)
       topic = Topic.find(topic_id)
-      topic.custom_fields['election_self_nomination_allowed'] = state
+      topic.custom_fields["election_self_nomination_allowed"] = state
       result = topic.save!
 
       ElectionTopic.refresh(topic_id)
 
-      topic.custom_fields['election_self_nomination_allowed']
+      topic.custom_fields["election_self_nomination_allowed"]
     end
 
     def self.notify_nominees(topic_id, type)
-      Jobs.cancel_scheduled_job(:election_notify_nominees, topic_id: topic_id, type: 'poll')
-      Jobs.cancel_scheduled_job(:election_notify_nominees, topic_id: topic_id, type: 'closed_poll')
+      Jobs.cancel_scheduled_job(:election_notify_nominees, topic_id: topic_id, type: "poll")
+      Jobs.cancel_scheduled_job(:election_notify_nominees, topic_id: topic_id, type: "closed_poll")
       Jobs.enqueue_in(1.hour, :election_notify_nominees, topic_id: topic_id, type: type)
+    end
+
+    # @params current_nominations_usernames : [{id: 1, username: 'user1', descritpion: 'description1'}, {id: 2, username: 'user2', descritpion: 'description2'}]
+    # (id: is optional)
+    # @params added_usernames ['user3', 'user4']
+    # @params removed_usersnames ['user5', 'user6']
+    def self.rebuild_nominations_usernames(current_nominations_usernames, added_usernames: [], removed_usernames: [])
+      new_nominations_usernames = []
+
+      if current_nominations_usernames.present?
+        current_nominations_usernames.each do |u|
+          if u.present? && u["username"].present?
+            user = User.find_by(username: u["username"])
+            unless removed_usersnames.include?(u["username"])
+              if user
+                new_nominations_usernames.push(u.dup.merge(id: user.id))
+              else
+                raise StandardError.new I18n.t("election.errors.user_was_not_found", user: u)
+              end
+            end
+          end
+        end
+
+        removed_usernames.each do |u|
+          user = User.find_by(username: u["username"])
+          if user
+            item = { id: u["id"], username: u["username"], description: "" }
+            new_nominations_usernames.push(item)
+          else
+            raise StandardError.new I18n.t("election.errors.user_was_not_found", user: u)
+          end
+        end
+      end
+
+      new_nominations_usernames
+    end
+
+    # @params current_nominations_usernames : [{id: 1, username: 'user1', descritpion: 'description1'}, {id: 2, username: 'user2', descritpion: 'description2'}]
+    # (id: is optional)
+    # @params added_user_ids [1, 3]
+    # @params removed_user_ids [2, 4]
+    def self.rebuild_nominations_usernames_by_id(current_nominations_usernames, added_user_ids: [], removed_user_ids: [])
+      new_nominations_usernames = []
+
+      if current_nominations_usernames.present?
+        current_nominations_usernames.each do |u|
+          if u.present? && u["username"].present?
+            user = User.find_by(username: u["username"])
+            unless removed_user_ids.include?(user.id)
+              if user.present?
+                new_nominations_usernames.push(u.dup.merge(id: user.id))
+              else
+                raise StandardError.new I18n.t("election.errors.user_was_not_found", user: u)
+              end
+            end
+          end
+        end
+
+        added_user_ids.each do |id|
+          user = User.find_by(id: id)
+          if user
+            item = { id: id, username: user["username"], description: "" }
+            new_nominations_usernames.push(item)
+          else
+            raise StandardError.new I18n.t("election.errors.user_was_not_found", user: id)
+          end
+        end
+      end
+
+      new_nominations_usernames
     end
   end
 end

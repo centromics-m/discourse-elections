@@ -23,10 +23,10 @@ DiscourseElections::Engine.routes.draw do
   put 'set-position' => 'election#set_position'
   put 'set-poll-time' => 'election#set_poll_time'
   put 'set-winner' => 'election#set_winner'
-  put 'start-poll' => 'election#start_poll'
+  put 'start-poll' => 'election#start_poll'  
   get 'category-list' => 'list#category_list'
-
   put 'set-poll-current-stage' => 'election#set_poll_current_stage'
+  get 'rebuild-election-post' => 'election#rebuild_election_post'
 end
 
 Discourse::Application.routes.append do

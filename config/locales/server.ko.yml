@@ -40,7 +40,7 @@ ko:
     post:
       nominated: "노미네이트"
       nominee_title: "<a href='%{url}'>%{position}번쨰 후보</a>"
-      winner: "승리자"
+      winner: "당선자"
 
   site_settings:
     elections_admin_moderator: "중재자가 선거를 관리할 수 있도록 허용"

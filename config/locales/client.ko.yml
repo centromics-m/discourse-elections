@@ -33,14 +33,12 @@ ko:
         closed_poll: "투표 마감"
       nomination:
         add:
-          label: "자신을 지명하기 Nominate Yourself"
-          body: "If you want to nominate yourself for {{position}}
-                in {{categoryName}}, click I nominate myself below."
+          label: "자신을 지명하기 "
+          body: "자신을 지명하고 싶으면 확인 버튼을 클릭하세요: [{{position}}] (분류: {{categoryName}})"                
           btn: "나는 자신을 지명합니다"
         remove:
-          label: "지명 철회 Withdraw Nomination"
-          body: "If you want to withdraw your nomination for {{position}}
-                in {{categoryName}} click I withdraw my nomination below.<br><br>"
+          label: "지명 철회 "
+          body: "지명을 철회하고 싶으면 확인 버튼을 클릭하세요: [{{position}}] (분류: {{categoryName}})"
           btn: "나는 자신에 대한 지명을 철회합니다"
         statement:
           add: "진술 추가 Add Statement"
