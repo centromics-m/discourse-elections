@@ -18,7 +18,8 @@ module DiscourseElections
 
       # new_nominations_usernames = []
 
-      # pp "################ set_by_username #{nominations_usernames}"
+      pp "################ set_by_username #{nominations_usernames}"
+
       # if nominations_usernames.present?
       #   nominations_usernames.each do |u|
       #     pp "############## user #{u}"
@@ -33,7 +34,13 @@ module DiscourseElections
       #   end
       # end
 
-      new_nominations_usernames = rebuild_nominations_usernames(existing_nominations_usernames, added_usernames: nominations_usernames)
+      existing_nominations_usernames.uniq! 
+      nominations_usernames.uniq!
+      
+      new_nominations_usernames = rebuild_nominations_usernames(existing_nominations_usernames, nominations_usernames: nominations_usernames)
+
+      pp new_nominations_usernames
+      pp existing_nominations_usernames
 
       if Set.new(existing_nominations_usernames) == Set.new(new_nominations_usernames)
         raise StandardError.new I18n.t("election.errors.nominations_not_changed")
@@ -46,10 +53,9 @@ module DiscourseElections
       # existing_nominations_ids = existing_nominations_usernames.map { |u|
       #   begin u['id'] rescue nil end
       # }.filter(&:present?).sort!
-      new_nominations = new_nominations_usernames
-          .map do |u|
-            begin u["id"] rescue StandardError; nil end            
-          end
+      new_nominations =
+        new_nominations_usernames
+          .map { |u| u.present? ? u["id"] : nil }          
           .filter(&:present?)
           .sort!
 
@@ -61,6 +67,7 @@ module DiscourseElections
           # only
           removed_nomination_ids =
             existing_nominations.reject { |n| !n || new_nominations.include?(n.to_i) }
+
           added_nomination_ids =
             new_nominations.reject { |u| !u || existing_nominations.include?(u.to_i) }
 
@@ -77,7 +84,6 @@ module DiscourseElections
       if !saved || topic.election_post.errors.any?
         pp "##################### set_by_username[4] #{saved}"
         pp topic.election_post.errors.full_messages
-        #raise StandardError.new I18n.t('election.errors.set_nominations_failed')
       end
 
       # post refresh
@@ -110,9 +116,10 @@ module DiscourseElections
       nominations_usernames = topic.election_nominations_usernames
       added_user_ids = [user_id]
 
-      if !nominations.include?(user_id)        
+      if !nominations.include?(user_id)
         nominations.push(user_id)
-        nominations_usernames = rebuild_nominations_usernames_by_id(nominations_usernames, added_user_ids: added_user_ids)
+        nominations_usernames =
+          rebuild_nominations_usernames_by_id(nominations_usernames, added_user_ids: added_user_ids)
       end
 
       saved = false
@@ -138,8 +145,12 @@ module DiscourseElections
       removed_user_ids = [user_id]
 
       if nominations.include?(user_id)
-        nominations = topic.election_nominations - removed_user_ids        
-        nominations_usernames = rebuild_nominations_usernames_by_id(topic.election_nominations_usernames, removed_user_ids: removed_user_ids)
+        nominations = topic.election_nominations - removed_user_ids
+        nominations_usernames =
+          rebuild_nominations_usernames_by_id(
+            topic.election_nominations_usernames,
+            removed_user_ids: removed_user_ids,
+          )
       end
 
       saved = false
@@ -157,6 +168,9 @@ module DiscourseElections
     end
 
     def self.save(topic, nominations, nominations_usernames)
+      nominations = nominations.uniq
+      nominations_usernames = nominations_usernames.uniq
+
       pp "################ save nominations : #{nominations}, #{nominations_usernames}"
       topic.custom_fields["election_nominations"] = nominations
       topic.custom_fields["election_nominations_usernames"] = nominations_usernames
@@ -209,16 +223,28 @@ module DiscourseElections
 
     # @params current_nominations_usernames : [{id: 1, username: 'user1', descritpion: 'description1'}, {id: 2, username: 'user2', descritpion: 'description2'}]
     # (id: is optional)
-    # @params added_usernames ['user3', 'user4']
-    # @params removed_usersnames ['user5', 'user6']
-    def self.rebuild_nominations_usernames(current_nominations_usernames, added_usernames: [], removed_usernames: [])
+    # @params nominations_usernames  (user input parameters from ui)
+    # [{"username"=>"user1", "description"=>"desctiption"}, {"username"=>"user2", "description"=>"desctiption"}]    
+    def self.rebuild_nominations_usernames(current_nominations_usernames, nominations_usernames: [])
+
+      added_usernames = nominations_usernames.reject { |x| 
+        current_nominations_usernames.any? { |y| y["username"] == x["username"] } 
+      }
+      removed_usernames = current_nominations_usernames.reject { |x|
+        nominations_usernames.any? { |y| y["username"] == x["username"] }
+      }
+
+      pp "################ rebuild_nominations_usernames current_nominations_usernames #{current_nominations_usernames}"
+      pp "################ rebuild_nominations_usernames added_usernames #{added_usernames}"
+      pp "################ rebuild_nominations_usernames removed_usernames #{removed_usernames}"
+
       new_nominations_usernames = []
 
       if current_nominations_usernames.present?
         current_nominations_usernames.each do |u|
           if u.present? && u["username"].present?
             user = User.find_by(username: u["username"])
-            unless removed_usersnames.include?(u["username"])
+            unless removed_usernames.include?(u["username"])
               if user
                 new_nominations_usernames.push(u.dup.merge(id: user.id))
               else
@@ -228,15 +254,25 @@ module DiscourseElections
           end
         end
 
-        removed_usernames.each do |u|
+        added_usernames.each do |u|
           user = User.find_by(username: u["username"])
           if user
-            item = { id: u["id"], username: u["username"], description: "" }
+            item = { id: u["id"], username: u["username"], description: u["description"] }
             new_nominations_usernames.push(item)
           else
             raise StandardError.new I18n.t("election.errors.user_was_not_found", user: u)
           end
         end
+      end
+
+      # description을 변경 사항 복사해줌. 
+      new_nominations_usernames = new_nominations_usernames.map do |userinfo|
+        nominations_usernames.each do |u|
+          if userinfo["username"] == u["username"]
+            userinfo["description"] = u["description"]
+          end
+        end
+        userinfo
       end
 
       new_nominations_usernames
@@ -246,7 +282,11 @@ module DiscourseElections
     # (id: is optional)
     # @params added_user_ids [1, 3]
     # @params removed_user_ids [2, 4]
-    def self.rebuild_nominations_usernames_by_id(current_nominations_usernames, added_user_ids: [], removed_user_ids: [])
+    def self.rebuild_nominations_usernames_by_id(
+      current_nominations_usernames,
+      added_user_ids: [],
+      removed_user_ids: []
+    )
       new_nominations_usernames = []
 
       if current_nominations_usernames.present?

@@ -407,6 +407,9 @@ class DiscourseElections::ElectionPost
 
     ## We always skip the revision as these are system edits to a single post.
     revisor_opts.merge!(skip_revision: true)
+
+    pp "############### content_out: " + content_out
+
     revise_result = revisor.revise!(election_post.user, { raw: content_out }, revisor_opts)
 
     if election_post.errors.any?
