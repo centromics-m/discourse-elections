@@ -146,11 +146,19 @@ class DiscourseElections::ElectionPost
     else
       message = topic.custom_fields['election_closed_poll_message']
     end
-
+    
     if message
-      content << "\n\n<div class='poll_msg'>#{message}</div>\n\n"
+      content.gsub!(%r{<p class='poll_msg'>.*</p>}m, '')
+      content << "\n\n<p class='poll_msg'>#{message}</p>\n\n"
     end
 
+    content = _clean_content_finally(content)
+    content 
+  end
+
+  def self._clean_content_finally(content)
+    # \n이 3개 이상일 경우 이를 2개로 줄이는 코드
+    content = content.gsub(/\n{3,}/, "\n\n")
     content
   end
 
@@ -251,7 +259,10 @@ class DiscourseElections::ElectionPost
         message = I18n.t('election.nomination.default_message')
       end
   
-      content << "\n\n<div class='poll_msg'>#{message}</div>\n\n"
+      if message.present? 
+        content.gsub!(%r{<p class='poll_msg'>.*</p>}m, '')
+        content << "\n\n<p class='poll_msg'>#{message}</p>\n\n"
+      end
     end
 
     content
@@ -349,6 +360,8 @@ class DiscourseElections::ElectionPost
 
     content << "\n<div class='title'>#{I18n.t('election.title', position: '')}</div>\n"
     content << "\n[poll type=regular status=#{poll_status} _generator=winner]#{poll_options}\n[/poll]"
+
+    content = _clean_content_finally(content)
 
     content
   end
