@@ -96,7 +96,7 @@ class DiscourseElections::ElectionPost
     # finding_answer    
     if topic.election_poll_enabled_stages.include?('finding_answer')
       if content.blank?
-        content = "<p class='poll_msg'>PollUiBuilder를 열어서 poll 내용을 구성해주세요.\n\n</p>"
+        #content = "<p class='poll_msg'>PollUiBuilder를 열어서 poll 내용을 구성해주세요.\n\n</p>"
       end
       content = build_poll__default(content, topic, unattended)      
     end
@@ -361,6 +361,7 @@ class DiscourseElections::ElectionPost
     pp election_post.raw
     pp "###################update_election_post 2" 
     pp contents
+    pp "###################update_election_post 3: #{Topic.election_statuses[:nomination]} #{status}"
 
     return if !election_post #|| election_post.raw == content
 
@@ -372,15 +373,20 @@ class DiscourseElections::ElectionPost
     #content = content_raw
 
     content1 = ''
-    if target_stage == 'finding_answer' && contents[:finding_answer].present?
+    if contents[:finding_answer].present? # && target_stage == 'finding_answer' 
       #matches = content.match(%r{<!--POLL_DEFAULT-->.*<!--\/POLL_DEFAULT-->}m)
       #if matches.present? then content1 = matches[0]
-      if status != Topic.election_statuses[:nomination]
-        content1 = "\n<!--POLL_DEFAULT-->\n" + remove_poll_tags(contents[:finding_answer].to_s) + "\n<!--/POLL_DEFAULT-->\n"
-      else
-        # NOTE: 20글자 이상 채워야 함.
-        content1 = "\n(현재 상태가 nomination이 아니므로 선거지명자 명단은 숨겨집니다.)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n"
-      end
+      #if status == Topic.election_statuses[:nomination]
+        #content1 = "\n<!--POLL_DEFAULT-->\n" + remove_poll_tags(contents[:finding_answer].to_s) + "\n<!--/POLL_DEFAULT-->\n"
+        
+        # NOTE: 없어지면 poll table에서도 삭제됨.. 자동 숨김하기 위해서는 poll plugin에서 본문에서 삭제시 table에서 삭제하지 않게 해야 함. 
+        # contents[:finding_answer].gsub!(%r{status='open'}, "status='closed'") # ==> 직접 종료버튼을 눌러야 하는거 같음. 
+        content1 = "\n<!--POLL_DEFAULT-->\n" + contents[:finding_answer] + "\n<!--/POLL_DEFAULT-->\n"
+
+      # else
+      #   # NOTE: 20글자 이상 채워야 함.
+      #   content1 = "\n#{status} (현재 상태가 nomination이 아니므로 선거지명자 명단은 숨겨집니다.)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n"
+      # end
       pp "###################5 finding_answer: #{content1}"
     end
 

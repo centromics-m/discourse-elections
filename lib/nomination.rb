@@ -227,6 +227,8 @@ module DiscourseElections
     # [{"username"=>"user1", "description"=>"desctiption"}, {"username"=>"user2", "description"=>"desctiption"}]    
     def self.rebuild_nominations_usernames(current_nominations_usernames, nominations_usernames: [])
 
+      current_nominations_usernames ||= []
+
       added_usernames = nominations_usernames.reject { |x| 
         current_nominations_usernames.any? { |y| y["username"] == x["username"] } 
       }
@@ -240,28 +242,26 @@ module DiscourseElections
 
       new_nominations_usernames = []
 
-      if current_nominations_usernames.present?
-        current_nominations_usernames.each do |u|
-          if u.present? && u["username"].present?
-            user = User.find_by(username: u["username"])
-            unless removed_usernames.include?(u["username"])
-              if user
-                new_nominations_usernames.push(u.dup.merge(id: user.id))
-              else
-                raise StandardError.new I18n.t("election.errors.user_was_not_found", user: u)
-              end
+      current_nominations_usernames.each do |u|
+        if u.present? && u["username"].present?
+          user = User.find_by(username: u["username"])
+          unless removed_usernames.include?(u["username"])
+            if user
+              new_nominations_usernames.push(u.dup.merge(id: user.id))
+            else
+              raise StandardError.new I18n.t("election.errors.user_was_not_found", user: u)
             end
           end
         end
+      end
 
-        added_usernames.each do |u|
-          user = User.find_by(username: u["username"])
-          if user
-            item = { id: u["id"], username: u["username"], description: u["description"] }
-            new_nominations_usernames.push(item)
-          else
-            raise StandardError.new I18n.t("election.errors.user_was_not_found", user: u)
-          end
+      added_usernames.each do |u|
+        user = User.find_by(username: u["username"])
+        if user
+          item = { id: u["id"], username: u["username"], description: u["description"] }
+          new_nominations_usernames.push(item)
+        else
+          raise StandardError.new I18n.t("election.errors.user_was_not_found", user: u)
         end
       end
 
