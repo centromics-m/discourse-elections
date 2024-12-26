@@ -195,7 +195,7 @@ export default {
         api.includePostAttributes(
           "topic",
           "election_post",
-          //"election_nomination_statement",
+          "election_nomination_statement",
           "election_nominee_title",
           "election_by_nominee"
         );

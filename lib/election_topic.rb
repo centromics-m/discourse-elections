@@ -217,7 +217,7 @@ class DiscourseElections::ElectionTopic
       election_poll_message: opts[:poll_message] || "",
       election_closed_poll_message: opts[:closed_poll_message] || ""
     }
-    
+
     topic.custom_fields = custom_fields
 
     if opts[:status_banner]
@@ -281,6 +281,7 @@ class DiscourseElections::ElectionTopic
 
     if opts[:content].present?
       result2 = self.update_poll_only(topic, opts)
+      #refresh(topic.id)
 
     else
       topic.subtype = "election"
@@ -346,6 +347,7 @@ class DiscourseElections::ElectionTopic
   def self.update_poll_only(topic, opts)
     # poll 정보 수정
     # NOTE: poll 은 post 에 저장되어 있으나, election poll의 경우, 현재 topic당 1개만 허용하기 때문에 그냥 topic의 custom_field에 저장함.
+    #    추가: poll table내에도 저장됨.
 
     # etna
     #JSON.parse(opts)
@@ -361,19 +363,46 @@ class DiscourseElections::ElectionTopic
       new_content += content_parsed['pollOutput']
     else
       # TODO: poll 이 여러개일 경우?
-      #new_content = election_post.raw.gsub(%r{(\[poll\s.*\[\/poll\])}m, content_parsed['pollOutput'])
-      new_content = election_post.raw.gsub(%r{(\[poll\s.*\[\/poll_data_link\])}m, content_parsed['pollOutput'])
+      new_content = old_content
+      content1 = extract_poll_default_content(old_content)
+      new_content = content1.gsub(/\[poll_data_link.*\/poll_data_link\]/, '')
+      new_content = content1.gsub(/\[poll\s.*\/poll\]/m, content_parsed['pollOutput'])      
     end
 
-    contents = { 
-      finding_answer: new_content, 
-      finding_winner: DiscourseElections::ElectionPost.build_content_for_finding_winner(topic, topic.election_status)
+    user_content = extract_user_content(old_content)
+
+    contents = {
+      default: nil,
+      finding_answer: new_content,
+      finding_winner: DiscourseElections::ElectionPost.build_content_for_finding_winner(topic, topic.election_status),
+      user_content: user_content,
     }
     result2 = DiscourseElections::ElectionPost.update_election_post(topic, contents, unattended = false, revisor_opts = {}, target_stage: 'finding_answer')
 
     result2
   end
 
+  def self.extract_poll_default_content(content)
+    regex = /<!--POLL_DEFAULT-->(.*)<!--\/POLL_DEFAULT-->/m
+    match = content.match(regex)
+
+    # 매칭된 텍스트 추출
+    if match
+      return match[1].strip # 앞뒤 공백 제거
+    end 
+
+    nil
+  end
+
+  def self.extract_user_content(content)
+    # <!--/POLL_DEFAULT-->까지 삭제
+    text_after_default = content.gsub(/.*<!--\/POLL_DEFAULT-->/m, '')
+
+    # <!--/POLL_ELECTION-->까지 삭제
+    text_after_election = text_after_default.gsub(/.*<!--\/POLL_ELECTION-->/m, '')
+
+    text_after_election.strip
+  end
 
   # def self.set_content(topic_id, content)
   #   topic = Topic.find(topic_id)
@@ -407,11 +436,10 @@ class DiscourseElections::ElectionTopic
     TopicCustomField.transaction do
       topic.custom_fields["election_poll_current_stage"] = poll_current_stage
       topic.election_poll_current_stage_changed = (existing_poll_current_stage != poll_current_stage)
-
       topic.save_custom_fields(true)
       saved = topic.save! ## need to save whole topic here as it triggers status change handlers - see 'handle_election_status_change' above
 
-      pp "##################### saved #{saved} poll_current_stage:#{poll_current_stage}"
+      pp "##################### set_election_poll_current_stagesaved:#{saved} poll_current_stage:#{poll_current_stage}"
       if saved && existing_poll_current_stage != poll_current_stage
         DiscourseElections::ElectionPost.rebuild_election_post(topic)
       end
@@ -435,11 +463,18 @@ class DiscourseElections::ElectionTopic
     TopicCustomField.transaction do
       topic.custom_fields["election_status"] = status
       topic.election_status_changed = status != current_status
+      topic.save_custom_fields(true)
       saved = topic.save! ## need to save whole topic here as it triggers status change handlers - see 'handle_election_status_change' above
 
       if saved && status != current_status
         DiscourseElections::ElectionPost.rebuild_election_post(topic, unattended)
       end
+
+    rescue ActiveRecord::Rollback => e
+      pp "Transaction failed: #{e.message}"
+      pp "Backtrace: #{e.backtrace[0..5]}" # 첫 5줄만 출력
+
+      raise StandardError.new "#{I18n.t("election.errors.set_status_failed")}: #{e.message}"
     end
 
     if !saved || topic.election_post.errors.any?
@@ -447,6 +482,12 @@ class DiscourseElections::ElectionTopic
     end
 
     topic.election_status
+
+  rescue => e
+    pp "Transaction failed: #{e.message}"
+    pp "Backtrace: #{e.backtrace[0..5]}" # 첫 5줄만 출력
+    #raise e # 트랜잭션 롤백을 유지하려면 다시 예외를 던져야 합니다.
+    raise StandardError.new e.message
   end
 
   def self.set_message(topic_id, message, type, same_message = nil)
@@ -478,6 +519,12 @@ class DiscourseElections::ElectionTopic
     self.refresh(topic_id) if saved
 
     saved
+
+  rescue => e
+    pp "Transaction failed: #{e.message}"
+    pp "Backtrace: #{e.backtrace[0..5]}" # 첫 5줄만 출력
+    #raise e # 트랜잭션 롤백을 유지하려면 다시 예외를 던져야 합니다.
+    raise StandardError.new e.message
   end
 
   def self.set_winner(topic_id, username)
@@ -499,6 +546,12 @@ class DiscourseElections::ElectionTopic
     else
       { failed: true }
     end
+
+  rescue => e
+    pp "Transaction failed: #{e.message}"
+    pp "Backtrace: #{e.backtrace[0..5]}" # 첫 5줄만 출력
+    #raise e # 트랜잭션 롤백을 유지하려면 다시 예외를 던져야 합니다.
+    raise StandardError.new e.message
   end
 
   def self.notify_moderators(topic_id, type)

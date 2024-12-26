@@ -81,7 +81,7 @@ en:
       manage:
         label: "Manage Election"
         nominees: "Select the nominees for this election."
-        nominees_help: "Enter username(ID) separated by commas (e.g., admin, user1, user2)"
+        nominees_help: "Enter username(ID) and description separated by a '='(equal) (e.g. admin=Admin User). One user per each line."
         save: "Save"
         done: "Done"
       post:

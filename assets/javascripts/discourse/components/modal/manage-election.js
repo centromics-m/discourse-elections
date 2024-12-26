@@ -6,6 +6,7 @@ import { action, computed, observer } from "@ember/object";
 import { inject as service } from "@ember/service";
 import DButton from "discourse/components/d-button";
 import { ElectionPollAvailableStages, ElectionStatuses } from "../../lib/election";
+import ElectionSaveCurrentStage from "../election-save-current-stage";
 import ElectionSaveTime from "../election-save-time";
 import ElectionSaveUsernames from "../election-save-usernames";
 import ElectionTime from "../election-time";

@@ -2,7 +2,7 @@ ko:
   election:
     title: "%{position} 선거"
     nomination:
-      default_message: "이 선거는 현재 후보 지명을 받고 있습니다."
+      default_message: "이 선거는 현재 후보 지명을 받고 있습니다. [기본 메시지]"
     status:
       poll: "열린 투표"
       closed_poll: "닫힌 투표"

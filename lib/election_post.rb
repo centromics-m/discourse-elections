@@ -79,11 +79,12 @@ class DiscourseElections::ElectionPost
     contents = {
       default: nil,
       finding_answer: build_content_for_finding_answer(topic, status, unattended),
-      finding_winner: build_content_for_finding_winner(topic, status, unattended)
+      finding_winner: build_content_for_finding_winner(topic, status, unattended),
+      user_content: nil,
     }
-    
+
     if contents[:finding_answer].blank? && contents[:finding_winner].blank?
-      content[:default] = "<p class='poll_msg'>제대로 입력이 안되고 있으면, 옵션을 체크해주세요.</p>"
+      #contents[:default] = "<p class='poll_msg'>제대로 입력이 안되고 있으면, 옵션을 체크해주세요.</p>"
     end
 
     revisor_opts = {}
@@ -92,17 +93,19 @@ class DiscourseElections::ElectionPost
 
   def self.build_content_for_finding_answer(topic, status, unattended = false)
     content = ''
+byebug
+    election_poll_enabled_stages_arr = topic.election_poll_enabled_stages.split(',').map(&:strip)
 
-    # finding_answer    
-    if topic.election_poll_enabled_stages.include?('finding_answer')
+    # finding_answer
+    if election_poll_enabled_stages_arr.include?('finding_answer')
       if content.blank?
         #content = "<p class='poll_msg'>PollUiBuilder를 열어서 poll 내용을 구성해주세요.\n\n</p>"
       end
-      content = build_poll__default(content, topic, unattended)      
+      content = build_poll__default(content, topic, unattended)
     end
 
     content
-  end    
+  end
 
   private
 
@@ -118,47 +121,36 @@ class DiscourseElections::ElectionPost
   def self.build_poll__default(content, topic, unattended)
     #nominations = topic.election_nominations
     status = topic.election_status
-
+byebug
     #return if nominations.length < 2
-
-    # poll_status = ''
-
-    # if status === Topic.election_statuses[:poll]
-    #   poll_status = 'open'
-    # else
-    #   poll_status = 'closed'
-    # end
-
-    # poll_options = _build_poll_markups(topic)
-
-    # if poll_options.present?
-    #   content << "\n[poll type=regular status=#{poll_status} _generator=default]#{poll_options}\n[/poll]"
-    # end
 
     poll_markups = _build_poll_markups(topic)
     if poll_markups.present?
+      # NOTE: 본문에서 open -> closed라 해서 실제로 바뀌지는 않음.
+      # election status == poll 이면
+      # if status === Topic.election_statuses[:poll] && poll_markups =~ /\s+status=['"]?poll['"]?\s+/
+      #   poll_markups.gsub!(/(status=['"]?open['"]?)/, "status='closed'")
+      # end
       content << "\n#{poll_markups}"
     end
 
+    # NOTE: default poll에 대해서는 자동 메시지가 나오게 하지 않음. 
+    # TODO: 추후 추가 란을 만들던지 해서 default poll 에 대한 메시지가 나오게 할수 있음. 
+
     message = nil
-    if status === Topic.election_statuses[:poll]
-      message = topic.custom_fields['election_poll_message']
-    else
-      message = topic.custom_fields['election_closed_poll_message']
-    end
-    
-    if message
-      content.gsub!(%r{<p class='poll_msg'>.*</p>}m, '')
+
+    # if status === Topic.election_statuses[:poll]
+    #   message = topic.custom_fields['election_poll_message']
+    # else
+    #   message = topic.custom_fields['election_closed_poll_message']
+    # end
+
+    content.gsub!(%r{<p class='poll_msg'>.*</p>}m, '')
+    if message.present?
       content << "\n\n<p class='poll_msg'>#{message}</p>\n\n"
     end
 
     content = _clean_content_finally(content)
-    content 
-  end
-
-  def self._clean_content_finally(content)
-    # \n이 3개 이상일 경우 이를 2개로 줄이는 코드
-    content = content.gsub(/\n{3,}/, "\n\n")
     content
   end
 
@@ -168,7 +160,10 @@ class DiscourseElections::ElectionPost
     content = ''
     posts.each do |post|
       post.polls.each do |poll|
-        content << _build_poll_markup_for_poll(poll, 'default')
+        poll_markup = _build_poll_markup_for_poll(poll, 'default')
+        # NOTE: election은 제외 (build_content_for_finding_winner)에서 같이 생성됨
+        next if /data-user-card/.match(poll_markup)
+        content << poll_markup
       end
     end
 
@@ -176,8 +171,9 @@ class DiscourseElections::ElectionPost
   end
 
   def self._build_poll_markup_for_poll(poll, _generator='default')
-    attrs = %w[type status results visibility min max steps chart_type score]
+    attrs = %w[type name status results visibility min max steps chart_type score]
     attrs_strs = []
+    poll[:name] = "poll#{Time.new.to_i}" if poll[:name].blank?
     attrs.each do |attr|
       attrs_strs << "#{attr}='#{poll[attr]}'" if poll[attr].present?
     end
@@ -196,13 +192,22 @@ class DiscourseElections::ElectionPost
     content2 = ''
     poll.poll_data_links.each do |link|
       content2 << "[poll_data_link]\n"
+      content2_1 = ''
+
       if link['url'].present?
-        content2 << "[#{link.title}](#{link.url})\n"
+        content2_1 << "[#{link.title}](#{link.url})\n"
       end
+
       if link.content.present?
-        content2 << "#{link.content}\n"
+        content2_1 << "#{link.content}\n"
       end
-      content2 << "[/poll_data_link]\n"
+
+      if content2_1.blank?
+        content2 = ''
+      else
+        content2 << content2_1
+        content2 << "[/poll_data_link]\n"
+      end
     end
 
     poll_content = poll_hd + content + poll_tl + content2
@@ -227,42 +232,47 @@ class DiscourseElections::ElectionPost
   def self.build_content_for_finding_winner(topic, status, unattended = false)
     content = ''
 
-    # finding_winner
-    if topic.election_poll_enabled_stages.include?('finding_winner') && topic.election_poll_current_stage == 'finding_winner'
-      if topic.election_winner.present?
-        user = User.find_by(username: topic.election_winner)
-        content << "<div class='title'>#{I18n.t('election.post.winner')}</div>"
-        content << build_winner(user)
-        content << "\n\n"
-      end
+    election_poll_enabled_stages_arr = topic.election_poll_enabled_stages.split(',').map(&:strip)
 
-      if status == Topic.election_statuses[:nomination]
-        content = build_nominations(content, topic, unattended)
-      elsif status == Topic.election_statuses[:poll] || status == Topic.election_statuses[:closed_poll]
-        content = build_poll__winner(content, topic, unattended)
-      else
-        content = '(unknown status)'
-      end
+    return '' unless election_poll_enabled_stages_arr.include?('finding_winner') &&
+      topic.election_poll_current_stage == 'finding_winner'
 
-      message = nil
-      if status === Topic.election_statuses[:poll]
-        message = topic.custom_fields['election_poll_message']
-      elsif status == Topic.election_statuses[:closed_poll]
-        message = topic.custom_fields['election_closed_poll_message']
-      elsif status == Topic.election_statuses[:nomination]
-        message = topic.custom_fields['election_nomination_message']
-      else 
-        message = '(unknown status)'
-      end
+    # finding_winner가 stage에 포함되어 있고, 현재 상태가 finding_winner이면 진행
 
-      if message.blank?
-        message = I18n.t('election.nomination.default_message')
-      end
-  
-      if message.present? 
-        content.gsub!(%r{<p class='poll_msg'>.*</p>}m, '')
-        content << "\n\n<p class='poll_msg'>#{message}</p>\n\n"
-      end
+    if topic.election_winner.present?
+      user = User.find_by(username: topic.election_winner)
+      content << "<div class='title'>#{I18n.t('election.post.winner')}</div>"
+      content << build_winner(user)
+      content << "\n\n"
+    end
+
+    if status == Topic.election_statuses[:nomination]
+      content = build_nominations(content, topic, unattended)
+    elsif status == Topic.election_statuses[:poll] || status == Topic.election_statuses[:closed_poll]
+      content = build_poll__winner(content, topic, unattended)
+    else
+      content = '(unknown status)'
+    end
+
+    message = nil
+    if status === Topic.election_statuses[:poll]
+      message = topic.custom_fields['election_poll_message']
+    elsif status == Topic.election_statuses[:closed_poll]
+      message = topic.custom_fields['election_closed_poll_message']
+    elsif status == Topic.election_statuses[:nomination]
+      message = topic.custom_fields['election_nomination_message']
+    end
+
+    if message.blank?
+      message = I18n.t('election.nomination.default_message')
+    end
+
+    # NOTE: election_poll_message 이 입력이 안되어 있으면 poll 상태에서도 기본 메시지로 나옴.
+    #       현재 기본 메시지: 이 선거는 현재 후보 지명을 받고 있습니다.
+
+    content.gsub!(%r{<p class='poll_msg'>.*</p>}m, '')
+    if message.present?
+      content << "\n\n<p class='poll_msg'>#{message}</p>\n\n"
     end
 
     content
@@ -353,13 +363,16 @@ class DiscourseElections::ElectionPost
       # the username placeholder is removed on the client before render.
 
       user = User.find(n)
-      #NOTE: 한줄에 한개의 옵션이어야 함. 
-      poll_options << "\n- #{user.username} (#{user.name}) " 
+      #NOTE: 한줄에 한개의 옵션이어야 함.
+      poll_options << "\n- #{user.username} (#{user.name}) "
       poll_options << build_nominee(topic, user)
     end
 
     content << "\n<div class='title'>#{I18n.t('election.title', position: '')}</div>\n"
-    content << "\n[poll type=regular status=#{poll_status} _generator=winner]#{poll_options}\n[/poll]"
+
+    #poll_name = "poll#{Time.new.to_i}"
+    poll_name = "election_poll"
+    content << "\n[poll type=regular name='#{poll_name}' status=#{poll_status} _generator=winner]#{poll_options}\n[/poll]"
 
     content = _clean_content_finally(content)
 
@@ -370,10 +383,10 @@ class DiscourseElections::ElectionPost
   def self.update_election_post(topic, contents, unattended = false, revisor_opts = {}, target_stage: 'finding_answer', status: nil)
     election_post = topic.election_post
 
-    pp "###################update_election_post 1" 
-    pp election_post.raw
-    pp "###################update_election_post 2" 
+    pp "###################update_election_post 1"
     pp contents
+    pp "###################update_election_post 2"
+    pp election_post.raw
     pp "###################update_election_post 3: #{Topic.election_statuses[:nomination]} #{status}"
 
     return if !election_post #|| election_post.raw == content
@@ -386,15 +399,15 @@ class DiscourseElections::ElectionPost
     #content = content_raw
 
     content1 = ''
-    if contents[:finding_answer].present? # && target_stage == 'finding_answer' 
+    if contents[:finding_answer].present? # && target_stage == 'finding_answer'
       #matches = content.match(%r{<!--POLL_DEFAULT-->.*<!--\/POLL_DEFAULT-->}m)
       #if matches.present? then content1 = matches[0]
       #if status == Topic.election_statuses[:nomination]
         #content1 = "\n<!--POLL_DEFAULT-->\n" + remove_poll_tags(contents[:finding_answer].to_s) + "\n<!--/POLL_DEFAULT-->\n"
-        
-        # NOTE: 없어지면 poll table에서도 삭제됨.. 자동 숨김하기 위해서는 poll plugin에서 본문에서 삭제시 table에서 삭제하지 않게 해야 함. 
-        # contents[:finding_answer].gsub!(%r{status='open'}, "status='closed'") # ==> 직접 종료버튼을 눌러야 하는거 같음. 
-        content1 = "\n<!--POLL_DEFAULT-->\n" + contents[:finding_answer] + "\n<!--/POLL_DEFAULT-->\n"
+
+        # NOTE: 없어지면 poll table에서도 삭제됨.. 자동 숨김하기 위해서는 poll plugin에서 본문에서 삭제시 table에서 삭제하지 않게 해야 함.
+        # contents[:finding_answer].gsub!(%r{status='open'}, "status='closed'") # ==> 직접 종료버튼을 눌러야 하는거 같음.
+        content1 = "\n<!--POLL_DEFAULT-->\n" + remove_poll_tags(contents[:finding_answer]) + "\n<!--/POLL_DEFAULT-->\n"
 
       # else
       #   # NOTE: 20글자 이상 채워야 함.
@@ -412,8 +425,8 @@ class DiscourseElections::ElectionPost
 
     content3 = contents[:default].to_s
 
-    content_out = "#{content1}\n#{content2}\n#{content3}"
-    
+    content_out = _clean_content_finally("#{content1}\n#{content2}\n#{content3}")
+
     content_out = "(본문이 없습니다.) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" if content_out.blank?
 
     puts "################### 본문: #{content_out}"
@@ -461,6 +474,12 @@ class DiscourseElections::ElectionPost
       SystemMessage.create_from_system_user(user, :error_updating_election_post,
         topic_id: topic_id, error: error)
     end
+  end
+  
+  def self._clean_content_finally(content)
+    # \n이 3개 이상일 경우 이를 2개로 줄이는 코드
+    content = content.gsub(/\n{3,}/, "\n\n")
+    content
   end
 
   def self.remove_poll_tags(content)

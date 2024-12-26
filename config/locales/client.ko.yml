@@ -34,15 +34,15 @@ ko:
       nomination:
         add:
           label: "자신을 지명하기 "
-          body: "자신을 지명하고 싶으면 확인 버튼을 클릭하세요: [{{position}}] (분류: {{categoryName}})"                
+          body: "자신을 지명하고 싶으면 확인 버튼을 클릭하세요: [{{position}}] (분류: {{categoryName}})"
           btn: "나는 자신을 지명합니다"
         remove:
           label: "지명 철회 "
           body: "지명을 철회하고 싶으면 확인 버튼을 클릭하세요: [{{position}}] (분류: {{categoryName}})"
           btn: "나는 자신에 대한 지명을 철회합니다"
         statement:
-          add: "지명 진술 추가"
-          label: "지명 진술"
+          add: "지명 의견 추가"
+          label: "지명 의견"
       set_time:
         hours: "Hours"
         days: "Days"
@@ -79,7 +79,7 @@ ko:
       manage:
         label: "선거관리"
         nominees: "이 선거에 대한 후보를 입력하세요."
-        nominees_help: "username(ID)를 쉼표로 나누어 입력 (예, admin, user1, user2)"
+        nominees_help: "username(ID)와 그에 대한 설명을 '='(equal)로 분리한 문자열로 입력(e.g. admin=Admin User) 한줄에 한 사용자씩."
         save: "Save"
         done: "Done"
       post:
