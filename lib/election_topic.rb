@@ -359,14 +359,16 @@ class DiscourseElections::ElectionTopic
     old_content = election_post.raw
 
     new_content = ''
+    # poll 이 없으면 그대로 추가 
     if old_content.blank? || old_content !~ %r{\[\/poll\]}
       new_content += content_parsed['pollOutput']
     else
       # TODO: poll 이 여러개일 경우?
       new_content = old_content
-      content1 = extract_poll_default_content(old_content)
-      new_content = content1.gsub(/\[poll_data_link.*\/poll_data_link\]/, '')
-      new_content = content1.gsub(/\[poll\s.*\/poll\]/m, content_parsed['pollOutput'])      
+      new_content = extract_poll_default_content(new_content)
+      new_content = new_content.gsub(/\[poll_data_link.*\/poll_data_link\]/m, '')
+      # [poll][/poll] 내를 입력받은 값으로 교체
+      new_content = new_content.gsub(/\[poll\s.*\/poll\]/m, content_parsed['pollOutput']) 
     end
 
     user_content = extract_user_content(old_content)

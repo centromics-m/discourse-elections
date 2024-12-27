@@ -93,7 +93,7 @@ class DiscourseElections::ElectionPost
 
   def self.build_content_for_finding_answer(topic, status, unattended = false)
     content = ''
-byebug
+
     election_poll_enabled_stages_arr = topic.election_poll_enabled_stages.split(',').map(&:strip)
 
     # finding_answer
@@ -121,7 +121,7 @@ byebug
   def self.build_poll__default(content, topic, unattended)
     #nominations = topic.election_nominations
     status = topic.election_status
-byebug
+
     #return if nominations.length < 2
 
     poll_markups = _build_poll_markups(topic)

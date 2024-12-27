@@ -24,7 +24,7 @@ export default class ElectionSaveCurrentStageComponent extends ElectionSave {
       original = this.topic[`election_${this.name}`];
       if (this.property === 'finding_answer' && original === 'finding_winner') {
         if (!confirm('finding_winner에서 finding_answer로 모드를 바꾸면 ' +
-          '기존에 생성된 election_poll은 삭제됩니다(재생성시 투표결과가 초기화됨). 계속하겠습니까?')) {
+          '기존에 생성된 election_poll의 투표결과가 초기화됩니다. 계속하겠습니까?')) {
           return;
         }
       }
