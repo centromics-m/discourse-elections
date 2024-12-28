@@ -249,6 +249,18 @@ export default createWidget("election-controls", {
     console.log('render election controls', topic);
     console.log('this.currentUser.id', this.currentUser.id);
 
+    // Manage
+    if (user && user.is_elections_admin) {
+      contents.push(
+        this.attach("button", {
+          action: "manage",
+          label: "election.manage.label",
+          className: "btn-primary manage-election",
+        })
+      );
+    }
+
+    // toggle-nomination-button
     if (
       topic.election_status === ElectionStatuses["nomination"] &&
       topic.election_self_nomination_allowed &&
@@ -264,7 +276,7 @@ export default createWidget("election-controls", {
       );
     }
 
-    // NOTE: disabled by etna (2024.10.22)
+    // makeStatement button (후보자 댓글 달기)
     if (topic.election_is_nominee && !topic.election_made_statement) {
       contents.push(this.attach('button', {
         action: 'makeStatement',
@@ -273,19 +285,11 @@ export default createWidget("election-controls", {
       }));
     }
 
-    if (user && user.is_elections_admin) {
-      contents.push(
-        this.attach("button", {
-          action: "manage",
-          label: "election.manage.label",
-          className: "btn-primary manage-election",
-        })
-      );
-    }
-
+    // openPollUiBuilder
     if (user &&
       user.is_elections_admin &&
-      topic.election_status === ElectionStatuses["nomination"]
+      topic.election_poll_current_stage === 'finding_answer'
+      //topic.election_status === ElectionStatuses["nomination"]
     ) {
       contents.push(
         this.attach("button", {
@@ -296,10 +300,12 @@ export default createWidget("election-controls", {
       );
     }
 
+    // startPoll
     if (
       user &&
       user.is_elections_admin &&
-      topic.election_status === ElectionStatuses["nomination"]
+      topic.election_poll_current_stage === 'finding_winner' && // poll stage == 'finding_winner'
+      topic.election_status === ElectionStatuses["nomination"] // topic status == 'nomination'
     ) {
       contents.push(
         this.attach("button", {

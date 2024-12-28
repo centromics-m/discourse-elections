@@ -271,6 +271,7 @@ export default {
           const topic = post.topic;
           console.log('decorateWidget post-contents:after-cooked', post, topic);
           if (topic.subtype === "election" && post.firstPost) {
+            //NOTE: call widgets/election-controls.js
             return helper.attach("election-controls", { topic });
           }
         });
